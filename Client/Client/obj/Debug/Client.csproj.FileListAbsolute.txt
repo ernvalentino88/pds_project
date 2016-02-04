@@ -32,3 +32,4 @@ C:\Users\John\Documents\GitHub\pds_project\Client\Client\obj\Debug\Client_Markup
 C:\Users\John\Documents\GitHub\pds_project\Client\Client\obj\Debug\Client.g.resources
 C:\Users\John\Documents\GitHub\pds_project\Client\Client\obj\Debug\Client.Properties.Resources.resources
 C:\Users\John\Documents\GitHub\pds_project\Client\Client\obj\Debug\Client.csproj.GenerateResource.Cache
+C:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\obj\Debug\App.baml
