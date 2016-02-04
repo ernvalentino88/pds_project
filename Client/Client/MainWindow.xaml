@@ -2,9 +2,19 @@
         x:Class="Client.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="MainWindow" Height="350" Width="525"
-        xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro">
+        Title="Client" Height="343.925" Width="525"
+        xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro" Foreground="#FFEC1343">
     <Grid>
+
+        <Controls:WindowCommands Foreground="#FF13EC9E"  Background="Azure" >
+        <TextBox Controls:TextBoxHelper.Watermark="IP address" Width="242" Height="22" Controls:TextBoxHelper.ClearTextButton="True" />
+            
         
+        <TextBox Controls:TextBoxHelper.Watermark="Port" Controls:TextBoxHelper.ClearTextButton="True" Width="84" Height="22" />
+    </Controls:WindowCommands>
     </Grid>
 </Controls:MetroWindow>
+
+
+   
+    
