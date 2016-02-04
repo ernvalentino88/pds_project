@@ -15,6 +15,7 @@
         </Controls:WindowCommands.Background>
         <TextBox x:Name="Text_ip" Controls:TextBoxHelper.Watermark="IP address" Width="242" Height="22" Controls:TextBoxHelper.ClearTextButton="True" />
         <TextBox x:Name="Text_port" Controls:TextBoxHelper.Watermark="Port" Controls:TextBoxHelper.ClearTextButton="True" Width="84" Height="22" />
+        <Button x:Name="Connect_button" Content="Connect" Style="{StaticResource AccentedSquareButtonStyle}" Height="35" Width="69" Click="Connect_button_Click"/>
     </Controls:WindowCommands>
     
 </Controls:MetroWindow>
