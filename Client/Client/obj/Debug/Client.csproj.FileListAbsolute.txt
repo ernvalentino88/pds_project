@@ -1,1 +1,2 @@
 C:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\bin\Debug\Client.exe.config
+C:\Users\John\Documents\GitHub\pds_project\Client\Client\bin\Debug\Client.exe.config
