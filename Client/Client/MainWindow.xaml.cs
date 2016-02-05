@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 using MahApps.Metro.Controls;
 using System.IO;
 using System.Net;
@@ -24,6 +25,8 @@ namespace Client
     /// </summary>
     public partial class MainWindow : MetroWindow
     {
+        private delegate void ConnectDelegate();
+
         public MainWindow()
         {
             InitializeComponent();
@@ -31,6 +34,11 @@ namespace Client
         }
 
         private void Connect_button_Click(object sender, RoutedEventArgs e)
+        {
+            this.Connect_button.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new ConnectDelegate(connect));
+        }
+
+        private void connect()
         {
             TcpClient tcpclnt = new TcpClient();
             try
@@ -80,7 +88,7 @@ namespace Client
                     for (int i = 0; i < k; i++)
                         Console.Write(Convert.ToChar(bb[i]));
 
-                    
+
                 }
             }
             catch (SocketException se)
@@ -98,5 +106,7 @@ namespace Client
                 tcpclnt.Close();
             }
         }
+
+
     }
 }
