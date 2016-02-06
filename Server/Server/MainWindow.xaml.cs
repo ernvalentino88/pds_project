@@ -27,9 +27,11 @@ namespace Server
     /// 
     public partial class MainWindow : MetroWindow
     {
-        public delegate void start_server_delegate();
-        //private Thread serverThread;
         TcpListener myList;
+        public delegate void start_server_delegate();
+        public delegate void update_ui_delegate(String msg);
+        //private Thread serverThread;
+       
         public MainWindow()
         {
             InitializeComponent();
@@ -37,53 +39,56 @@ namespace Server
 
         private void launch_button_Click(object sender, RoutedEventArgs e)
         {
-            myList = new TcpListener(IPAddress.Any, Int32.Parse(this.text_port.Text));
-            this.launch_button.Visibility = Visibility.Collapsed;
-            this.text_port.Visibility = Visibility.Collapsed;
 
-
-            this.con_stat.Visibility = Visibility.Visible;
-            this.launch_button.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new start_server_delegate(start_server));
-           
+           myList = new TcpListener(IPAddress.Any, Int32.Parse(this.text_port.Text));
+           start_server_delegate sd = new start_server_delegate(start_server);
+           sd.BeginInvoke(null,null);
+          
 
 
 
         }
 
         public void start_server() {
-
+           
             try
             {
-               
-                //TcpListener myList = new TcpListener(IPAddress.Any, Int32.Parse(this.text_port.Text));
-                //System.Threading.Thread.Sleep(1000);
-                myList.Start();
-                //this.launch_button.Visibility = Visibility.Collapsed;
-               // this.text_port.Visibility = Visibility.Collapsed;
-
-
-               // this.con_stat.Visibility = Visibility.Visible;
-                this.con_stat.Content = "The server is running at : " + myList.LocalEndpoint;
-                //System.Threading.Thread.Sleep(5000);
-                /* Start Listeneting at the specified port */
                 
+                myList.Start();
+              
+               String msg="The server is running at : " + myList.LocalEndpoint;
+                this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new update_ui_delegate(update_msg), msg);
+               
+          
+               
+              
+                /* Start Listeneting at the specified port */
+            
+                while (true)
+                {
+                    Socket s = myList.AcceptSocket();
+                    msg = "Connection accpeted from " + s.RemoteEndPoint;
+                   this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new update_ui_delegate(update_msg), msg);
+                   
+                   
 
-                Socket s = myList.AcceptSocket();
-
-
-
-                this.con_stat.Content = "Connection accpeted from "+s.RemoteEndPoint;
-
-
-                s.Close();
-                 myList.Stop();
+                    s.Close();
+                }
+                myList.Stop();
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
-                Console.WriteLine("Error..... " + ex.StackTrace);
+              String msg = ex.Message;
+              this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new update_ui_delegate(update_msg), msg);
             }
         
+        }
+
+        private void update_msg(String msg) {
+            this.launch_button.Visibility = Visibility.Collapsed;
+            this.text_port.Visibility = Visibility.Collapsed;
+            this.con_stat.Visibility = Visibility.Visible;
+            this.con_stat.Content = msg;
         }
 
 

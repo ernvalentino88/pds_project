@@ -3,12 +3,13 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         Title="Server" Height="350" Width="525">
-    <Controls:WindowCommands>
-        <TextBox x:Name="text_port" Controls:TextBoxHelper.Watermark="Port" Controls:TextBoxHelper.ClearTextButton="True" Height="24" Width="134" />
-        <Button x:Name="launch_button" Content="Launch" Style="{StaticResource AccentedSquareButtonStyle}" Height="35" Width="69" Click="launch_button_Click" />
-        <Label x:Name="con_stat" Visibility="Hidden"/>
-        
-
+    
+        <Controls:WindowCommands>
+            <Grid>
+                <TextBox x:Name="text_port" Controls:TextBoxHelper.Watermark="Port" Controls:TextBoxHelper.ClearTextButton="True" Height="24" Width="134" Margin="124,8,-124,0.667" />
+                <Button x:Name="launch_button" Content="Launch" Style="{StaticResource AccentedSquareButtonStyle}" Width="69" Click="launch_button_Click" Margin="300,9,-235,-1" RenderTransformOrigin="0.056,0.444" />
+                <Label x:Name="con_stat" Visibility="Hidden"/>
+            </Grid>
     </Controls:WindowCommands>
 
 </Controls:MetroWindow>
