@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -25,7 +26,8 @@ namespace Client
     /// </summary>
     public partial class MainWindow : MetroWindow
     {
-        private delegate void ConnectDelegate();
+        private delegate void ConnectDelegate(String address, String port);
+        private delegate void UpdateDelegate(String msg);
 
         public MainWindow()
         {
@@ -35,16 +37,18 @@ namespace Client
 
         private void Connect_button_Click(object sender, RoutedEventArgs e)
         {
-            this.Connect_button.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new ConnectDelegate(connect));
+            ConnectDelegate cd = new ConnectDelegate(connect);
+            cd.BeginInvoke(this.Text_ip.Text, this.Text_port.Text,null, null);
         }
 
-        private void connect()
+        private void connect(String address, String port)
         {
             TcpClient tcpclnt = new TcpClient();
             try
             {
-                Int32 port = Int32.Parse(this.Text_port.Text);
-                tcpclnt.Connect(this.Text_ip.Text, port);
+                tcpclnt.Connect(address,Int32.Parse(port));
+                String msg = "Connection estabilished with: " + this.Text_ip.Text + ":" + this.Text_port.Text;
+                this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegate(update),msg);
                 Stream stm = tcpclnt.GetStream();
                 String str = "ar.pdf";
 
@@ -93,19 +97,29 @@ namespace Client
             }
             catch (SocketException se)
             {
-                Console.WriteLine(se.Message);
-                Console.WriteLine("Error..... " + se.StackTrace);
+                String msg = "Error while trying to connect: " + se.Message;
+                //this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegate(update), msg);
             }
             catch (Exception exc)
             {
-                Console.WriteLine(exc.Message);
-                Console.WriteLine("Error..... " + exc.StackTrace);
+                String msg = "Error while trying to connect: " + exc.Message;
+                //this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegate(update), msg);
             }
             finally
             {
                 tcpclnt.Close();
             }
         }
+
+        public void update(String msg)
+        {  
+            this.Text_ip.Visibility = Visibility.Collapsed;
+            this.Text_port.Visibility = Visibility.Collapsed;
+            this.Message_label.Content = msg;
+            this.Message_label.Visibility = Visibility.Visible;
+            this.Connect_button.Content = "Disconnect";
+        }
+
 
 
     }
