@@ -47,7 +47,7 @@ namespace Client
             try
             {
                 tcpclnt.Connect(address,Int32.Parse(port));
-                String msg = "Connection estabilished with: " + this.Text_ip.Text + ":" + this.Text_port.Text;
+                String msg = "Connection estabilished with: " + address + ":" + port;
                 this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegate(update),msg);
                 Stream stm = tcpclnt.GetStream();
                 String str = "ar.pdf";
@@ -98,12 +98,14 @@ namespace Client
             catch (SocketException se)
             {
                 String msg = "Error while trying to connect: " + se.Message;
-                //this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegate(update), msg);
+                Console.WriteLine(se.StackTrace);
+                this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegate(update), msg);
             }
             catch (Exception exc)
             {
                 String msg = "Error while trying to connect: " + exc.Message;
-                //this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegate(update), msg);
+                Console.WriteLine(exc.StackTrace);
+                this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegate(update), msg);
             }
             finally
             {
