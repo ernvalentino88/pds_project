@@ -34,3 +34,11 @@ C:\Users\Ernesto\Documents\GitHub\pds_project\Server\Server\obj\Debug\Server_Mar
 C:\Users\Ernesto\Documents\GitHub\pds_project\Server\Server\obj\Debug\Server.g.resources
 C:\Users\Ernesto\Documents\GitHub\pds_project\Server\Server\obj\Debug\Server.Properties.Resources.resources
 C:\Users\Ernesto\Documents\GitHub\pds_project\Server\Server\obj\Debug\Server.csproj.GenerateResource.Cache
+C:\Users\John\Documents\GitHub\pds_project\Server\Server\bin\Debug\EntityFramework.dll
+C:\Users\John\Documents\GitHub\pds_project\Server\Server\bin\Debug\EntityFramework.SqlServer.dll
+C:\Users\John\Documents\GitHub\pds_project\Server\Server\bin\Debug\System.Data.SQLite.dll
+C:\Users\John\Documents\GitHub\pds_project\Server\Server\bin\Debug\System.Data.SQLite.EF6.dll
+C:\Users\John\Documents\GitHub\pds_project\Server\Server\bin\Debug\System.Data.SQLite.Linq.dll
+C:\Users\John\Documents\GitHub\pds_project\Server\Server\bin\Debug\EntityFramework.xml
+C:\Users\John\Documents\GitHub\pds_project\Server\Server\bin\Debug\EntityFramework.SqlServer.xml
+C:\Users\John\Documents\GitHub\pds_project\Server\Server\bin\Debug\System.Data.SQLite.xml
