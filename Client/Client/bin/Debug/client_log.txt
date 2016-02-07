@@ -1,0 +1,144 @@
+07/02/2016 01:49:52 ***Fatal Error***  Formato della stringa di input non corretto.
+   in System.Number.StringToNumber(String str, NumberStyles options, NumberBuffer& number, NumberFormatInfo info, Boolean parseDecimal)
+   in System.Number.ParseInt32(String s, NumberStyles style, NumberFormatInfo info)
+   in System.Int32.Parse(String s)
+   in Client.MainWindow.connect(String address, String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 57
+07/02/2016 01:50:05 ***Fatal Error***  Formato della stringa di input non corretto.
+   in System.Number.StringToNumber(String str, NumberStyles options, NumberBuffer& number, NumberFormatInfo info, Boolean parseDecimal)
+   in System.Number.ParseInt32(String s, NumberStyles style, NumberFormatInfo info)
+   in System.Int32.Parse(String s)
+   in Client.MainWindow.connect(String address, String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 57
+07/02/2016 02:13:37 ***Fatal Error***  Formato della stringa di input non corretto.
+   in System.Number.StringToNumber(String str, NumberStyles options, NumberBuffer& number, NumberFormatInfo info, Boolean parseDecimal)
+   in System.Number.ParseInt32(String s, NumberStyles style, NumberFormatInfo info)
+   in System.Int32.Parse(String s)
+   in Client.MainWindow.connect(String address, String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 58
+07/02/2016 02:17:23 ***Fatal Error***  Impossibile stabilire la connessione. Risposta non corretta della parte connessa dopo l'intervallo di tempo oppure mancata risposta dall'host collegato 192.168.1.135:8001
+   in System.Net.Sockets.TcpClient.Connect(String hostname, Int32 port)
+   in Client.MainWindow.connect(String address, String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 60
+07/02/2016 02:22:25 ***Fatal Error***  Impossibile stabilire la connessione. Risposta non corretta della parte connessa dopo l'intervallo di tempo oppure mancata risposta dall'host collegato 192.168.1.134:8001
+   in System.Net.Sockets.TcpClient.Connect(String hostname, Int32 port)
+   in Client.MainWindow.connect(String address, String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 61
+07/02/2016 02:22:30 ***Fatal Error***  Impossibile stabilire la connessione. Risposta non corretta della parte connessa dopo l'intervallo di tempo oppure mancata risposta dall'host collegato 192.168.1.134:8001
+   in System.Net.Sockets.TcpClient.Connect(String hostname, Int32 port)
+   in Client.MainWindow.connect(String address, String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 61
+07/02/2016 02:26:54 ***Fatal Error***  Formato della stringa di input non corretto.
+   in System.Number.StringToNumber(String str, NumberStyles options, NumberBuffer& number, NumberFormatInfo info, Boolean parseDecimal)
+   in System.Number.ParseInt32(String s, NumberStyles style, NumberFormatInfo info)
+   in System.Int32.Parse(String s)
+   in Client.MainWindow.connect(String address, String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 61
+07/02/2016 02:26:56 ***Fatal Error***  Formato della stringa di input non corretto.
+   in System.Number.StringToNumber(String str, NumberStyles options, NumberBuffer& number, NumberFormatInfo info, Boolean parseDecimal)
+   in System.Number.ParseInt32(String s, NumberStyles style, NumberFormatInfo info)
+   in System.Int32.Parse(String s)
+   in Client.MainWindow.connect(String address, String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 61
+07/02/2016 02:26:56 ***Fatal Error***  Formato della stringa di input non corretto.
+   in System.Number.StringToNumber(String str, NumberStyles options, NumberBuffer& number, NumberFormatInfo info, Boolean parseDecimal)
+   in System.Number.ParseInt32(String s, NumberStyles style, NumberFormatInfo info)
+   in System.Int32.Parse(String s)
+   in Client.MainWindow.connect(String address, String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 61
+07/02/2016 02:26:57 ***Fatal Error***  Formato della stringa di input non corretto.
+   in System.Number.StringToNumber(String str, NumberStyles options, NumberBuffer& number, NumberFormatInfo info, Boolean parseDecimal)
+   in System.Number.ParseInt32(String s, NumberStyles style, NumberFormatInfo info)
+   in System.Int32.Parse(String s)
+   in Client.MainWindow.connect(String address, String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 61
+07/02/2016 02:26:58 ***Fatal Error***  Formato della stringa di input non corretto.
+   in System.Number.StringToNumber(String str, NumberStyles options, NumberBuffer& number, NumberFormatInfo info, Boolean parseDecimal)
+   in System.Number.ParseInt32(String s, NumberStyles style, NumberFormatInfo info)
+   in System.Int32.Parse(String s)
+   in Client.MainWindow.connect(String address, String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 61
+07/02/2016 02:26:58 ***Fatal Error***  Formato della stringa di input non corretto.
+   in System.Number.StringToNumber(String str, NumberStyles options, NumberBuffer& number, NumberFormatInfo info, Boolean parseDecimal)
+   in System.Number.ParseInt32(String s, NumberStyles style, NumberFormatInfo info)
+   in System.Int32.Parse(String s)
+   in Client.MainWindow.connect(String address, String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 61
+07/02/2016 02:27:02 ***Fatal Error***  Formato della stringa di input non corretto.
+   in System.Number.StringToNumber(String str, NumberStyles options, NumberBuffer& number, NumberFormatInfo info, Boolean parseDecimal)
+   in System.Number.ParseInt32(String s, NumberStyles style, NumberFormatInfo info)
+   in System.Int32.Parse(String s)
+   in Client.MainWindow.connect(String address, String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 61
+07/02/2016 02:27:03 ***Fatal Error***  Formato della stringa di input non corretto.
+   in System.Number.StringToNumber(String str, NumberStyles options, NumberBuffer& number, NumberFormatInfo info, Boolean parseDecimal)
+   in System.Number.ParseInt32(String s, NumberStyles style, NumberFormatInfo info)
+   in System.Int32.Parse(String s)
+   in Client.MainWindow.connect(String address, String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 61
+07/02/2016 02:27:04 ***Fatal Error***  Formato della stringa di input non corretto.
+   in System.Number.StringToNumber(String str, NumberStyles options, NumberBuffer& number, NumberFormatInfo info, Boolean parseDecimal)
+   in System.Number.ParseInt32(String s, NumberStyles style, NumberFormatInfo info)
+   in System.Int32.Parse(String s)
+   in Client.MainWindow.connect(String address, String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 61
+07/02/2016 02:27:20 ***Fatal Error***  Impossibile stabilire la connessione. Rifiuto persistente del computer di destinazione 192.168.1.130:8001
+   in System.Net.Sockets.TcpClient.Connect(String hostname, Int32 port)
+   in Client.MainWindow.connect(String address, String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 61
+07/02/2016 02:27:31 ***Fatal Error***  Impossibile stabilire la connessione. Rifiuto persistente del computer di destinazione 192.168.1.130:8001
+   in System.Net.Sockets.TcpClient.Connect(String hostname, Int32 port)
+   in Client.MainWindow.connect(String address, String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 61
+07/02/2016 02:27:58 ***Fatal Error***  Impossibile stabilire la connessione. Risposta non corretta della parte connessa dopo l'intervallo di tempo oppure mancata risposta dall'host collegato 192.168.1.134:8001
+   in System.Net.Sockets.TcpClient.Connect(String hostname, Int32 port)
+   in Client.MainWindow.connect(String address, String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 61
+07/02/2016 02:32:54 ***Fatal Error***  Impossibile stabilire la connessione. Rifiuto persistente del computer di destinazione 192.168.1.130:8001
+   in System.Net.Sockets.TcpClient.Connect(String hostname, Int32 port)
+   in Client.MainWindow.connect(String address, String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 61
+07/02/2016 02:36:08 ***Fatal Error***  Host sconosciuto
+   in System.Net.Dns.GetAddrInfo(String name)
+   in System.Net.Dns.InternalGetHostByName(String hostName, Boolean includeIPv6)
+   in System.Net.Dns.GetHostAddresses(String hostNameOrAddress)
+   in System.Net.Sockets.TcpClient.Connect(String hostname, Int32 port)
+   in Client.MainWindow.connect(String address, String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 61
+07/02/2016 02:40:13 ***Fatal Error***  Host sconosciuto
+   in System.Net.Dns.GetAddrInfo(String name)
+   in System.Net.Dns.InternalGetHostByName(String hostName, Boolean includeIPv6)
+   in System.Net.Dns.GetHostAddresses(String hostNameOrAddress)
+   in System.Net.Sockets.TcpClient.Connect(String hostname, Int32 port)
+   in Client.MainWindow.connect(String address, String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 65
+07/02/2016 02:40:46 ***Fatal Error***  Impossibile stabilire la connessione. Risposta non corretta della parte connessa dopo l'intervallo di tempo oppure mancata risposta dall'host collegato 192.168.1.11:8001
+   in System.Net.Sockets.TcpClient.Connect(String hostname, Int32 port)
+   in Client.MainWindow.connect(String address, String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 65
+07/02/2016 02:50:03 ***Fatal Error***  Host sconosciuto
+   in System.Net.Dns.GetAddrInfo(String name)
+   in System.Net.Dns.InternalGetHostByName(String hostName, Boolean includeIPv6)
+   in System.Net.Dns.GetHostAddresses(String hostNameOrAddress)
+   in System.Net.Sockets.TcpClient.Connect(String hostname, Int32 port)
+   in Client.MainWindow.connect(String address, String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 65
+07/02/2016 03:39:00 ***Fatal Error***  Host sconosciuto
+   in System.Net.Dns.GetAddrInfo(String name)
+   in System.Net.Dns.InternalGetHostByName(String hostName, Boolean includeIPv6)
+   in System.Net.Dns.GetHostAddresses(String hostNameOrAddress)
+   in System.Net.Sockets.TcpClient.Connect(String hostname, Int32 port)
+   in Client.MainWindow.connect(String address, String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 67
+07/02/2016 03:40:44 ***Fatal Error***  Host sconosciuto
+   in System.Net.Dns.GetAddrInfo(String name)
+   in System.Net.Dns.InternalGetHostByName(String hostName, Boolean includeIPv6)
+   in System.Net.Dns.GetHostAddresses(String hostNameOrAddress)
+   in System.Net.Sockets.TcpClient.Connect(String hostname, Int32 port)
+   in Client.MainWindow.connect(String address, String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 67
+07/02/2016 03:42:41 ***Fatal Error***  Host sconosciuto
+   in System.Net.Dns.GetAddrInfo(String name)
+   in System.Net.Dns.InternalGetHostByName(String hostName, Boolean includeIPv6)
+   in System.Net.Dns.GetHostAddresses(String hostNameOrAddress)
+   in System.Net.Sockets.TcpClient.Connect(String hostname, Int32 port)
+   in Client.MainWindow.connect(String address, String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 67
+07/02/2016 03:43:15 ***Fatal Error***  Host sconosciuto
+   in System.Net.Dns.GetAddrInfo(String name)
+   in System.Net.Dns.InternalGetHostByName(String hostName, Boolean includeIPv6)
+   in System.Net.Dns.GetHostAddresses(String hostNameOrAddress)
+   in System.Net.Sockets.TcpClient.Connect(String hostname, Int32 port)
+   in Client.MainWindow.connect(String address, String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 67
+07/02/2016 03:44:08 ***Fatal Error***  Host sconosciuto
+   in System.Net.Dns.GetAddrInfo(String name)
+   in System.Net.Dns.InternalGetHostByName(String hostName, Boolean includeIPv6)
+   in System.Net.Dns.GetHostAddresses(String hostNameOrAddress)
+   in System.Net.Sockets.TcpClient.Connect(String hostname, Int32 port)
+   in Client.MainWindow.connect(String address, String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 67
+07/02/2016 03:45:32 ***Fatal Error***  Impossibile stabilire la connessione. Risposta non corretta della parte connessa dopo l'intervallo di tempo oppure mancata risposta dall'host collegato 192.168.1.12:8001
+   in System.Net.Sockets.TcpClient.Connect(String hostname, Int32 port)
+   in Client.MainWindow.connect(String address, String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 67
+07/02/2016 03:47:15 ***Fatal Error***  Impossibile stabilire la connessione. Risposta non corretta della parte connessa dopo l'intervallo di tempo oppure mancata risposta dall'host collegato 192.168.1.12:8001
+   in System.Net.Sockets.TcpClient.Connect(String hostname, Int32 port)
+   in Client.MainWindow.connect(String address, String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 67
+07/02/2016 03:48:46 ***Fatal Error***  Impossibile stabilire la connessione. Risposta non corretta della parte connessa dopo l'intervallo di tempo oppure mancata risposta dall'host collegato 192.168.1.12:8001
+   in System.Net.Sockets.TcpClient.Connect(String hostname, Int32 port)
+   in Client.MainWindow.connect(String address, String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 67
+07/02/2016 03:49:16 ***Fatal Error***  Impossibile stabilire la connessione. Risposta non corretta della parte connessa dopo l'intervallo di tempo oppure mancata risposta dall'host collegato 192.168.1.12:8001
+   in System.Net.Sockets.TcpClient.Connect(String hostname, Int32 port)
+   in Client.MainWindow.connect(String address, String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 67

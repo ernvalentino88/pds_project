@@ -14,6 +14,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
 using MahApps.Metro.Controls;
+using MahApps.Metro.Controls.Dialogs;
 using System.Net;
 using System.Net.Sockets;
 using System.IO;
@@ -27,71 +28,104 @@ namespace Server
     /// 
     public partial class MainWindow : MetroWindow
     {
-        TcpListener myList;
-        public delegate void start_server_delegate();
+        public delegate void start_server_delegate(String port);
         public delegate void update_ui_delegate(String msg);
-        //private Thread serverThread;
+        public delegate Task UpdateDelegateAsync(String msg, String bannerTitle, String bannerMsg);
+        private TcpListener myList;
+        private Boolean connected;
        
         public MainWindow()
         {
             InitializeComponent();
+            connected = false;
         }
 
         private void launch_button_Click(object sender, RoutedEventArgs e)
         {
-
-           myList = new TcpListener(IPAddress.Any, Int32.Parse(this.text_port.Text));
-           start_server_delegate sd = new start_server_delegate(start_server);
-           sd.BeginInvoke(null,null);
-          
-
-
-
+            start_server_delegate sd = new start_server_delegate(start_server);
+            sd.BeginInvoke(this.text_port.Text,null, null);
         }
 
-        public void start_server() {
-           
-            try
+        public void start_server(String port) 
+        {
+            if (connected)
             {
-                
-                myList.Start();
-              
-               String msg="The server is running at : " + myList.LocalEndpoint;
-                this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new update_ui_delegate(update_msg), msg);
-               
-          
-               
-              
-                /* Start Listeneting at the specified port */
-            
-                while (true)
-                {
-                    Socket s = myList.AcceptSocket();
-                    msg = "Connection accpeted from " + s.RemoteEndPoint;
-                   this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new update_ui_delegate(update_msg), msg);
-                   
-                   
-
-                    s.Close();
-                }
+                connected = false;
+                this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new update_ui_delegate(updateUI), "Insert port number for listening to ingress connection");
                 myList.Stop();
             }
-            catch (Exception ex)
+            else
             {
-              String msg = ex.Message;
-              this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new update_ui_delegate(update_msg), msg);
+                try
+                {
+                    myList = new TcpListener(IPAddress.Any, Int32.Parse(port));
+                    myList.Start();
+                    connected = true;
+                    String msg = "The server is running at : " + myList.LocalEndpoint;
+                    this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new update_ui_delegate(updateUI), msg);
+
+                    while (true)
+                    {
+                        //TODO uscire correttamente dal while
+                        Socket s = myList.AcceptSocket();
+                        msg = "Connection accpeted from " + s.RemoteEndPoint;
+                        this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new update_ui_delegate(updateUI_msg), msg);
+                        s.Close();
+                    }
+                }
+                catch (SocketException se)
+                {
+                    connected = false;
+                    String msg = "Insert port number for listening to ingress connection";
+                    StreamWriter sw = new StreamWriter("server_log.txt", true);
+                    sw.Write(DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss"));
+                    sw.WriteLine(" ***Fatal Error***  " + se.Message);
+                    sw.WriteLine(se.StackTrace);
+                    sw.Close();
+                    this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegateAsync(updateUI_banner), msg, "Network Error", se.Message);
+                }
+                catch (Exception ex)
+                {
+                    connected = false;
+                    String msg = "Insert port number for listening to ingress connection";
+                    StreamWriter sw = new StreamWriter("server_log.txt", true);
+                    sw.Write(DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss"));
+                    sw.WriteLine(" ***Fatal Error***  " + ex.Message);
+                    sw.WriteLine(ex.StackTrace);
+                    sw.Close();
+                    this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegateAsync(updateUI_banner), msg, "Unexpected Error", ex.Message);
+                }
             }
-        
         }
 
-        private void update_msg(String msg) {
-            this.launch_button.Visibility = Visibility.Collapsed;
-            this.text_port.Visibility = Visibility.Collapsed;
-            this.con_stat.Visibility = Visibility.Visible;
-            this.con_stat.Content = msg;
+        private void updateUI_msg(String msg)
+        {
+            this.text_label.Content = msg;
+        }
+
+        private void updateUI(String msg)
+        {
+            if (connected)
+            {
+                this.launch_button.Content = "disconnect";
+                this.text_port.Visibility = Visibility.Hidden;
+            }
+            else
+            {
+                this.launch_button.Content = "launch";
+                this.text_port.Visibility = Visibility.Visible;
+            }
+            this.text_label.Content = msg;
+        }
+
+        private async Task updateUI_banner(String msg, String bannerTitle, String bannerMsg)
+        {
+            await this.ShowMessageAsync(bannerTitle, bannerMsg);
+            this.launch_button.Content = "launch";
+            this.text_port.Visibility = Visibility.Visible;
+            this.text_label.Content = msg;
         }
 
 
-       
     }
 }

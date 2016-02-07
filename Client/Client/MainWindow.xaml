@@ -17,10 +17,13 @@
             <TextBox x:Name="Text_ip" Controls:TextBoxHelper.Watermark="IP address" Height="22" Controls:TextBoxHelper.ClearTextButton="True" Margin="35,150,217,106" />
             <TextBox x:Name="Text_port" Controls:TextBoxHelper.Watermark="Port" Controls:TextBoxHelper.ClearTextButton="True" Width="84" Height="22" Margin="356,150,67,106" />
             <Button HorizontalAlignment="Right" Margin="0,247,67,0" x:Name="Connect_button" Content="Connect" Style="{StaticResource AccentedSquareButtonStyle}" Height="35" Width="69" Click="Connect_button_Click"/>
-            <Label x:Name="Message_label" Visibility="Hidden"/>
+            <Grid Margin="35,26,67,214" HorizontalAlignment="Center">
+                <Label x:Name="Message_label" Content="Insert IP address and port of the server to connect" FontSize="14" FontWeight="Bold"/>
+            </Grid>
+            <Controls:MetroProgressBar x:Name="progress_bar" IsIndeterminate="True" Visibility="Hidden"  Height="27" Margin="35,104,67,151" HorizontalAlignment="Center" Width="405"/>
         </Grid>
     </Controls:WindowCommands>
-
+    
 </Controls:MetroWindow>
 
 

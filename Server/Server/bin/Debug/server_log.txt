@@ -1,0 +1,27 @@
+07/02/2016 04:11:49 ***Fatal Error***  Formato della stringa di input non corretto.
+   in System.Number.StringToNumber(String str, NumberStyles options, NumberBuffer& number, NumberFormatInfo info, Boolean parseDecimal)
+   in System.Number.ParseInt32(String s, NumberStyles style, NumberFormatInfo info)
+   in System.Int32.Parse(String s)
+   in Server.MainWindow.start_server(String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:riga 61
+07/02/2016 04:12:00 ***Fatal Error***  Operazione di blocco interrotta da una chiamata a WSACancelBlockingCall
+   in System.Net.Sockets.Socket.Accept()
+   in System.Net.Sockets.TcpListener.AcceptSocket()
+   in Server.MainWindow.start_server(String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:riga 69
+07/02/2016 04:24:59 ***Fatal Error***  Operazione di blocco interrotta da una chiamata a WSACancelBlockingCall
+   in System.Net.Sockets.Socket.Accept()
+   in System.Net.Sockets.TcpListener.AcceptSocket()
+   in Server.MainWindow.start_server(String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:riga 69
+07/02/2016 04:25:07 ***Fatal Error***  Operazione di blocco interrotta da una chiamata a WSACancelBlockingCall
+   in System.Net.Sockets.Socket.Accept()
+   in System.Net.Sockets.TcpListener.AcceptSocket()
+   in Server.MainWindow.start_server(String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:riga 69
+07/02/2016 04:31:05 ***Fatal Error***  Si sono verificati uno o più errori.
+   in System.Threading.Tasks.Task.ThrowIfExceptional(Boolean includeTaskCanceledExceptions)
+   in System.Threading.Tasks.Task`1.GetResultCore(Boolean waitCompletionNotification)
+   in System.Threading.Tasks.Task`1.get_Result()
+   in Server.MainWindow.start_server(String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:riga 70
+07/02/2016 04:36:48 ***Fatal Error***  Formato della stringa di input non corretto.
+   in System.Number.StringToNumber(String str, NumberStyles options, NumberBuffer& number, NumberFormatInfo info, Boolean parseDecimal)
+   in System.Number.ParseInt32(String s, NumberStyles style, NumberFormatInfo info)
+   in System.Int32.Parse(String s)
+   in Server.MainWindow.start_server(String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:riga 61

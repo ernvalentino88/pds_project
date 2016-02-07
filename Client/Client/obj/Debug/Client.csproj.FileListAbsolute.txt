@@ -33,3 +33,9 @@ C:\Users\John\Documents\GitHub\pds_project\Client\Client\obj\Debug\Client.g.reso
 C:\Users\John\Documents\GitHub\pds_project\Client\Client\obj\Debug\Client.Properties.Resources.resources
 C:\Users\John\Documents\GitHub\pds_project\Client\Client\obj\Debug\Client.csproj.GenerateResource.Cache
 C:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\obj\Debug\App.baml
+C:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\bin\Debug\Microsoft.Threading.Tasks.dll
+C:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\bin\Debug\Microsoft.Threading.Tasks.Extensions.Desktop.dll
+C:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\bin\Debug\Microsoft.Threading.Tasks.Extensions.dll
+C:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\bin\Debug\Microsoft.Threading.Tasks.xml
+C:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\bin\Debug\Microsoft.Threading.Tasks.Extensions.xml
+C:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\bin\Debug\Microsoft.Threading.Tasks.Extensions.Desktop.xml
