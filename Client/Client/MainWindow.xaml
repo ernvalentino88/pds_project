@@ -2,8 +2,8 @@
         x:Class="Client.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Client" Height="339.925" Width="502"
-        xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro" Foreground="#FF020202">
+        Title="Client" Height="437" Width="354"
+        xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro" Foreground="#FF020202" ResizeMode="CanMinimize">
 
 
     <Controls:WindowCommands Foreground="{x:Null}" Margin="0,0,2,8" >
@@ -13,17 +13,46 @@
                 <GradientStop Color="#FFD1C2C2" Offset="1"/>
             </LinearGradientBrush>
         </Controls:WindowCommands.Background>
-        <Grid Height="282" Width="507">
-            <TextBox x:Name="Text_ip" Controls:TextBoxHelper.Watermark="IP address" Height="22" Controls:TextBoxHelper.ClearTextButton="True" Margin="35,150,217,106" />
-            <TextBox x:Name="Text_port" Controls:TextBoxHelper.Watermark="Port" Controls:TextBoxHelper.ClearTextButton="True" Width="84" Height="22" Margin="356,150,67,106" />
-            <Button HorizontalAlignment="Right" Margin="0,247,67,0" x:Name="Connect_button" Content="Connect" Style="{StaticResource AccentedSquareButtonStyle}" Height="35" Width="69" Click="Connect_button_Click"/>
-            <Grid Margin="35,26,67,214" HorizontalAlignment="Center">
-                <Label x:Name="Message_label" Content="Insert IP address and port of the server to connect" FontSize="14" FontWeight="Bold"/>
-            </Grid>
-            <Controls:MetroProgressBar x:Name="progress_bar" IsIndeterminate="True" Visibility="Hidden"  Height="27" Margin="35,104,67,151" HorizontalAlignment="Center" Width="405"/>
+
+        <Grid x:Name="Grid_initial" Height="376" Width="350">
+            <Controls:MetroContentControl>
+                <TabControl>
+                    <TabItem Header="Register" Margin="0,0,-47,0">
+                        <Grid Margin="-11,0,0,0">
+                            <TextBox HorizontalAlignment="Center" x:Name="Text_regUser" Controls:TextBoxHelper.Watermark="Username" Controls:TextBoxHelper.ClearTextButton="True" Width="253" Height="22" Margin="34,81,33,224"  />
+                            <PasswordBox HorizontalAlignment="Center" x:Name="Box_regPwd1" Controls:TextBoxHelper.Watermark="Password" Controls:TextBoxHelper.ClearTextButton="True" Width="252" Height="22" Margin="34,126,34,179" />
+                            <PasswordBox HorizontalAlignment="Center" x:Name="Box_regPwd2" Controls:TextBoxHelper.Watermark="Re-type password" Controls:TextBoxHelper.ClearTextButton="True" Width="252" Height="22" Margin="52,169,51,136" />
+                            <TextBox HorizontalAlignment="Center" x:Name="Text_regIp" Controls:TextBoxHelper.Watermark="IP address" Height="22" Controls:TextBoxHelper.ClearTextButton="True" Width="252" Margin="52,210,51,95"  />
+                            <TextBox HorizontalAlignment="Center" x:Name="Text_regPort" Controls:TextBoxHelper.Watermark="Port" Controls:TextBoxHelper.ClearTextButton="True" Width="252" Height="22" Margin="52,250,51,55"  />
+                            <Grid HorizontalAlignment="Center">
+                                <Label HorizontalAlignment="Center" x:Name="label_regMsg" Content="Create account" FontSize="14" FontWeight="ExtraBold"  FontFamily="Calibri" Foreground="SteelBlue" Height="43" VerticalAlignment="Top" Margin="70,10,68,0" />
+                            </Grid>
+                            <Controls:MetroProgressBar x:Name="progressBar_reg" IsIndeterminate="True" Visibility="Hidden" Height="27" HorizontalAlignment="Center" Width="313" Margin="7,152,0,152"/>
+                            <Button HorizontalAlignment="Center" VerticalAlignment="Bottom" x:Name="Register_button" Content="register" Style="{StaticResource AccentedSquareButtonStyle}" Height="35" Width="70" Margin="125,0" Click="Register_button_Click"/>
+                        </Grid>
+                    </TabItem>
+                     
+                    <TabItem Header="Log In" Margin="84,0,-139,0">
+                        <Grid Margin="-11,0,0,0">
+                            <TextBox HorizontalAlignment="Center" x:Name="Text_user" Controls:TextBoxHelper.Watermark="Username" Controls:TextBoxHelper.ClearTextButton="True" Width="253" Height="22" Margin="34,81,33,224"  />
+                            <PasswordBox HorizontalAlignment="Center" x:Name="Box_pwd" Controls:TextBoxHelper.Watermark="Password" Controls:TextBoxHelper.ClearTextButton="True" Width="252" Height="22" Margin="34,126,34,179" />
+                            <TextBox HorizontalAlignment="Center" x:Name="Text_ip" Controls:TextBoxHelper.Watermark="IP address" Height="22" Controls:TextBoxHelper.ClearTextButton="True" Width="252" Margin="35,170,33,135" />
+                            <TextBox HorizontalAlignment="Center" x:Name="Text_port" Controls:TextBoxHelper.Watermark="Port" Controls:TextBoxHelper.ClearTextButton="True" Width="252" Height="22" Margin="35,217,33,88"  />
+                            <Grid HorizontalAlignment="Center">
+                                <Label HorizontalAlignment="Center" x:Name="Message_label" Content="Log in to the remote server" FontSize="14" FontWeight="ExtraBold"  FontFamily="Calibri" Foreground="SteelBlue" Height="43" VerticalAlignment="Top" Margin="70,10,68,0" />
+                            </Grid>
+                            <Controls:MetroProgressBar x:Name="progress_bar" IsIndeterminate="True" Visibility="Hidden" Height="27" HorizontalAlignment="Center" Width="313" Margin="7,152,0,152"/>
+                            <Button HorizontalAlignment="Center" VerticalAlignment="Bottom" x:Name="Connect_button" Content="Connect" Style="{StaticResource AccentedSquareButtonStyle}" Height="35" Width="70" Click="Connect_button_Click" Margin="125,0"/>
+                        </Grid>
+                    </TabItem>
+
+                </TabControl>
+            </Controls:MetroContentControl>
+        </Grid>
+        <Grid x:Name="Grid_register" Height="376" Width="326" Visibility="Collapsed">
         </Grid>
     </Controls:WindowCommands>
-    
+
 </Controls:MetroWindow>
 
 
