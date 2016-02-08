@@ -272,3 +272,45 @@
 07/02/2016 20:18:44 ***Fatal Error***  Impossibile stabilire la connessione. Risposta non corretta della parte connessa dopo l'intervallo di tempo oppure mancata risposta dall'host collegato 192.168.1.134:8001
    in System.Net.Sockets.TcpClient.Connect(String hostname, Int32 port)
    in Client.MainWindow.register(String address, String port, String user, String pwd1, String pwd2) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 177
+08/02/2016 19:30:43 ***Fatal Error***  Argomento specificato non compreso nell'intervallo.
+Nome parametro: size
+   in System.Net.Sockets.NetworkStream.Write(Byte[] buffer, Int32 offset, Int32 size)
+   in Client.MainWindow.connect(String address, String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 90
+08/02/2016 19:32:05 ***Fatal Error***  Impossibile leggere dati dalla connessione del trasporto: Connessione in corso interrotta forzatamente dall'host remoto.
+   in System.Net.Sockets.NetworkStream.Read(Byte[] buffer, Int32 offset, Int32 size)
+   in Client.MainWindow.register(String address, String port, String user, String pwd1, String pwd2) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 181
+08/02/2016 19:33:38 ***Fatal Error***  Impossibile leggere dati dalla connessione del trasporto: Connessione in corso interrotta forzatamente dall'host remoto.
+   in System.Net.Sockets.NetworkStream.Read(Byte[] buffer, Int32 offset, Int32 size)
+   in Client.MainWindow.register(String address, String port, String user, String pwd1, String pwd2) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 181
+08/02/2016 19:36:58 ***Fatal Error***  Impossibile leggere dati dalla connessione del trasporto: Connessione in corso interrotta forzatamente dall'host remoto.
+   in System.Net.Sockets.NetworkStream.Read(Byte[] buffer, Int32 offset, Int32 size)
+   in Client.MainWindow.register(String address, String port, String user, String pwd1, String pwd2) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 181
+08/02/2016 19:38:53 ***Fatal Error***  Impossibile leggere dati dalla connessione del trasporto: Connessione in corso interrotta forzatamente dall'host remoto.
+   in System.Net.Sockets.NetworkStream.Read(Byte[] buffer, Int32 offset, Int32 size)
+   in Client.MainWindow.register(String address, String port, String user, String pwd1, String pwd2) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 181
+08/02/2016 19:40:25 ***Fatal Error***  Impossibile leggere dati dalla connessione del trasporto: Connessione in corso interrotta forzatamente dall'host remoto.
+   in System.Net.Sockets.NetworkStream.Read(Byte[] buffer, Int32 offset, Int32 size)
+   in Client.MainWindow.register(String address, String port, String user, String pwd1, String pwd2) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 181
+08/02/2016 19:43:33 ***Fatal Error***  Impossibile leggere dati dalla connessione del trasporto: Connessione in corso interrotta forzatamente dall'host remoto.
+   in System.Net.Sockets.NetworkStream.Read(Byte[] buffer, Int32 offset, Int32 size)
+   in Client.MainWindow.register(String address, String port, String user, String pwd1, String pwd2) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 181
+08/02/2016 19:45:48 ***Fatal Error***  Impossibile leggere dati dalla connessione del trasporto: Connessione in corso interrotta forzatamente dall'host remoto.
+   in System.Net.Sockets.NetworkStream.Read(Byte[] buffer, Int32 offset, Int32 size)
+   in Client.MainWindow.connect(String address, String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 95
+08/02/2016 19:45:54 ***Fatal Error***  Impossibile scrivere dati sulla connessione di trasporto: Connessione in corso interrotta forzatamente dall'host remoto.
+   in System.Net.Sockets.NetworkStream.Write(Byte[] buffer, Int32 offset, Int32 size)
+   in Client.MainWindow.connect(String address, String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 91
+08/02/2016 19:47:02 ***Fatal Error***  Impossibile leggere dati dalla connessione del trasporto: Connessione in corso interrotta forzatamente dall'host remoto.
+   in System.Net.Sockets.NetworkStream.Read(Byte[] buffer, Int32 offset, Int32 size)
+   in Client.MainWindow.connect(String address, String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 93
+08/02/2016 19:50:42 ***Fatal Error***  Argomento specificato non compreso nell'intervallo.
+Nome parametro: size
+   in System.Net.Sockets.NetworkStream.Write(Byte[] buffer, Int32 offset, Int32 size)
+   in Client.MainWindow.connect(String address, String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 90
+08/02/2016 19:53:25 ***Fatal Error***  Impossibile leggere dati dalla connessione del trasporto: Connessione in corso interrotta forzatamente dall'host remoto.
+   in System.Net.Sockets.NetworkStream.Read(Byte[] buffer, Int32 offset, Int32 size)
+   in Client.MainWindow.register(String address, String port, String user, String pwd1, String pwd2) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 182
+08/02/2016 19:54:00 ***Fatal Error***  Argomento specificato non compreso nell'intervallo.
+Nome parametro: size
+   in System.Net.Sockets.NetworkStream.Write(Byte[] buffer, Int32 offset, Int32 size)
+   in Client.MainWindow.connect(String address, String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 91

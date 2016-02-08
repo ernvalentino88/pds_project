@@ -34,12 +34,13 @@ namespace Client
         private Boolean connected;
         private enum CONNECTION_CODES
         {
-            ERR,
-            OK,
-            HELLO,
-            AUTH_FAILURE,
-            REG_FAILURE,
-            NEW_REG,
+            ERR = 0,
+            OK = 1,
+            HELLO = 3,
+            AUTH_FAILURE = 4,
+            REG_FAILURE = 5,
+            NEW_REG = 6,
+            KEY_EXC = 7
         };
 
         public MainWindow()
@@ -76,51 +77,26 @@ namespace Client
                     this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegate(updateUI_progressBar), msg);
                     tcpclnt.Connect(address, portInt);
                     msg = "Connection estabilished with: " + address + ":" + port;
-                    this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegate(updateUI), msg);
+                    this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegate(updateUI_progressBar), msg);
                     Stream stm = tcpclnt.GetStream();
-                    String str = "ar.pdf";
 
-                    Console.WriteLine("Sending file infos...");
+                    byte[] code = BitConverter.GetBytes((UInt32)CONNECTION_CODES.KEY_EXC);
+                    stm.Write(code, 0, code.Length);
+                    RSA rsa = new RSA();
+                    byte[] modulus = rsa.getModulus();
+                    byte[] exp = rsa.getExponent();
+                    Console.WriteLine(exp.Length);
 
-                    Console.WriteLine("Transmitting file size.....");
-                    FileInfo file = new FileInfo("C:\\Users\\Ernesto\\Documents\\ar.pdf");
-                    byte[] fileLen = BitConverter.GetBytes(file.Length);
+                    stm.Write(modulus, 0, modulus.Length);
+                    stm.Write(exp, 0, exp.Length);
 
-                    stm.Write(fileLen, 0, fileLen.Length);
-
-                    ASCIIEncoding asen = new ASCIIEncoding();
-                    byte[] ba = asen.GetBytes(str);
-                    Console.WriteLine("Transmitting file name.....");
-
-                    stm.Write(ba, 0, ba.Length);
-
-                    byte[] bb = new byte[100];
-                    int k = stm.Read(bb, 0, 100);
-
-                    if (k > 0)
+                    byte[] recvBuf = new byte[256];
+                    int bytesRead = stm.Read(recvBuf, 0, 256);
+                    if (bytesRead == 256)
                     {
-                        for (int i = 0; i < k; i++)
-                            Console.Write(Convert.ToChar(bb[i]));
-
-                        Console.WriteLine("Sending file.....");
-                        FileStream fr = File.OpenRead("C:\\Users\\Ernesto\\Documents\\ar.pdf");
-
-                        byte[] fileBytes = new byte[1024];
-                        int byteRead = 0;
-                        while ((byteRead = fr.Read(fileBytes, 0, fileBytes.Length)) > 0)
-                        {
-                            stm.Write(fileBytes, 0, byteRead);
-                        }
-                        fr.Close();
-                        Console.WriteLine("File sent");
-
-                        bb = new byte[100];
-                        k = stm.Read(bb, 0, 100);
-
-                        for (int i = 0; i < k; i++)
-                            Console.Write(Convert.ToChar(bb[i]));
-
-
+                        byte[] decryptedData = rsa.RSADecrypt(recvBuf, false);
+                        msg = System.Text.Encoding.UTF8.GetString(decryptedData);
+                        this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegate(updateUI), msg);
                     }
                 }
                 catch (SocketException se)
