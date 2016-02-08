@@ -25,3 +25,50 @@
    in System.Number.ParseInt32(String s, NumberStyles style, NumberFormatInfo info)
    in System.Int32.Parse(String s)
    in Server.MainWindow.start_server(String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:riga 61
+08/02/2016 14:37:29 ***Fatal Error***  unable to open database file
+   at Server.MainWindow.check_db() in c:\Users\John\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:line 181
+   at Server.MainWindow.start_server(String port) in c:\Users\John\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:line 64
+08/02/2016 14:40:59 ***Fatal Error***  unable to open database file
+   at Server.MainWindow.check_db() in c:\Users\John\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:line 181
+   at Server.MainWindow.start_server(String port) in c:\Users\John\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:line 64
+08/02/2016 14:41:37 ***Fatal Error***  unable to open database file
+   at Server.MainWindow.check_db() in c:\Users\John\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:line 181
+   at Server.MainWindow.start_server(String port) in c:\Users\John\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:line 64
+08/02/2016 14:50:03 ***Fatal Error***  SQL logic error or missing database
+no such table: users
+   at Server.MainWindow.check_db() in c:\Users\John\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:line 182
+   at Server.MainWindow.start_server(String port) in c:\Users\John\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:line 64
+08/02/2016 15:07:41 ***Fatal Error***  Format of the initialization string does not conform to specification starting at index 0.
+   at System.Data.Common.DbConnectionOptions.GetKeyValuePair(String connectionString, Int32 currentPosition, StringBuilder buffer, Boolean useOdbcRules, String& keyname, String& keyvalue)
+   at System.Data.Common.DbConnectionOptions.ParseInternal(Hashtable parsetable, String connectionString, Boolean buildChain, Hashtable synonyms, Boolean firstKey)
+   at System.Data.Common.DbConnectionOptions..ctor(String connectionString, Hashtable synonyms, Boolean useOdbcRules)
+   at System.Data.Common.DbConnectionStringBuilder.set_ConnectionString(String value)
+   at System.Data.SQLite.SQLiteConnection.ParseConnectionStringViaFramework(String connectionString, Boolean strict)
+   at System.Data.SQLite.SQLiteConnection.ParseConnectionString(String connectionString, Boolean parseViaFramework, Boolean allowNameOnly)
+   at System.Data.SQLite.SQLiteConnection.Open()
+   at Server.MainWindow.connect_db() in c:\Users\John\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:line 140
+   at Server.MainWindow.check_db() in c:\Users\John\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:line 168
+   at Server.MainWindow.start_server(String port) in c:\Users\John\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:line 64
+08/02/2016 15:08:04 ***Fatal Error***  Format of the initialization string does not conform to specification starting at index 0.
+   at System.Data.Common.DbConnectionOptions.GetKeyValuePair(String connectionString, Int32 currentPosition, StringBuilder buffer, Boolean useOdbcRules, String& keyname, String& keyvalue)
+   at System.Data.Common.DbConnectionOptions.ParseInternal(Hashtable parsetable, String connectionString, Boolean buildChain, Hashtable synonyms, Boolean firstKey)
+   at System.Data.Common.DbConnectionOptions..ctor(String connectionString, Hashtable synonyms, Boolean useOdbcRules)
+   at System.Data.Common.DbConnectionStringBuilder.set_ConnectionString(String value)
+   at System.Data.SQLite.SQLiteConnection.ParseConnectionStringViaFramework(String connectionString, Boolean strict)
+   at System.Data.SQLite.SQLiteConnection.ParseConnectionString(String connectionString, Boolean parseViaFramework, Boolean allowNameOnly)
+   at System.Data.SQLite.SQLiteConnection.Open()
+   at Server.MainWindow.connect_db() in c:\Users\John\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:line 140
+   at Server.MainWindow.check_db() in c:\Users\John\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:line 168
+   at Server.MainWindow.start_server(String port) in c:\Users\John\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:line 64
+08/02/2016 15:23:51 ***Fatal Error***  constraint failed
+UNIQUE constraint failed: users.user_id
+   at Server.MainWindow.check_db() in c:\Users\John\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:line 173
+   at Server.MainWindow.start_server(String port) in c:\Users\John\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:line 64
+08/02/2016 15:31:44 ***Fatal Error***  A blocking operation was interrupted by a call to WSACancelBlockingCall
+   at System.Net.Sockets.Socket.Accept()
+   at System.Net.Sockets.TcpListener.AcceptSocket()
+   at Server.MainWindow.start_server(String port) in c:\Users\John\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:line 74
+08/02/2016 15:32:05 ***Fatal Error***  A blocking operation was interrupted by a call to WSACancelBlockingCall
+   at System.Net.Sockets.Socket.Accept()
+   at System.Net.Sockets.TcpListener.AcceptSocket()
+   at Server.MainWindow.start_server(String port) in c:\Users\John\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:line 74

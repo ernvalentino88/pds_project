@@ -20,6 +20,7 @@ using System.Net.Sockets;
 using System.IO;
 using System.Threading;
 using System.Data.SQLite;
+using System.Security.Cryptography;
 
 namespace Server
 {
@@ -43,7 +44,7 @@ namespace Server
 
         private void launch_button_Click(object sender, RoutedEventArgs e)
         {
-            check_db();
+            
             start_server_delegate sd = new start_server_delegate(start_server);
             sd.BeginInvoke(this.text_port.Text,null, null);
         }
@@ -60,6 +61,7 @@ namespace Server
             {
                 try
                 {
+             
                     myList = new TcpListener(IPAddress.Any, Int32.Parse(port));
                     myList.Start();
                     connected = true;
@@ -128,38 +130,13 @@ namespace Server
             this.text_label.Content = msg;
         }
 
-        private SQLiteConnection connect_db() {
-            SQLiteConnection dbCon;
-            dbCon = new SQLiteConnection("Data Source=PDS;Version=3");
-            dbCon.Open();
+       
 
-            return dbCon;
-        }
+        
 
-        private String find_user(SQLiteConnection db_con,String id)
-        {
-            string sql = "select user_id from dbo.users where user_id=" + id;
-            SQLiteCommand command = new SQLiteCommand(sql, db_con);
-            SQLiteDataReader reader = command.ExecuteReader();
-            while (reader.Read()) {
-                if (reader["user_id"].Equals(id)) {
-                   string pwd_hash= reader.GetString(1);
-                   // String pwd_hash = new string(reader["pwd"].ToString);
-                   return pwd_hash;
-                }
-            }
-            
-            return null;
-        }
+       
 
-        private void check_db() {
-            SQLiteConnection con = connect_db();
-            string sql = "insert into users (user_id,pwd) values ('Alex','1234557')";
-            SQLiteCommand command = new SQLiteCommand(sql, con);
-            command.ExecuteNonQuery();
-
-
-        }
+       
 
 
 
