@@ -72,3 +72,68 @@ UNIQUE constraint failed: users.user_id
    at System.Net.Sockets.Socket.Accept()
    at System.Net.Sockets.TcpListener.AcceptSocket()
    at Server.MainWindow.start_server(String port) in c:\Users\John\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:line 74
+08/02/2016 19:30:42 ***Fatal Error***  Wrong exponent bytes
+   at Server.MainWindow.start_server(String port) in c:\Users\John\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:line 100
+08/02/2016 19:32:03 ***Fatal Error***  Unexpected command
+   at Server.MainWindow.start_server(String port) in c:\Users\John\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:line 110
+08/02/2016 19:33:06 ***Fatal Error***  A blocking operation was interrupted by a call to WSACancelBlockingCall
+   at System.Net.Sockets.Socket.Accept()
+   at System.Net.Sockets.TcpListener.AcceptSocket()
+   at Server.MainWindow.start_server(String port) in c:\Users\John\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:line 84
+08/02/2016 19:33:36 ***Fatal Error***  Unexpected command
+   at Server.MainWindow.start_server(String port) in c:\Users\John\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:line 110
+08/02/2016 19:36:56 ***Fatal Error***  Unexpected command
+   at Server.MainWindow.start_server(String port) in c:\Users\John\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:line 110
+08/02/2016 19:38:51 ***Fatal Error***  Unexpected command: 186085
+   at Server.MainWindow.start_server(String port) in c:\Users\John\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:line 110
+08/02/2016 19:39:58 ***Fatal Error***  Only one usage of each socket address (protocol/network address/port) is normally permitted
+   at System.Net.Sockets.Socket.DoBind(EndPoint endPointSnapshot, SocketAddress socketAddress)
+   at System.Net.Sockets.Socket.Bind(EndPoint localEP)
+   at System.Net.Sockets.TcpListener.Start(Int32 backlog)
+   at System.Net.Sockets.TcpListener.Start()
+   at Server.MainWindow.start_server(String port) in c:\Users\John\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:line 76
+08/02/2016 19:40:23 ***Fatal Error***  Unexpected command: 186085
+   at Server.MainWindow.start_server(String port) in c:\Users\John\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:line 110
+08/02/2016 19:43:32 ***Fatal Error***  Unexpected command: 186085
+   at Server.MainWindow.start_server(String port) in c:\Users\John\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:line 110
+08/02/2016 19:45:47 ***Fatal Error***  Wrong exponent bytes
+   at Server.MainWindow.start_server(String port) in c:\Users\John\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:line 100
+08/02/2016 19:47:01 ***Fatal Error***  The parameter is incorrect.
+
+   at System.Security.Cryptography.CryptographicException.ThrowCryptographicException(Int32 hr)
+   at System.Security.Cryptography.Utils._ImportKey(SafeProvHandle hCSP, Int32 keyNumber, CspProviderFlags flags, Object cspObject, SafeKeyHandle& hKey)
+   at System.Security.Cryptography.RSACryptoServiceProvider.ImportParameters(RSAParameters parameters)
+   at Server.RSAUtility.set_public_key(Byte[] modulus, Byte[] exponent) in c:\Users\John\Documents\GitHub\pds_project\Server\Server\Class2.cs:line 38
+   at Server.MainWindow.start_server(String port) in c:\Users\John\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:line 103
+08/02/2016 19:50:41 ***Fatal Error***  The parameter is incorrect.
+
+   at System.Security.Cryptography.CryptographicException.ThrowCryptographicException(Int32 hr)
+   at System.Security.Cryptography.Utils._ImportKey(SafeProvHandle hCSP, Int32 keyNumber, CspProviderFlags flags, Object cspObject, SafeKeyHandle& hKey)
+   at System.Security.Cryptography.RSACryptoServiceProvider.ImportParameters(RSAParameters parameters)
+   at Server.RSAUtility.set_public_key(Byte[] modulus, Byte[] exponent) in c:\Users\John\Documents\GitHub\pds_project\Server\Server\Class2.cs:line 38
+   at Server.MainWindow.start_server(String port) in c:\Users\John\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:line 103
+08/02/2016 19:53:12 ***Fatal Error***  Only one usage of each socket address (protocol/network address/port) is normally permitted
+   at System.Net.Sockets.Socket.DoBind(EndPoint endPointSnapshot, SocketAddress socketAddress)
+   at System.Net.Sockets.Socket.Bind(EndPoint localEP)
+   at System.Net.Sockets.TcpListener.Start(Int32 backlog)
+   at System.Net.Sockets.TcpListener.Start()
+   at Server.MainWindow.start_server(String port) in c:\Users\John\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:line 76
+08/02/2016 19:53:23 ***Fatal Error***  Unexpected command: 186085
+   at Server.MainWindow.start_server(String port) in c:\Users\John\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:line 110
+08/02/2016 19:53:47 ***Fatal Error***  Only one usage of each socket address (protocol/network address/port) is normally permitted
+   at System.Net.Sockets.Socket.DoBind(EndPoint endPointSnapshot, SocketAddress socketAddress)
+   at System.Net.Sockets.Socket.Bind(EndPoint localEP)
+   at System.Net.Sockets.TcpListener.Start(Int32 backlog)
+   at System.Net.Sockets.TcpListener.Start()
+   at Server.MainWindow.start_server(String port) in c:\Users\John\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:line 76
+08/02/2016 19:53:59 ***Fatal Error***  The parameter is incorrect.
+
+   at System.Security.Cryptography.CryptographicException.ThrowCryptographicException(Int32 hr)
+   at System.Security.Cryptography.Utils._ImportKey(SafeProvHandle hCSP, Int32 keyNumber, CspProviderFlags flags, Object cspObject, SafeKeyHandle& hKey)
+   at System.Security.Cryptography.RSACryptoServiceProvider.ImportParameters(RSAParameters parameters)
+   at Server.RSAUtility.set_public_key(Byte[] modulus, Byte[] exponent) in c:\Users\John\Documents\GitHub\pds_project\Server\Server\Class2.cs:line 38
+   at Server.MainWindow.start_server(String port) in c:\Users\John\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:line 103
+08/02/2016 19:59:22 ***Fatal Error***  A blocking operation was interrupted by a call to WSACancelBlockingCall
+   at System.Net.Sockets.Socket.Accept()
+   at System.Net.Sockets.TcpListener.AcceptSocket()
+   at Server.MainWindow.start_server(String port) in c:\Users\John\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:line 84

@@ -35,6 +35,16 @@ namespace Server
         public delegate Task UpdateDelegateAsync(String msg, String bannerTitle, String bannerMsg);
         private TcpListener myList;
         private Boolean connected;
+        private enum CONNECTION_CODES
+        {
+            ERR = 0,
+            OK = 1,
+            HELLO = 3,
+            AUTH_FAILURE = 4,
+            REG_FAILURE = 5,
+            NEW_REG = 6,
+            KEY_EXC = 7
+        };
        
         public MainWindow()
         {
@@ -74,6 +84,42 @@ namespace Server
                         Socket s = myList.AcceptSocket();
                         msg = "Connection accpeted from " + s.RemoteEndPoint;
                         this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new update_ui_delegate(updateUI_msg), msg);
+                        //connection done
+                        byte[] buffer_command = new byte[4];
+                        int b = s.Receive(buffer_command);
+                        if (b != 4) { throw new System.Exception("Wrong command bytes"); }
+                        CONNECTION_CODES code = (CONNECTION_CODES) BitConverter.ToUInt32(buffer_command,0);
+                        if (code == CONNECTION_CODES.KEY_EXC)
+                        {
+                            //receive  public key
+                            byte[] buffer_modulus = new byte[256];
+                            b = s.Receive(buffer_modulus);
+                            if (b != 256) { throw new System.Exception("Wrong modulus bytes"); }
+                            byte[] buffer_exponent = new byte[4];
+                            b = s.Receive(buffer_exponent);
+                            if (b<1) { throw new System.Exception("Wrong exponent bytes"); }
+                            //adjust exponent size
+                            byte[] exponent = new byte[b];
+                            if (b != 4){
+                                for (int i = 0; i < b; i++){
+                                    exponent[i] = buffer_exponent[i];
+                                }
+                            }
+                            else {
+                                exponent = buffer_exponent;
+                            }
+                            //set public key
+                            RSAUtility rsa = new RSAUtility();
+                            rsa.set_public_key(buffer_modulus,exponent);
+                            //encrypt simmetric key and send
+                            ASCIIEncoding asen = new ASCIIEncoding();
+                            byte[] sim_key_to_send = rsa.RSAEncrypt(asen.GetBytes("CIAO!"), false);
+                            if (sim_key_to_send == null) { throw new System.Exception("Error in ecnryption"); }
+                            s.Send(sim_key_to_send);
+                        }
+                        else { throw new Exception("Unexpected command: "+code); }
+
+
                         s.Close();
                     }
                 }
