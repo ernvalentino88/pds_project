@@ -27,8 +27,9 @@ namespace Server
             return dbCon;
         }
 
-        private String find_user(SQLiteConnection db_con, String id)
+        public String find_user(String id)
         {
+            SQLiteConnection db_con = connect_db();
             string sql = "select user_id from dbo.users where user_id=" + id;
             SQLiteCommand command = new SQLiteCommand(sql, db_con);
             SQLiteDataReader reader = command.ExecuteReader();
@@ -43,6 +44,21 @@ namespace Server
             }
 
             return null;
+        }
+
+        public bool register(String id, String pass) {
+            try
+            {
+                SQLiteConnection con = connect_db();
+                String pwd_md5 = CalculateMD5Hash(pass);
+                string sql="insert into users (user_id, pwd) values ('"+id+"', "+pwd_md5+")";
+                SQLiteCommand command = new SQLiteCommand(sql, con);
+                command.ExecuteNonQuery();
+            }
+            catch (System.Data.SQLite.SQLiteException ex) { 
+                return false;
+            }
+            return true;
         }
 
         public string CalculateMD5Hash(string input) {

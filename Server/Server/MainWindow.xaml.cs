@@ -35,6 +35,8 @@ namespace Server
         public delegate Task UpdateDelegateAsync(String msg, String bannerTitle, String bannerMsg);
         private TcpListener myList;
         private Boolean connected;
+        DBmanager dbm = new DBmanager();
+        AESUtility aes;
         private enum CONNECTION_CODES
         {
             ERR = 0,
@@ -43,7 +45,9 @@ namespace Server
             AUTH_FAILURE = 4,
             REG_FAILURE = 5,
             NEW_REG = 6,
-            KEY_EXC = 7
+            KEY_EXC = 7,
+            EXIT=8,
+            AUTH=9
         };
        
         public MainWindow()
@@ -112,10 +116,14 @@ namespace Server
                             RSAUtility rsa = new RSAUtility();
                             rsa.set_public_key(buffer_modulus,exponent);
                             //encrypt simmetric key and send
+                            //TODO change CIAO to pawword for AES
                             ASCIIEncoding asen = new ASCIIEncoding();
                             byte[] sim_key_to_send = rsa.RSAEncrypt(asen.GetBytes("CIAO!"), false);
                             if (sim_key_to_send == null) { throw new System.Exception("Error in ecnryption"); }
                             s.Send(sim_key_to_send);
+                            aes = new AESUtility(asen.GetBytes("CIAO!"));//TODO change CIAO to pawword for AES
+                            bool exit = false;
+                            while (!exit) { exit=get_cmd(s); }
                         }
                         else { throw new Exception("Unexpected command: "+code); }
 
@@ -176,15 +184,66 @@ namespace Server
             this.text_label.Content = msg;
         }
 
-       
+        private bool get_cmd(Socket s) {
+            byte[] buffer_command = new byte[4];
+            int b = s.Receive(buffer_command);
+            if (b != 4) { throw new System.Exception("Wrong command bytes"); }
+            CONNECTION_CODES code = (CONNECTION_CODES)BitConverter.ToUInt32(buffer_command, 0);
+            switch (code) {
+                case CONNECTION_CODES.EXIT: return false ; 
+                case CONNECTION_CODES.NEW_REG: register(s); break;
+                case CONNECTION_CODES.AUTH: authenticate(s); break;
+                
+
+            }
+
+            return true;
+        }
+
+        private void register(Socket s) {
+            byte[] buffer_name = new byte[256];
+            byte[] buffer_pwd = new byte[256];
+            int b=s.Receive(buffer_name);
+            if (b != 256) { throw new System.Exception("Wrong size"); }
+            b = s.Receive(buffer_pwd);
+            if (b != 256) { throw new System.Exception("Wrong size"); }
+            byte[] name = aes.AES_Decrypt(buffer_name);
+            byte[] pwd = aes.AES_Decrypt(buffer_pwd);
+            string id = System.Text.Encoding.Default.GetString(name);
+            string pass = System.Text.Encoding.Default.GetString(pwd);
+
+            if (!dbm.register(id, pass)) {
+                s.Send(BitConverter.GetBytes((UInt32)CONNECTION_CODES.ERR));
+                throw new Exception("Error during register");   
+            }
+        }
+
+        private void authenticate(Socket s) {
+            byte[] buffer_id = new byte[256];
+            int b = s.Receive(buffer_id);
+            if (b != 256) { throw new System.Exception("Wrong size"); }
+            byte[] id = aes.AES_Decrypt(buffer_id);
+            String user= System.Text.Encoding.Default.GetString(id)
+            //make RANDOM challange
+            String chlg = RandomString(10);
+            ASCIIEncoding asen = new ASCIIEncoding();
+            byte[] chlg_aes=aes.AES_Encrypt(asen.GetBytes(chlg));
+            s.Send(chlg_aes);
+
+            String hash=dbm.find_user(user);
+            //TODO RECEIVE R & Calcolate R'
+
 
         
+        }
 
-       
-
-       
-
-
+        public static string RandomString(int length)
+        {
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            var random = new Random();
+            return new string(Enumerable.Repeat(chars, length)
+              .Select(s => s[random.Next(s.Length)]).ToArray());
+        }
 
     }
 }
