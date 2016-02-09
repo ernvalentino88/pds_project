@@ -44,7 +44,7 @@ namespace Client
                 decryptedData = this.rsa.Decrypt(DataToDecrypt, DoOAEPPadding);
                 return decryptedData;
             }
-            catch (CryptographicException e)
+            catch (CryptographicException)
             {
                 return null;
             }

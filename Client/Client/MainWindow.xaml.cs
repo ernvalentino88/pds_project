@@ -85,7 +85,7 @@ namespace Client
                     RSA rsa = new RSA();
                     byte[] modulus = rsa.getModulus();
                     byte[] exp = rsa.getExponent();
-                    Console.WriteLine(exp.Length);
+                    
 
                     stm.Write(modulus, 0, modulus.Length);
                     stm.Write(exp, 0, exp.Length);
