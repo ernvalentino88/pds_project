@@ -12,6 +12,7 @@ namespace Utility
 {
     class Networking
     {
+        public static int TIME_OUT = 10 * 1000;
 
         public enum CONNECTION_CODES
         {
@@ -30,50 +31,44 @@ namespace Utility
         {
             TcpClient tcpclnt = new TcpClient();
             tcpclnt.Connect(ipAddress, port);
+            tcpclnt.ReceiveTimeout = TIME_OUT;
+            tcpclnt.SendTimeout = TIME_OUT;
             Stream stm = tcpclnt.GetStream();
             byte[] command = new byte[4];
             command = BitConverter.GetBytes((UInt32)CONNECTION_CODES.KEY_EXC);
             stm.Write(command, 0, command.Length);
-            int bytesRead = stm.Read(command, 0, 4);
-
-            if (bytesRead == 4 && (
-                ((CONNECTION_CODES)BitConverter.ToUInt32(command, 0) == CONNECTION_CODES.OK)))
+            
+            RSACryptoServiceProvider rsa = Security.generateRSAKey();
+            byte[] modulus = Security.getModulus(rsa);
+            byte[] exp = Security.getExponent(rsa);
+            stm.Write(modulus, 0, modulus.Length);
+            stm.Write(exp, 0, exp.Length);
+            
+            byte[] recvBuf = my_recv(256, tcpclnt.Client);
+            if (recvBuf != null)
             {
-                RSACryptoServiceProvider rsa = Security.generateRSAKey();
-                byte[] modulus = Security.getModulus(rsa);
-                byte[] exp = Security.getExponent(rsa);
-                stm.Write(modulus, 0, modulus.Length);
-                stm.Write(exp, 0, exp.Length);
+                byte[] decryptedData = Security.RSADecrypt(rsa, recvBuf, false);
+                MemoryStream ms = new MemoryStream(decryptedData);
+                byte[] Key = new byte[32];
+                ms.Read(Key, 0, 32);
+                byte[] IV = new byte[16];
+                ms.Read(IV, 0, 16);
 
-                bytesRead = stm.Read(command, 0, 4);
-                if (bytesRead == 4 && (
-                    ((CONNECTION_CODES)BitConverter.ToUInt32(command, 0) == CONNECTION_CODES.OK)))
+                if (Key != null && IV != null)
                 {
-                    byte[] recvBuf = new byte[512];
-                    bytesRead = stm.Read(recvBuf, 0, 512);
-                    if (bytesRead == 512)
-                    {
-                        MemoryStream ms = new MemoryStream(recvBuf);
-                        byte[] encKey = new byte[256];
-                        ms.Read(encKey, 0, 256);
-                        byte[] encIV = new byte[256];
-                        ms.Read(encIV, 0, 256);
-                        byte[] key = Security.RSADecrypt(rsa, encKey, false);
-                        byte[] iv = Security.RSADecrypt(rsa, encIV, false);
-                        if (key != null && iv != null)
-                        {
-                            AesCryptoServiceProvider aes = Security.getAESKey(key, iv);
-                            command = BitConverter.GetBytes((UInt32)CONNECTION_CODES.OK);
-                            stm.Write(command, 0, command.Length);
+                    AesCryptoServiceProvider aes = Security.getAESKey(Key, IV);
+                    command = BitConverter.GetBytes((UInt32)CONNECTION_CODES.OK);
+                    stm.Write(command, 0, command.Length);
 
-                            tcpclnt.Close();
-                            return aes;
-                        }
-                    }
+                    tcpclnt.Close();
+                    return aes;
+                }
+                else
+                {
+                    command = BitConverter.GetBytes((UInt32)CONNECTION_CODES.ERR);
+                    stm.Write(command, 0, command.Length);
                 }
             }
-            command = BitConverter.GetBytes((UInt32)CONNECTION_CODES.ERR);
-            stm.Write(command, 0, command.Length);
             tcpclnt.Close();
 
             return null;
@@ -84,11 +79,9 @@ namespace Utility
             byte[] recvBuf = new byte[259];
             byte[] command = new byte[4];
 
-            int bytesRead = client.Receive(recvBuf);
-            if (bytesRead == 259)
+            recvBuf = my_recv(259, client);
+            if (recvBuf != null)
             {
-                command = BitConverter.GetBytes((UInt32)CONNECTION_CODES.OK);
-                client.Send(command);
                 byte[] modulus = new byte[256];
                 byte[] exponent = new byte[3];
                 MemoryStream ms = new MemoryStream(recvBuf);
@@ -96,29 +89,30 @@ namespace Utility
                 ms.Read(exponent, 0, 3);
                 RSACryptoServiceProvider rsa = Security.getPublicKey(modulus, exponent);
                 AesCryptoServiceProvider aes = Security.generateAESKey();
-                byte[] encKey = Security.RSAEncrypt(rsa, aes.Key, false);
-                byte[] encIV = Security.RSAEncrypt(rsa, aes.IV, false);
-                if (encKey != null && encIV != null)
+                byte[] dataToEncrypt = new byte[48];
+                ms = new MemoryStream(dataToEncrypt);
+                ms.Write(aes.Key, 0, aes.Key.Length);
+                ms.Write(aes.IV, 0, aes.IV.Length);
+                byte[] encrypted = Security.RSAEncrypt(rsa, dataToEncrypt, false);
+
+                if (encrypted != null)
                 {
-                    client.Send(encKey);
-                    client.Send(encIV);
-                    bytesRead = client.Receive(command);
-                    if (bytesRead == 4 && (
+                    client.Send(encrypted);
+                    command = my_recv(4, client);
+                    if (command != null && (
                          ((CONNECTION_CODES)BitConverter.ToUInt32(command, 0) == CONNECTION_CODES.OK)))
                     {
                         client.Close();
                         return aes;
-                    }           
+                    }         
                 }
             }
-            command = BitConverter.GetBytes((UInt32)CONNECTION_CODES.ERR);
-            client.Send(command);
             client.Close();
 
             return null;
         }
 
-        public static UInt64? authenticationTcpClient(Aes aes, String username, String pwd, IPEndPoint server)
+        public static Int64 authenticationTcpClient(Aes aes, String username, String pwd, IPEndPoint server)
         {
             TcpClient tcpclnt = new TcpClient();
             tcpclnt.Connect(server);
@@ -126,56 +120,146 @@ namespace Utility
             byte[] command = new byte[4];
             command = BitConverter.GetBytes((UInt32)CONNECTION_CODES.AUTH);
             stm.Write(command, 0, command.Length);
-            int bytesRead = stm.Read(command, 0, 4);
-
-            if (bytesRead == 4 && (
-                ((CONNECTION_CODES)BitConverter.ToUInt32(command, 0) == CONNECTION_CODES.OK)))
+            
+            byte[] encrypted = Security.AESEncrypt(aes, username);
+            stm.Write(encrypted, 0, encrypted.Length);
+            command = my_recv(4, tcpclnt.Client);
+            if (command != null && (
+                    ((CONNECTION_CODES)BitConverter.ToUInt32(command, 0) == CONNECTION_CODES.OK)))
             {
-                byte[] encrypted = Security.AESEncrypt(aes, username);
-                stm.Write(encrypted, 0, encrypted.Length);
-                bytesRead = stm.Read(command, 0, 4);
-                if (bytesRead == 4 && (
-                     ((CONNECTION_CODES)BitConverter.ToUInt32(command, 0) == CONNECTION_CODES.OK)))
+                byte[] recvBuf = new byte[16];
+                recvBuf = my_recv(16, tcpclnt.Client);
+                if (recvBuf != null)
                 {
-                    byte[] recvBuf = new byte[16];
-                    bytesRead = stm.Read(recvBuf, 0, recvBuf.Length);
-                    if (bytesRead == 16)
+                    byte[] challenge = Security.AESDecrypt(aes, recvBuf);
+                    SHA1 sha = new SHA1CryptoServiceProvider();
+                    byte[] p = Encoding.UTF8.GetBytes(Security.CalculateMD5Hash(pwd));
+                    byte[] hash = sha.ComputeHash(Security.XOR(p, challenge));
+                    stm.Write(hash, 0, 20);
+                    command = my_recv(4, tcpclnt.Client);
+                    if (command != null && (
+                            ((CONNECTION_CODES)BitConverter.ToUInt32(command, 0) == CONNECTION_CODES.OK)))
                     {
-                        byte[] challenge = Security.AESDecrypt(aes, recvBuf);
-                        command = BitConverter.GetBytes((UInt32)CONNECTION_CODES.OK);
-                        stm.Write(command, 0, 4);
-                        byte[] p = Encoding.UTF8.GetBytes(pwd);
-                        SHA1 sha = new SHA1CryptoServiceProvider();
-                        byte[] hash = sha.ComputeHash(Security.XOR(p, challenge));
-                        byte[] sendBuf = Security.AESEncrypt(aes, hash);
-                        stm.Write(sendBuf, 0, 32);
-                        bytesRead = stm.Read(command, 0, 4);
-                        if (bytesRead == 4 && (
-                             ((CONNECTION_CODES)BitConverter.ToUInt32(command, 0) == CONNECTION_CODES.OK)))
+                        recvBuf = new byte[16];
+                        recvBuf = my_recv(16, tcpclnt.Client);
+                        if (recvBuf != null)
                         {
-                            recvBuf = new byte[16];
-                            bytesRead = stm.Read(recvBuf, 0, recvBuf.Length);
-                            if (bytesRead == 16)
-                            {
-                                byte[] id = Security.AESDecrypt(aes, recvBuf);
-                                UInt64 sessionID = BitConverter.ToUInt64(id, 0);
-                                command = BitConverter.GetBytes((UInt32)CONNECTION_CODES.OK);
-                                stm.Write(command, 0, command.Length);
-                                tcpclnt.Close();
-                                return sessionID;
-                            }
+                            byte[] id = Security.AESDecrypt(aes, recvBuf);
+                            Int64 sessionID = BitConverter.ToInt64(id, 0);
+                            command = BitConverter.GetBytes((UInt32)CONNECTION_CODES.OK);
+                            stm.Write(command, 0, command.Length);
+                            tcpclnt.Close();
+                            return sessionID;
                         }
-
                     }
-                    else
+                    if ( ((CONNECTION_CODES)BitConverter.ToUInt32(command, 0) == CONNECTION_CODES.AUTH_FAILURE) )
                     {
-                        command = BitConverter.GetBytes((UInt32)CONNECTION_CODES.ERR);
-                        stm.Write(command, 0, command.Length);
+                        //password not correct
+                        tcpclnt.Close();
+                        return -2;
                     }
                 }
             }
+            if ( ((CONNECTION_CODES)BitConverter.ToUInt32(command, 0) == CONNECTION_CODES.AUTH_FAILURE) )
+            {
+                //Error: username is not valid
+                tcpclnt.Close();
+                return -2;
+            }
             tcpclnt.Close();
-            return null;
+            return -1;
+        }
+
+        public static Int64 authenticationTcpServer(Aes aes, Socket client)
+        {
+            byte[] command = new byte[4];
+
+            byte[]  recvBuf = my_recv(16, client);
+            if (recvBuf != null)
+            {
+                byte[] decryptedData = Security.AESDecrypt(aes, recvBuf);
+                String pwd = DBmanager.find_user(Encoding.UTF8.GetString(decryptedData));
+                if (pwd != null)
+                {
+                    command = BitConverter.GetBytes((UInt32)CONNECTION_CODES.OK);
+                    client.Send(command);
+                    Random r = new Random();
+                    byte[] challenge = new byte[8];
+                    r.NextBytes(challenge);
+                    byte[] encryptedData = Security.AESEncrypt(aes, challenge);
+                    client.Send(encryptedData);
+                    SHA1 sha = new SHA1CryptoServiceProvider();
+                    byte[] p = Encoding.UTF8.GetBytes(pwd);
+                    byte[] hash = sha.ComputeHash(Security.XOR(p, challenge));
+                    byte[] hashClient = my_recv(20, client);
+                    if (hashClient != null)
+                    {
+                        if (hash.SequenceEqual(hashClient))
+                        {
+                            command = BitConverter.GetBytes((UInt32)CONNECTION_CODES.OK);
+                            client.Send(command);
+                            Int64 sessionID = r.Next();
+                            encryptedData = Security.AESEncrypt(aes, BitConverter.GetBytes(sessionID));
+                            client.Send(encryptedData);
+                            command = my_recv(4, client);
+                            if (command != null && (
+                                ((CONNECTION_CODES)BitConverter.ToUInt32(command, 0) == CONNECTION_CODES.OK)))
+                            {
+                                client.Close();
+                                return sessionID;
+                            }
+                            else
+                            {
+                                client.Close();
+                                return -1; //error on last ack
+                            }
+                        }
+                        else
+                        {
+                            //auth failed: pwd error
+                            command = BitConverter.GetBytes((UInt32)CONNECTION_CODES.AUTH_FAILURE);
+                            client.Send(command);
+                            return -2;
+                        }
+                    }
+                }
+                else
+                {
+                    //auth failed: user not existent
+                    command = BitConverter.GetBytes((UInt32)CONNECTION_CODES.AUTH_FAILURE);
+                    client.Send(command);
+                    return -3;
+                }
+            }
+            client.Close();
+            return 0;
+        }
+
+        private static byte[] my_recv(int size, Socket s)
+        {
+            int left = size;
+            int b;
+            byte[] received = new byte[size];
+            byte[] buffer = new byte[256];
+            MemoryStream ms = new MemoryStream(buffer);
+            try
+            {
+                while (left > 0)
+                {
+                    b = s.Receive(buffer);
+                    if (b <= 0)
+                    {
+                        return null;
+                    }
+                    ms.Read(received, 0, b);
+                    left -= b;
+                }
+            }
+            catch (SocketException)
+            {
+                return null;
+            }
+            return received;
         }
 
     }

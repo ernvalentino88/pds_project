@@ -19,6 +19,7 @@ using MahApps.Metro.Controls.Dialogs;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
+using Utility;
 
 namespace Client
 {
@@ -32,16 +33,6 @@ namespace Client
         private delegate void UpdateDelegate(String msg);
         private delegate Task UpdateDelegateAsync(String msg, String bannerTitle, String bannerMsg);
         private Boolean connected;
-        private enum CONNECTION_CODES
-        {
-            ERR = 0,
-            OK = 1,
-            HELLO = 3,
-            AUTH_FAILURE = 4,
-            REG_FAILURE = 5,
-            NEW_REG = 6,
-            KEY_EXC = 7
-        };
 
         public MainWindow()
         {
@@ -75,29 +66,7 @@ namespace Client
                     connected = true;
                     String msg = "Trying to connect to the server . . .";
                     this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegate(updateUI_progressBar), msg);
-                    tcpclnt.Connect(address, portInt);
-                    msg = "Connection estabilished with: " + address + ":" + port;
-                    this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegate(updateUI_progressBar), msg);
-                    Stream stm = tcpclnt.GetStream();
-
-                    byte[] code = BitConverter.GetBytes((UInt32)CONNECTION_CODES.KEY_EXC);
-                    stm.Write(code, 0, code.Length);
-                    RSA rsa = new RSA();
-                    byte[] modulus = rsa.getModulus();
-                    byte[] exp = rsa.getExponent();
                     
-
-                    stm.Write(modulus, 0, modulus.Length);
-                    stm.Write(exp, 0, exp.Length);
-
-                    byte[] recvBuf = new byte[256];
-                    int bytesRead = stm.Read(recvBuf, 0, 256);
-                    if (bytesRead == 256)
-                    {
-                        byte[] decryptedData = rsa.RSADecrypt(recvBuf, false);
-                        msg = System.Text.Encoding.UTF8.GetString(decryptedData);
-                        this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegate(updateUI), msg);
-                    }
                 }
                 catch (SocketException se)
                 {
