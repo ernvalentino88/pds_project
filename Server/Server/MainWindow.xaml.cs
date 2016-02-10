@@ -21,6 +21,7 @@ using System.IO;
 using System.Threading;
 using System.Data.SQLite;
 using System.Security.Cryptography;
+using Utility;
 
 namespace Server
 {
@@ -39,23 +40,13 @@ namespace Server
         private TcpListener myList;
         private Boolean connected;
         AESUtility aes;
-        private enum CONNECTION_CODES
-        {
-            ERR = 0,
-            OK = 1,
-            HELLO = 3,
-            AUTH_FAILURE = 4,
-            REG_FAILURE = 5,
-            NEW_REG = 6,
-            KEY_EXC = 7,
-            EXIT=8,
-            AUTH=9
-        };
+        
        
         public MainWindow()
         {
             InitializeComponent();
             connected = false;
+            
         }
 
         private void launch_button_Click(object sender, RoutedEventArgs e)

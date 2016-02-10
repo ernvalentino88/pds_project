@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Data.SQLite;
 using System.Security.Cryptography;
 
-namespace Server
+namespace Utility
 {
     class DBmanager
     {
@@ -37,32 +37,33 @@ namespace Server
             {
                 if (reader["user_id"].Equals(id))
                 {
-                    //string pwd_hash = reader.GetString(1);
-                    //String pwd_hash = new string((char[])reader["pwd"]);
-                    string pwd_hash = (string)reader["pwd"];
-                    return pwd_hash;
+                    String pwd = "" + reader["pwd"];
+                    return pwd;
                 }
             }
 
             return null;
         }
 
-        public static bool register(String id, String pass) {
+        public static bool register(String id, String pass)
+        {
             try
             {
                 SQLiteConnection con = connect_db();
                 String pwd_md5 = CalculateMD5Hash(pass);
-                string sql="insert into users (user_id, pwd) values ('"+id+"', "+pwd_md5+")";
+                string sql = "insert into users (user_id, pwd) values ('" + id + "', " + pwd_md5 + ")";
                 SQLiteCommand command = new SQLiteCommand(sql, con);
                 command.ExecuteNonQuery();
             }
-            catch (System.Data.SQLite.SQLiteException ex) { 
+            catch (System.Data.SQLite.SQLiteException ex)
+            {
                 return false;
             }
             return true;
         }
 
-        public static string CalculateMD5Hash(string input) {
+        public static string CalculateMD5Hash(string input)
+        {
             // step 1, calculate MD5 hash from input
             MD5 md5 = System.Security.Cryptography.MD5.Create();
             byte[] inputBytes = System.Text.Encoding.ASCII.GetBytes(input);
