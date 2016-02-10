@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.IO;
 using System.Security.Cryptography;
 
 namespace Utility
@@ -18,12 +19,12 @@ namespace Utility
             return rsa;
         }
 
-        public static byte[] getModulus(RSACryptoServiceProvider rsa)
+        public static byte[] getModulus(RSA rsa)
         {
             return rsa.ExportParameters(false).Modulus;
         }
 
-        public static byte[] getExponent(RSACryptoServiceProvider rsa)
+        public static byte[] getExponent(RSA rsa)
         {
             return rsa.ExportParameters(false).Exponent;
         }
@@ -87,14 +88,147 @@ namespace Utility
             return aes;
         }
 
-        public static ICryptoTransform getEncryptor(AesCryptoServiceProvider aes)
+        public static ICryptoTransform getEncryptor(Aes aes)
         {
             return aes.CreateEncryptor(aes.Key, aes.IV);
         }
 
-        public static ICryptoTransform getDecryptor(AesCryptoServiceProvider aes)
+        public static ICryptoTransform getDecryptor(Aes aes)
         {
             return aes.CreateDecryptor(aes.Key, aes.IV);
+        }
+
+        public static byte[] AESEncrypt(Aes aes, byte[] dataToEncrypt)
+        {
+            byte[] encryptedBytes = null;
+            using (MemoryStream ms = new MemoryStream())
+            {
+                
+                using (var cs = new CryptoStream(ms, getEncryptor(aes), CryptoStreamMode.Write))
+                {
+                    cs.Write(dataToEncrypt, 0, dataToEncrypt.Length);
+                    cs.Close();
+                }
+                encryptedBytes = ms.ToArray();
+                
+            }
+
+            return encryptedBytes;
+        }
+
+        public static byte[] AESDecrypt(Aes aes, byte[] dataToDecrypt)
+        {
+            byte[] decryptedBytes = null;
+            using (MemoryStream ms = new MemoryStream())
+            {
+
+                using (var cs = new CryptoStream(ms, getDecryptor(aes), CryptoStreamMode.Write))
+                {
+                    cs.Write(dataToDecrypt, 0, dataToDecrypt.Length);
+                    cs.Close();
+                }
+                decryptedBytes = ms.ToArray();
+
+            }
+
+            return decryptedBytes;
+        }
+
+        public static byte[] AESEncrypt(Aes aes, String plaintext)
+        {
+            byte[] dataToEncrypt = Encoding.UTF8.GetBytes(plaintext);
+            byte[] encryptedBytes = null;
+            using (MemoryStream ms = new MemoryStream())
+            {
+
+                using (var cs = new CryptoStream(ms, getEncryptor(aes), CryptoStreamMode.Write))
+                {
+                    cs.Write(dataToEncrypt, 0, dataToEncrypt.Length);
+                    cs.Close();
+                }
+                encryptedBytes = ms.ToArray();
+
+            }
+
+            return encryptedBytes;
+        }
+
+        public static byte[] AESEncrypt(Aes aes, UInt64 n)
+        {
+            byte[] dataToEncrypt = BitConverter.GetBytes(n);
+            byte[] encryptedBytes = null;
+            using (MemoryStream ms = new MemoryStream())
+            {
+
+                using (var cs = new CryptoStream(ms, getEncryptor(aes), CryptoStreamMode.Write))
+                {
+                    cs.Write(dataToEncrypt, 0, dataToEncrypt.Length);
+                    cs.Close();
+                }
+                encryptedBytes = ms.ToArray();
+
+            }
+
+            return encryptedBytes;
+        }
+
+        public static UInt64 AESDecryptUInt64(Aes aes, byte[] dataToDecrypt)
+        {
+            byte[] decryptedBytes = null;
+            using (MemoryStream ms = new MemoryStream())
+            {
+
+                using (var cs = new CryptoStream(ms, getDecryptor(aes), CryptoStreamMode.Write))
+                {
+                    cs.Write(dataToDecrypt, 0, dataToDecrypt.Length);
+                    cs.Close();
+                }
+                decryptedBytes = ms.ToArray();
+
+            }
+
+            return BitConverter.ToUInt64(decryptedBytes, 0);
+        }
+
+        public static String AESDecryptString(Aes aes, byte[] dataToDecrypt)
+        {
+            byte[] decryptedBytes = null;
+            using (MemoryStream ms = new MemoryStream())
+            {
+
+                using (var cs = new CryptoStream(ms, getDecryptor(aes), CryptoStreamMode.Write))
+                {
+                    cs.Write(dataToDecrypt, 0, dataToDecrypt.Length);
+                    cs.Close();
+                }
+                decryptedBytes = ms.ToArray();
+
+            }
+
+            return Encoding.UTF8.GetString(decryptedBytes);
+        }
+
+        public static byte[] XOR(byte[] a, byte[] b)
+        {
+            byte[] xored = (a.Length >= b.Length) ? new byte[a.Length] : new byte[b.Length];
+            for (int i = 0; i < xored.Length; i++)
+                xored[i] = (byte)(a[i] ^ b[i]);
+            if (a.Length > b.Length)
+            {
+                for (int i = b.Length; i < a.Length; i++)
+                {
+                    xored[i] = a[i];
+                }
+            }
+            if (b.Length > a.Length)
+            {
+                for (int i = a.Length; i < b.Length; i++)
+                {
+                    xored[i] = b[i];
+                }
+            }
+
+            return xored;
         }
     }
 }
