@@ -87,7 +87,7 @@ namespace Utility
                 MemoryStream ms = new MemoryStream(recvBuf);
                 ms.Read(modulus, 0, 256);
                 ms.Read(exponent, 0, 3);
-                RSACryptoServiceProvider rsa = Security.getPublicKey(modulus, exponent);
+                RSACryptoServiceProvider rsa = Security.getPublicKey(modulus,exponent);
                 AesCryptoServiceProvider aes = Security.generateAESKey();
                 byte[] dataToEncrypt = new byte[48];
                 ms = new MemoryStream(dataToEncrypt);
