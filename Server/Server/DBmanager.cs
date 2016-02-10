@@ -38,7 +38,8 @@ namespace Server
                 if (reader["user_id"].Equals(id))
                 {
                     //string pwd_hash = reader.GetString(1);
-                    String pwd_hash = new string((char[])reader["pwd"]);
+                    //String pwd_hash = new string((char[])reader["pwd"]);
+                    string pwd_hash = (string)reader["pwd"];
                     return pwd_hash;
                 }
             }

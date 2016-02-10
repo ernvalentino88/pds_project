@@ -228,7 +228,7 @@ namespace Server
             int b = s.Receive(buffer_id);
             if (b != 256) { throw new System.Exception("Wrong size"); }
             byte[] id = aes.AES_Decrypt(buffer_id);
-            String user= System.Text.Encoding.Default.GetString(id)
+            String user = System.Text.Encoding.Default.GetString(id);
             //make RANDOM challange
             String chlg = RandomString(10);
             ASCIIEncoding asen = new ASCIIEncoding();
