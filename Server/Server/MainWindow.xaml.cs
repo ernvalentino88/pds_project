@@ -30,12 +30,14 @@ namespace Server
     /// 
     public partial class MainWindow : MetroWindow
     {
+        public static int receive_timeout = 1000 * 10;
+        public static int send_timoute = 1000 * 10;
+
         public delegate void start_server_delegate(String port);
         public delegate void update_ui_delegate(String msg);
         public delegate Task UpdateDelegateAsync(String msg, String bannerTitle, String bannerMsg);
         private TcpListener myList;
         private Boolean connected;
-        DBmanager dbm = new DBmanager();
         AESUtility aes;
         private enum CONNECTION_CODES
         {
@@ -86,6 +88,8 @@ namespace Server
                     {
                         //TODO uscire correttamente dal while
                         Socket s = myList.AcceptSocket();
+                        s.ReceiveTimeout = receive_timeout;
+                        s.SendTimeout =send_timoute;
                         msg = "Connection accpeted from " + s.RemoteEndPoint;
                         this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new update_ui_delegate(updateUI_msg), msg);
                         //connection done
@@ -122,6 +126,7 @@ namespace Server
                             if (sim_key_to_send == null) { throw new System.Exception("Error in ecnryption"); }
                             s.Send(sim_key_to_send);
                             aes = new AESUtility(asen.GetBytes("CIAO!"));//TODO change CIAO to pawword for AES
+
                             bool exit = false;
                             while (!exit) { exit=get_cmd(s); }
                         }
@@ -212,7 +217,7 @@ namespace Server
             string id = System.Text.Encoding.Default.GetString(name);
             string pass = System.Text.Encoding.Default.GetString(pwd);
 
-            if (!dbm.register(id, pass)) {
+            if (!DBmanager.register(id, pass)) {
                 s.Send(BitConverter.GetBytes((UInt32)CONNECTION_CODES.ERR));
                 throw new Exception("Error during register");   
             }
@@ -230,12 +235,14 @@ namespace Server
             byte[] chlg_aes=aes.AES_Encrypt(asen.GetBytes(chlg));
             s.Send(chlg_aes);
 
-            String hash=dbm.find_user(user);
+            String hash=DBmanager.find_user(user);
             //TODO RECEIVE R & Calcolate R'
 
 
         
         }
+
+  
 
         public static string RandomString(int length)
         {

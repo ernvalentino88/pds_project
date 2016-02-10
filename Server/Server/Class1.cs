@@ -3,78 +3,82 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Data.SQLite;
 using System.Security.Cryptography;
+using System.IO;
 
 namespace Server
 {
-    class DBmanager
+    class AESUtility
     {
-
-        private SQLiteConnection connect_db()
+        byte[] passwordBytes;
+        public AESUtility(byte[] password)
         {
-            SQLiteConnection dbCon;
-            String con_str = @"Data Source=C:\Users\John\Desktop\SQLiteStudio\PDS.db;Version=3;";
-            dbCon = new SQLiteConnection(con_str, true);
-            try
-            {
-                dbCon.Open();
-            }
-            catch (System.Data.SQLite.SQLiteException ex)
-            {
-                throw ex;
-            }
-            return dbCon;
+            passwordBytes = password;
         }
-
-        public String find_user(String id)
+        public byte[] AES_Encrypt(byte[] bytesToBeEncrypted)
         {
-            SQLiteConnection db_con = connect_db();
-            string sql = "select user_id from dbo.users where user_id=" + id;
-            SQLiteCommand command = new SQLiteCommand(sql, db_con);
-            SQLiteDataReader reader = command.ExecuteReader();
-            while (reader.Read())
+            byte[] encryptedBytes = null;
+
+            // Set your salt here, change it to meet your flavor:
+            // The salt bytes must be at least 8 bytes.
+            byte[] saltBytes = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8 };
+
+            using (MemoryStream ms = new MemoryStream())
             {
-                if (reader["user_id"].Equals(id))
+                using (RijndaelManaged AES = new RijndaelManaged())
                 {
-                    string pwd_hash = reader.GetString(1);
-                    // String pwd_hash = new string(reader["pwd"].ToString);
-                    return pwd_hash;
+                    AES.KeySize = 256;
+                    AES.BlockSize = 128;
+
+                    var key = new Rfc2898DeriveBytes(passwordBytes, saltBytes, 1000);
+                    AES.Key = key.GetBytes(AES.KeySize / 8);
+                    AES.IV = key.GetBytes(AES.BlockSize / 8);
+
+                    AES.Mode = CipherMode.CBC;
+
+                    using (var cs = new CryptoStream(ms, AES.CreateEncryptor(), CryptoStreamMode.Write))
+                    {
+                        cs.Write(bytesToBeEncrypted, 0, bytesToBeEncrypted.Length);
+                        cs.Close();
+                    }
+                    encryptedBytes = ms.ToArray();
                 }
             }
 
-            return null;
+            return encryptedBytes;
         }
 
-        public bool register(String id, String pass) {
-            try
+        public byte[] AES_Decrypt(byte[] bytesToBeDecrypted)
+        {
+            byte[] decryptedBytes = null;
+
+            // Set your salt here, change it to meet your flavor:
+            // The salt bytes must be at least 8 bytes.
+            byte[] saltBytes = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8 };
+
+            using (MemoryStream ms = new MemoryStream())
             {
-                SQLiteConnection con = connect_db();
-                String pwd_md5 = CalculateMD5Hash(pass);
-                string sql="insert into users (user_id, pwd) values ('"+id+"', "+pwd_md5+")";
-                SQLiteCommand command = new SQLiteCommand(sql, con);
-                command.ExecuteNonQuery();
+                using (RijndaelManaged AES = new RijndaelManaged())
+                {
+                    AES.KeySize = 256;
+                    AES.BlockSize = 128;
+
+                    var key = new Rfc2898DeriveBytes(passwordBytes, saltBytes, 1000);
+                    AES.Key = key.GetBytes(AES.KeySize / 8);
+                    AES.IV = key.GetBytes(AES.BlockSize / 8);
+
+                    AES.Mode = CipherMode.CBC;
+
+                    using (var cs = new CryptoStream(ms, AES.CreateDecryptor(), CryptoStreamMode.Write))
+                    {
+                        cs.Write(bytesToBeDecrypted, 0, bytesToBeDecrypted.Length);
+                        cs.Close();
+                    }
+                    decryptedBytes = ms.ToArray();
+                }
             }
-            catch (System.Data.SQLite.SQLiteException ex) { 
-                return false;
-            }
-            return true;
+
+            return decryptedBytes;
         }
-
-        public string CalculateMD5Hash(string input) {
-            // step 1, calculate MD5 hash from input
-            MD5 md5 = System.Security.Cryptography.MD5.Create();
-            byte[] inputBytes = System.Text.Encoding.ASCII.GetBytes(input);
-            byte[] hash = md5.ComputeHash(inputBytes);
-            // step 2, convert byte array to hex string
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < hash.Length; i++)
-            {
-                sb.Append(hash[i].ToString("X2"));
-            }
-            return sb.ToString();
-        }
-
-
     }
 }
