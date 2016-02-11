@@ -39,3 +39,7 @@ C:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\bin\Debug\Microsoft.
 C:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\bin\Debug\Microsoft.Threading.Tasks.xml
 C:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\bin\Debug\Microsoft.Threading.Tasks.Extensions.xml
 C:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\bin\Debug\Microsoft.Threading.Tasks.Extensions.Desktop.xml
+C:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\bin\Debug\Utility.dll
+C:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\bin\Debug\System.Data.SQLite.dll
+C:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\bin\Debug\Utility.pdb
+C:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\bin\Debug\System.Data.SQLite.xml

@@ -211,7 +211,8 @@ namespace Utility
         public static byte[] XOR(byte[] a, byte[] b)
         {
             byte[] xored = (a.Length >= b.Length) ? new byte[a.Length] : new byte[b.Length];
-            for (int i = 0; i < xored.Length; i++)
+            int minLen = (a.Length >= b.Length) ? b.Length : a.Length;
+            for (int i = 0; i < minLen; i++)
                 xored[i] = (byte)(a[i] ^ b[i]);
             if (a.Length > b.Length)
             {

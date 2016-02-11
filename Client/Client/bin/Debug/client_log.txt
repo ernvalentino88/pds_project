@@ -314,3 +314,54 @@ Nome parametro: size
 Nome parametro: size
    in System.Net.Sockets.NetworkStream.Write(Byte[] buffer, Int32 offset, Int32 size)
    in Client.MainWindow.connect(String address, String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 91
+11/02/2016 13:18:51 ***Fatal Error***  Il valore non può essere null.
+Nome parametro: value
+   in System.BitConverter.ToUInt32(Byte[] value, Int32 startIndex)
+   in Utility.Networking.authenticationTcpClient(Aes aes, String username, String pwd, IPEndPoint server) in c:\Users\Ernesto\Documents\GitHub\pds_project\Utility\Utility\Networking.cs:riga 163
+   in Client.MainWindow.connect(String address, String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 74
+11/02/2016 13:32:40 ***Fatal Error***  Il valore non può essere null.
+Nome parametro: value
+   in System.BitConverter.ToUInt32(Byte[] value, Int32 startIndex)
+   in Utility.Networking.authenticationTcpClient(Aes aes, String username, String pwd, IPEndPoint server) in c:\Users\Ernesto\Documents\GitHub\pds_project\Utility\Utility\Networking.cs:riga 163
+   in Client.MainWindow.connect(String address, String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 74
+11/02/2016 14:05:13 ***Fatal Error***  Il valore non può essere null.
+Nome parametro: value
+   in System.BitConverter.ToUInt32(Byte[] value, Int32 startIndex)
+   in Utility.Networking.authenticationTcpClient(Aes aes, String username, String pwd, IPEndPoint server) in c:\Users\Ernesto\Documents\GitHub\pds_project\Utility\Utility\Networking.cs:riga 163
+   in Client.MainWindow.connect(String address, String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 74
+11/02/2016 14:11:37 ***Fatal Error***  Il valore non può essere null.
+Nome parametro: value
+   in System.BitConverter.ToUInt32(Byte[] value, Int32 startIndex)
+   in Utility.Networking.authenticationTcpClient(Aes aes, String username, String pwd, IPEndPoint server) in c:\Users\Ernesto\Documents\GitHub\pds_project\Utility\Utility\Networking.cs:riga 163
+   in Client.MainWindow.connect(String address, String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 74
+11/02/2016 14:26:41 ***Fatal Error***  Host sconosciuto
+   in System.Net.Dns.GetAddrInfo(String name)
+   in System.Net.Dns.InternalGetHostByName(String hostName, Boolean includeIPv6)
+   in System.Net.Dns.GetHostAddresses(String hostNameOrAddress)
+   in System.Net.Sockets.TcpClient.Connect(String hostname, Int32 port)
+   in Utility.Networking.keyExchangeTcpClient(String ipAddress, Int32 port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Utility\Utility\Networking.cs:riga 33
+   in Client.MainWindow.connect(String address, String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 70
+11/02/2016 14:26:51 ***Fatal Error***  Il valore non può essere null.
+Nome parametro: value
+   in System.BitConverter.ToUInt32(Byte[] value, Int32 startIndex)
+   in Utility.Networking.authenticationTcpClient(Aes aes, String username, String pwd, IPEndPoint server) in c:\Users\Ernesto\Documents\GitHub\pds_project\Utility\Utility\Networking.cs:riga 163
+   in Client.MainWindow.connect(String address, String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 74
+11/02/2016 14:29:12 ***Fatal Error***  Il valore non può essere null.
+Nome parametro: value
+   in System.BitConverter.ToUInt32(Byte[] value, Int32 startIndex)
+   in Utility.Networking.authenticationTcpClient(Aes aes, String username, String pwd, IPEndPoint server) in c:\Users\Ernesto\Documents\GitHub\pds_project\Utility\Utility\Networking.cs:riga 163
+   in Client.MainWindow.connect(String address, String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 74
+11/02/2016 14:30:15 ***Fatal Error***  Il valore non può essere null.
+Nome parametro: value
+   in System.BitConverter.ToUInt32(Byte[] value, Int32 startIndex)
+   in Utility.Networking.authenticationTcpClient(Aes aes, String username, String pwd, IPEndPoint server) in c:\Users\Ernesto\Documents\GitHub\pds_project\Utility\Utility\Networking.cs:riga 163
+   in Client.MainWindow.connect(String address, String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 74
+11/02/2016 14:37:14 ***Fatal Error***  Il valore non può essere null.
+Nome parametro: value
+   in System.BitConverter.ToUInt32(Byte[] value, Int32 startIndex)
+   in Utility.Networking.authenticationTcpClient(Aes aes, String username, String pwd, IPEndPoint server) in c:\Users\Ernesto\Documents\GitHub\pds_project\Utility\Utility\Networking.cs:riga 163
+   in Client.MainWindow.connect(String address, String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 74
+11/02/2016 14:40:29 ***Fatal Error***  Indice oltre i limiti della matrice.
+   in Utility.Security.XOR(Byte[] a, Byte[] b) in c:\Users\Ernesto\Documents\GitHub\pds_project\Utility\Utility\Security.cs:riga 215
+   in Utility.Networking.authenticationTcpClient(Aes aes, String username, String pwd, IPEndPoint server) in c:\Users\Ernesto\Documents\GitHub\pds_project\Utility\Utility\Networking.cs:riga 137
+   in Client.MainWindow.connect(String address, String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 74

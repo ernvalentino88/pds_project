@@ -42,3 +42,13 @@ C:\Users\John\Documents\GitHub\pds_project\Server\Server\bin\Debug\System.Data.S
 C:\Users\John\Documents\GitHub\pds_project\Server\Server\bin\Debug\EntityFramework.xml
 C:\Users\John\Documents\GitHub\pds_project\Server\Server\bin\Debug\EntityFramework.SqlServer.xml
 C:\Users\John\Documents\GitHub\pds_project\Server\Server\bin\Debug\System.Data.SQLite.xml
+C:\Users\Ernesto\Documents\GitHub\pds_project\Server\Server\bin\Debug\EntityFramework.dll
+C:\Users\Ernesto\Documents\GitHub\pds_project\Server\Server\bin\Debug\EntityFramework.SqlServer.dll
+C:\Users\Ernesto\Documents\GitHub\pds_project\Server\Server\bin\Debug\System.Data.SQLite.dll
+C:\Users\Ernesto\Documents\GitHub\pds_project\Server\Server\bin\Debug\System.Data.SQLite.EF6.dll
+C:\Users\Ernesto\Documents\GitHub\pds_project\Server\Server\bin\Debug\System.Data.SQLite.Linq.dll
+C:\Users\Ernesto\Documents\GitHub\pds_project\Server\Server\bin\Debug\Utility.dll
+C:\Users\Ernesto\Documents\GitHub\pds_project\Server\Server\bin\Debug\Utility.pdb
+C:\Users\Ernesto\Documents\GitHub\pds_project\Server\Server\bin\Debug\EntityFramework.xml
+C:\Users\Ernesto\Documents\GitHub\pds_project\Server\Server\bin\Debug\EntityFramework.SqlServer.xml
+C:\Users\Ernesto\Documents\GitHub\pds_project\Server\Server\bin\Debug\System.Data.SQLite.xml

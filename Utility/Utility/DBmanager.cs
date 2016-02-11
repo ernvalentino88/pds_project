@@ -14,7 +14,10 @@ namespace Utility
         private static SQLiteConnection connect_db()
         {
             SQLiteConnection dbCon;
-            String con_str = @"Data Source=C:\Users\John\Desktop\SQLiteStudio\PDS.db;Version=3;";
+            //pc alex
+            //String con_str = @"Data Source=C:\Users\John\Desktop\SQLiteStudio\PDS.db;Version=3;";
+            //pc ernesto
+            String con_str = @"Data Source=C:\Users\Ernesto\Documents\SQLiteStudio\pds.db;Version=3;";
             dbCon = new SQLiteConnection(con_str, true);
             try
             {
@@ -30,9 +33,10 @@ namespace Utility
         public static String find_user(String id)
         {
             SQLiteConnection db_con = connect_db();
-            string sql = "select user_id from dbo.users where user_id=" + id;
+            string sql = "select * from users where user_id = '" + id + "'";
             SQLiteCommand command = new SQLiteCommand(sql, db_con);
             SQLiteDataReader reader = command.ExecuteReader();
+
             while (reader.Read())
             {
                 if (reader["user_id"].Equals(id))
@@ -50,8 +54,8 @@ namespace Utility
             try
             {
                 SQLiteConnection con = connect_db();
-                String pwd_md5 = CalculateMD5Hash(pass);
-                string sql = "insert into users (user_id, pwd) values ('" + id + "', " + pwd_md5 + ")";
+                String pwd_md5 = Security.CalculateMD5Hash(pass);
+                string sql = "insert into users (user_id, pwd) values ('" + id + "', '" + pwd_md5 + "')";
                 SQLiteCommand command = new SQLiteCommand(sql, con);
                 command.ExecuteNonQuery();
             }
@@ -61,22 +65,5 @@ namespace Utility
             }
             return true;
         }
-
-        public static string CalculateMD5Hash(string input)
-        {
-            // step 1, calculate MD5 hash from input
-            MD5 md5 = System.Security.Cryptography.MD5.Create();
-            byte[] inputBytes = System.Text.Encoding.ASCII.GetBytes(input);
-            byte[] hash = md5.ComputeHash(inputBytes);
-            // step 2, convert byte array to hex string
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < hash.Length; i++)
-            {
-                sb.Append(hash[i].ToString("X2"));
-            }
-            return sb.ToString();
-        }
-
-
     }
 }

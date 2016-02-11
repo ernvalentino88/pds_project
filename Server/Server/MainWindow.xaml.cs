@@ -40,6 +40,7 @@ namespace Server
         private TcpListener myList;
         private Boolean connected;
         AesCryptoServiceProvider aes;
+        Int64 sessionId;
         
        
         public MainWindow()
@@ -86,16 +87,20 @@ namespace Server
                         //connection done
                         byte[] buffer_command = new byte[4];
                         int b = s.Receive(buffer_command);
-                        if (b != 4) { throw new System.Exception("Wrong command bytes"); }
-                        Networking.CONNECTION_CODES code = (Networking.CONNECTION_CODES)BitConverter.ToUInt32(buffer_command, 0);
-                        if (code == Networking.CONNECTION_CODES.KEY_EXC)
+                        if (b == 4)
                         {
-                            aes=Networking.keyExchangeTcpServer(s);
-                            bool exit = false;
-                            while (!exit) { exit=get_cmd(s); }
+                            Networking.CONNECTION_CODES code = (Networking.CONNECTION_CODES)BitConverter.ToUInt32(buffer_command, 0);
+                            switch (code)
+                            {
+                                case Networking.CONNECTION_CODES.KEY_EXC :
+                                    aes = Networking.keyExchangeTcpServer(s); 
+                                    break;
+                                case Networking.CONNECTION_CODES.AUTH :
+                                    sessionId = Networking.authenticationTcpServer(aes, s);
+                                    break;
+                                default: break;
+                            }
                         }
-                        else { throw new Exception("Unexpected command: "+code); }
-
 
                         s.Close();
                     }

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Security.Cryptography;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -66,7 +67,14 @@ namespace Client
                     connected = true;
                     String msg = "Trying to connect to the server . . .";
                     this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegate(updateUI_progressBar), msg);
-                    
+                    AesCryptoServiceProvider aes = Networking.keyExchangeTcpClient(address, portInt);
+                    IPEndPoint server = new IPEndPoint(IPAddress.Parse(address), portInt);
+                    if (aes != null)
+                    {
+                        Int64 sessionId = Networking.authenticationTcpClient(aes, "admin", "12345", server);
+                        msg = "" + sessionId;
+                        this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegate(updateUI), msg);
+                    }
                 }
                 catch (SocketException se)
                 {

@@ -163,3 +163,97 @@ UNIQUE constraint failed: users.user_id
    at System.Net.Sockets.Socket.Accept()
    at System.Net.Sockets.TcpListener.AcceptSocket()
    at Server.MainWindow.start_server(String port) in c:\Users\John\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:line 81
+11/02/2016 12:36:01 ***Fatal Error***  Impossibile accedere a un oggetto eliminato.
+Nome oggetto: 'System.Net.Sockets.Socket'.
+   in System.Net.Sockets.Socket.Receive(Byte[] buffer, Int32 offset, Int32 size, SocketFlags socketFlags, SocketError& errorCode)
+   in System.Net.Sockets.Socket.Receive(Byte[] buffer, Int32 offset, Int32 size, SocketFlags socketFlags)
+   in System.Net.Sockets.Socket.Receive(Byte[] buffer)
+   in Server.MainWindow.get_cmd(Socket s) in c:\Users\Ernesto\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:riga 158
+   in Server.MainWindow.start_server(String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:riga 95
+11/02/2016 13:05:51 ***Fatal Error***  Operazione di blocco interrotta da una chiamata a WSACancelBlockingCall
+   in System.Net.Sockets.Socket.Accept()
+   in System.Net.Sockets.TcpListener.AcceptSocket()
+   in Server.MainWindow.start_server(String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:riga 82
+11/02/2016 13:18:50 ***Fatal Error***  SQL logic error or missing database
+no such table: dbo.users
+   in System.Data.SQLite.SQLite3.Prepare(SQLiteConnection cnn, String strSql, SQLiteStatement previous, UInt32 timeoutMS, String& strRemain)
+   in System.Data.SQLite.SQLiteCommand.BuildNextCommand()
+   in System.Data.SQLite.SQLiteCommand.GetStatement(Int32 index)
+   in System.Data.SQLite.SQLiteDataReader.NextResult()
+   in System.Data.SQLite.SQLiteDataReader..ctor(SQLiteCommand cmd, CommandBehavior behave)
+   in System.Data.SQLite.SQLiteCommand.ExecuteReader(CommandBehavior behavior)
+   in System.Data.SQLite.SQLiteCommand.ExecuteReader()
+   in Utility.DBmanager.find_user(String id) in c:\Users\Ernesto\Documents\GitHub\pds_project\Utility\Utility\DBmanager.cs:riga 38
+   in Utility.Networking.authenticationTcpServer(Aes aes, Socket client) in c:\Users\Ernesto\Documents\GitHub\pds_project\Utility\Utility\Networking.cs:riga 181
+   in Server.MainWindow.start_server(String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:riga 99
+11/02/2016 13:32:40 ***Fatal Error***  SQL logic error or missing database
+no such table: dbo.users
+   in System.Data.SQLite.SQLite3.Prepare(SQLiteConnection cnn, String strSql, SQLiteStatement previous, UInt32 timeoutMS, String& strRemain)
+   in System.Data.SQLite.SQLiteCommand.BuildNextCommand()
+   in System.Data.SQLite.SQLiteCommand.GetStatement(Int32 index)
+   in System.Data.SQLite.SQLiteDataReader.NextResult()
+   in System.Data.SQLite.SQLiteDataReader..ctor(SQLiteCommand cmd, CommandBehavior behave)
+   in System.Data.SQLite.SQLiteCommand.ExecuteReader(CommandBehavior behavior)
+   in System.Data.SQLite.SQLiteCommand.ExecuteReader()
+   in Utility.DBmanager.find_user(String id) in c:\Users\Ernesto\Documents\GitHub\pds_project\Utility\Utility\DBmanager.cs:riga 38
+   in Utility.Networking.authenticationTcpServer(Aes aes, Socket client) in c:\Users\Ernesto\Documents\GitHub\pds_project\Utility\Utility\Networking.cs:riga 181
+   in Server.MainWindow.start_server(String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:riga 99
+11/02/2016 14:05:13 ***Fatal Error***  SQL logic error or missing database
+no such column: admin
+   in System.Data.SQLite.SQLite3.Prepare(SQLiteConnection cnn, String strSql, SQLiteStatement previous, UInt32 timeoutMS, String& strRemain)
+   in System.Data.SQLite.SQLiteCommand.BuildNextCommand()
+   in System.Data.SQLite.SQLiteCommand.GetStatement(Int32 index)
+   in System.Data.SQLite.SQLiteDataReader.NextResult()
+   in System.Data.SQLite.SQLiteDataReader..ctor(SQLiteCommand cmd, CommandBehavior behave)
+   in System.Data.SQLite.SQLiteCommand.ExecuteReader(CommandBehavior behavior)
+   in System.Data.SQLite.SQLiteCommand.ExecuteReader()
+   in Utility.DBmanager.find_user(String id) in c:\Users\Ernesto\Documents\GitHub\pds_project\Utility\Utility\DBmanager.cs:riga 38
+   in Utility.Networking.authenticationTcpServer(Aes aes, Socket client) in c:\Users\Ernesto\Documents\GitHub\pds_project\Utility\Utility\Networking.cs:riga 181
+   in Server.MainWindow.start_server(String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:riga 99
+11/02/2016 14:11:37 ***Fatal Error***  Indice oltre i limiti della matrice.
+   in System.Data.SQLite.SQLiteDataReader.GetSQLiteType(SQLiteConnectionFlags flags, Int32 i)
+   in System.Data.SQLite.SQLiteDataReader.GetValue(Int32 i)
+   in System.Data.SQLite.SQLiteDataReader.get_Item(String name)
+   in Utility.DBmanager.find_user(String id) in c:\Users\Ernesto\Documents\GitHub\pds_project\Utility\Utility\DBmanager.cs:riga 43
+   in Utility.Networking.authenticationTcpServer(Aes aes, Socket client) in c:\Users\Ernesto\Documents\GitHub\pds_project\Utility\Utility\Networking.cs:riga 181
+   in Server.MainWindow.start_server(String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:riga 99
+11/02/2016 14:26:50 ***Fatal Error***  Indice oltre i limiti della matrice.
+   in System.Data.SQLite.SQLiteDataReader.GetSQLiteType(SQLiteConnectionFlags flags, Int32 i)
+   in System.Data.SQLite.SQLiteDataReader.GetValue(Int32 i)
+   in System.Data.SQLite.SQLiteDataReader.get_Item(Int32 i)
+   in Utility.DBmanager.find_user(String id) in c:\Users\Ernesto\Documents\GitHub\pds_project\Utility\Utility\DBmanager.cs:riga 43
+   in Utility.Networking.authenticationTcpServer(Aes aes, Socket client) in c:\Users\Ernesto\Documents\GitHub\pds_project\Utility\Utility\Networking.cs:riga 181
+   in Server.MainWindow.start_server(String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:riga 99
+11/02/2016 14:29:12 ***Fatal Error***  Indice oltre i limiti della matrice.
+   in System.Data.SQLite.SQLiteDataReader.GetSQLiteType(SQLiteConnectionFlags flags, Int32 i)
+   in System.Data.SQLite.SQLiteDataReader.GetValue(Int32 i)
+   in System.Data.SQLite.SQLiteDataReader.get_Item(String name)
+   in Utility.DBmanager.find_user(String id) in c:\Users\Ernesto\Documents\GitHub\pds_project\Utility\Utility\DBmanager.cs:riga 43
+   in Utility.Networking.authenticationTcpServer(Aes aes, Socket client) in c:\Users\Ernesto\Documents\GitHub\pds_project\Utility\Utility\Networking.cs:riga 181
+   in Server.MainWindow.start_server(String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:riga 99
+11/02/2016 14:30:15 ***Fatal Error***  Indice oltre i limiti della matrice.
+   in System.Data.SQLite.SQLiteDataReader.GetSQLiteType(SQLiteConnectionFlags flags, Int32 i)
+   in System.Data.SQLite.SQLiteDataReader.GetValue(Int32 i)
+   in System.Data.SQLite.SQLiteDataReader.get_Item(String name)
+   in Utility.DBmanager.find_user(String id) in c:\Users\Ernesto\Documents\GitHub\pds_project\Utility\Utility\DBmanager.cs:riga 43
+   in Utility.Networking.authenticationTcpServer(Aes aes, Socket client) in c:\Users\Ernesto\Documents\GitHub\pds_project\Utility\Utility\Networking.cs:riga 181
+   in Server.MainWindow.start_server(String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:riga 99
+11/02/2016 14:37:14 ***Fatal Error***  Indice oltre i limiti della matrice.
+   in System.Data.SQLite.SQLiteDataReader.GetSQLiteType(SQLiteConnectionFlags flags, Int32 i)
+   in System.Data.SQLite.SQLiteDataReader.GetValue(Int32 i)
+   in System.Data.SQLite.SQLiteDataReader.get_Item(String name)
+   in Utility.DBmanager.find_user(String id) in c:\Users\Ernesto\Documents\GitHub\pds_project\Utility\Utility\DBmanager.cs:riga 41
+   in Utility.Networking.authenticationTcpServer(Aes aes, Socket client) in c:\Users\Ernesto\Documents\GitHub\pds_project\Utility\Utility\Networking.cs:riga 181
+   in Server.MainWindow.start_server(String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:riga 99
+11/02/2016 14:40:29 ***Fatal Error***  Indice oltre i limiti della matrice.
+   in Utility.Security.XOR(Byte[] a, Byte[] b) in c:\Users\Ernesto\Documents\GitHub\pds_project\Utility\Utility\Security.cs:riga 215
+   in Utility.Networking.authenticationTcpServer(Aes aes, Socket client) in c:\Users\Ernesto\Documents\GitHub\pds_project\Utility\Utility\Networking.cs:riga 193
+   in Server.MainWindow.start_server(String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:riga 99
+11/02/2016 14:50:50 ***Fatal Error***  Operazione di blocco interrotta da una chiamata a WSACancelBlockingCall
+   in System.Net.Sockets.Socket.Accept()
+   in System.Net.Sockets.TcpListener.AcceptSocket()
+   in Server.MainWindow.start_server(String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:riga 82
+11/02/2016 14:54:44 ***Fatal Error***  Operazione di blocco interrotta da una chiamata a WSACancelBlockingCall
+   in System.Net.Sockets.Socket.Accept()
+   in System.Net.Sockets.TcpListener.AcceptSocket()
+   in Server.MainWindow.start_server(String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:riga 82

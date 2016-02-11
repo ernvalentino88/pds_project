@@ -240,18 +240,19 @@ namespace Utility
             int left = size;
             int b;
             byte[] received = new byte[size];
-            byte[] buffer = new byte[256];
-            MemoryStream ms = new MemoryStream(buffer);
+            
+            MemoryStream ms = new MemoryStream(received);
             try
             {
                 while (left > 0)
                 {
+                    byte[] buffer = new byte[256];
                     b = s.Receive(buffer);
                     if (b <= 0)
                     {
                         return null;
                     }
-                    ms.Read(received, 0, b);
+                    ms.Write(buffer, 0, b);
                     left -= b;
                 }
             }
