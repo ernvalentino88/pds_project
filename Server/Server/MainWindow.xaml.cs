@@ -31,8 +31,9 @@ namespace Server
     /// 
     public partial class MainWindow : MetroWindow
     {
-        public static int receive_timeout = 1000 * 10;
-        public static int send_timeout = 1000 * 10;
+        public static int receive_timeout_long = 1000 * 5*60;
+        public static int send_timeout_short = 1000 * 10;
+        public static int receive_timeout_short = 1000 * 10;
 
         public delegate void start_server_delegate(String port);
         public delegate void update_ui_delegate(String msg);
@@ -67,6 +68,7 @@ namespace Server
             }
             else
             {
+                Socket s = null;
                 try
                 {
              
@@ -79,17 +81,18 @@ namespace Server
                     while (true)
                     {
                         //TODO uscire correttamente dal while
-                        Socket s = myList.AcceptSocket();
-                        s.ReceiveTimeout = receive_timeout;
-                        s.SendTimeout =send_timeout;
+                        s = myList.AcceptSocket();
                         msg = "Connection accpeted from " + s.RemoteEndPoint;
                         this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new update_ui_delegate(updateUI_msg), msg);
                         //connection done
                         bool exit = false;
                         while (!exit)
                         {
+                            s.ReceiveTimeout = receive_timeout_long;
+                            s.SendTimeout =send_timeout_short;
                             byte[] buffer_command = new byte[4];
                             int b = s.Receive(buffer_command);
+                            s.ReceiveTimeout = receive_timeout_short;
                             if (b == 4)
                             {
                                 Networking.CONNECTION_CODES code = (Networking.CONNECTION_CODES)BitConverter.ToUInt32(buffer_command, 0);
@@ -111,6 +114,7 @@ namespace Server
                             }
                         }
                         s.Close();
+                        
                     }
                 }
                 catch (SocketException se)
@@ -123,6 +127,9 @@ namespace Server
                     sw.WriteLine(se.StackTrace);
                     sw.Close();
                     this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegateAsync(updateUI_banner), msg, "Network Error", se.Message);
+                    if (s != null) {
+                        s.Close();
+                    }
                 }
                 catch (Exception ex)
                 {
