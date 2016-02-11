@@ -15,9 +15,9 @@ namespace Utility
         {
             SQLiteConnection dbCon;
             //pc alex
-            //String con_str = @"Data Source=C:\Users\John\Desktop\SQLiteStudio\PDS.db;Version=3;";
+            String con_str = @"Data Source=C:\Users\John\Desktop\SQLiteStudio\PDS.db;Version=3;";
             //pc ernesto
-            String con_str = @"Data Source=C:\Users\Ernesto\Documents\SQLiteStudio\pds.db;Version=3;";
+            //String con_str = @"Data Source=C:\Users\Ernesto\Documents\SQLiteStudio\pds.db;Version=3;";
             dbCon = new SQLiteConnection(con_str, true);
             try
             {

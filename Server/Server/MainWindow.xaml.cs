@@ -85,23 +85,31 @@ namespace Server
                         msg = "Connection accpeted from " + s.RemoteEndPoint;
                         this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new update_ui_delegate(updateUI_msg), msg);
                         //connection done
-                        byte[] buffer_command = new byte[4];
-                        int b = s.Receive(buffer_command);
-                        if (b == 4)
+                        bool exit = false;
+                        while (!exit)
                         {
-                            Networking.CONNECTION_CODES code = (Networking.CONNECTION_CODES)BitConverter.ToUInt32(buffer_command, 0);
-                            switch (code)
+                            byte[] buffer_command = new byte[4];
+                            int b = s.Receive(buffer_command);
+                            if (b == 4)
                             {
-                                case Networking.CONNECTION_CODES.KEY_EXC :
-                                    aes = Networking.keyExchangeTcpServer(s); 
-                                    break;
-                                case Networking.CONNECTION_CODES.AUTH :
-                                    sessionId = Networking.authenticationTcpServer(aes, s);
-                                    break;
-                                default: break;
+                                Networking.CONNECTION_CODES code = (Networking.CONNECTION_CODES)BitConverter.ToUInt32(buffer_command, 0);
+                                switch (code)
+                                {
+                                    case Networking.CONNECTION_CODES.KEY_EXC:
+                                        aes = Networking.keyExchangeTcpServer(s);
+                                        if (aes == null) { exit = true; }
+                                        break;
+                                    case Networking.CONNECTION_CODES.AUTH:
+                                        sessionId = Networking.authenticationTcpServer(aes, s);
+                                        if (sessionId <=0) { exit = true; }
+                                        break;
+                                    case Networking.CONNECTION_CODES.EXIT:
+                                        exit = true;
+                                        break;
+                                    default: break;
+                                }
                             }
                         }
-
                         s.Close();
                     }
                 }

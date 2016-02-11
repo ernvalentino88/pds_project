@@ -102,13 +102,12 @@ namespace Utility
                     if (command != null && (
                          ((CONNECTION_CODES)BitConverter.ToUInt32(command, 0) == CONNECTION_CODES.OK)))
                     {
-                        client.Close();
+                        //client.Close();
                         return aes;
                     }         
                 }
             }
-            client.Close();
-
+            //client.Close();
             return null;
         }
 
@@ -205,12 +204,12 @@ namespace Utility
                             if (command != null && (
                                 ((CONNECTION_CODES)BitConverter.ToUInt32(command, 0) == CONNECTION_CODES.OK)))
                             {
-                                client.Close();
+                                //client.Close();
                                 return sessionID;
                             }
                             else
                             {
-                                client.Close();
+                                //client.Close();
                                 return -1; //error on last ack
                             }
                         }
@@ -231,7 +230,7 @@ namespace Utility
                     return -3;
                 }
             }
-            client.Close();
+            //client.Close();
             return 0;
         }
 

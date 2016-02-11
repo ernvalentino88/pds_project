@@ -52,3 +52,5 @@ C:\Users\Ernesto\Documents\GitHub\pds_project\Server\Server\bin\Debug\Utility.pd
 C:\Users\Ernesto\Documents\GitHub\pds_project\Server\Server\bin\Debug\EntityFramework.xml
 C:\Users\Ernesto\Documents\GitHub\pds_project\Server\Server\bin\Debug\EntityFramework.SqlServer.xml
 C:\Users\Ernesto\Documents\GitHub\pds_project\Server\Server\bin\Debug\System.Data.SQLite.xml
+C:\Users\John\Documents\GitHub\pds_project\Server\Server\bin\Debug\Utility.dll
+C:\Users\John\Documents\GitHub\pds_project\Server\Server\bin\Debug\Utility.pdb
