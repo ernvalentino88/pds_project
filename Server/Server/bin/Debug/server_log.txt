@@ -137,3 +137,29 @@ UNIQUE constraint failed: users.user_id
    at System.Net.Sockets.Socket.Accept()
    at System.Net.Sockets.TcpListener.AcceptSocket()
    at Server.MainWindow.start_server(String port) in c:\Users\John\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:line 84
+10/02/2016 19:55:11 ***Fatal Error***  The parameter is incorrect.
+
+   at System.Security.Cryptography.CryptographicException.ThrowCryptographicException(Int32 hr)
+   at System.Security.Cryptography.Utils._ImportKey(SafeProvHandle hCSP, Int32 keyNumber, CspProviderFlags flags, Object cspObject, SafeKeyHandle& hKey)
+   at System.Security.Cryptography.RSACryptoServiceProvider.ImportParameters(RSAParameters parameters)
+   at Utility.Security.getPublicKey(Byte[] modulus, Byte[] exponent) in c:\Users\John\Documents\GitHub\pds_project\Server\Server\Security.cs:line 38
+   at Utility.Networking.keyExchangeTcpServer(Socket client) in c:\Users\John\Documents\GitHub\pds_project\Server\Server\Networking.cs:line 90
+   at Server.MainWindow.start_server(String port) in c:\Users\John\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:line 93
+10/02/2016 20:04:01 ***Fatal Error***  The parameter is incorrect.
+
+   at System.Security.Cryptography.CryptographicException.ThrowCryptographicException(Int32 hr)
+   at System.Security.Cryptography.Utils._ImportKey(SafeProvHandle hCSP, Int32 keyNumber, CspProviderFlags flags, Object cspObject, SafeKeyHandle& hKey)
+   at System.Security.Cryptography.RSACryptoServiceProvider.ImportParameters(RSAParameters parameters)
+   at Utility.Security.getPublicKey(Byte[] modulus, Byte[] exponent) in c:\Users\John\Documents\GitHub\pds_project\Server\Server\Security.cs:line 38
+   at Utility.Networking.keyExchangeTcpServer(Socket client) in c:\Users\John\Documents\GitHub\pds_project\Server\Server\Networking.cs:line 90
+   at Server.MainWindow.start_server(String port) in c:\Users\John\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:line 93
+10/02/2016 20:04:27 ***Fatal Error***  Only one usage of each socket address (protocol/network address/port) is normally permitted
+   at System.Net.Sockets.Socket.DoBind(EndPoint endPointSnapshot, SocketAddress socketAddress)
+   at System.Net.Sockets.Socket.Bind(EndPoint localEP)
+   at System.Net.Sockets.TcpListener.Start(Int32 backlog)
+   at System.Net.Sockets.TcpListener.Start()
+   at Server.MainWindow.start_server(String port) in c:\Users\John\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:line 73
+10/02/2016 20:04:36 ***Fatal Error***  A blocking operation was interrupted by a call to WSACancelBlockingCall
+   at System.Net.Sockets.Socket.Accept()
+   at System.Net.Sockets.TcpListener.AcceptSocket()
+   at Server.MainWindow.start_server(String port) in c:\Users\John\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:line 81

@@ -39,7 +39,7 @@ namespace Server
         public delegate Task UpdateDelegateAsync(String msg, String bannerTitle, String bannerMsg);
         private TcpListener myList;
         private Boolean connected;
-        AESUtility aes;
+        AesCryptoServiceProvider aes;
         
        
         public MainWindow()
@@ -87,37 +87,10 @@ namespace Server
                         byte[] buffer_command = new byte[4];
                         int b = s.Receive(buffer_command);
                         if (b != 4) { throw new System.Exception("Wrong command bytes"); }
-                        CONNECTION_CODES code = (CONNECTION_CODES) BitConverter.ToUInt32(buffer_command,0);
-                        if (code == CONNECTION_CODES.KEY_EXC)
+                        Networking.CONNECTION_CODES code = (Networking.CONNECTION_CODES)BitConverter.ToUInt32(buffer_command, 0);
+                        if (code == Networking.CONNECTION_CODES.KEY_EXC)
                         {
-                            //receive  public key
-                            byte[] buffer_modulus = new byte[256];
-                            b = s.Receive(buffer_modulus);
-                            if (b != 256) { throw new System.Exception("Wrong modulus bytes"); }
-                            byte[] buffer_exponent = new byte[4];
-                            b = s.Receive(buffer_exponent);
-                            if (b<1) { throw new System.Exception("Wrong exponent bytes"); }
-                            //adjust exponent size
-                            byte[] exponent = new byte[b];
-                            if (b != 4){
-                                for (int i = 0; i < b; i++){
-                                    exponent[i] = buffer_exponent[i];
-                                }
-                            }
-                            else {
-                                exponent = buffer_exponent;
-                            }
-                            //set public key
-                            RSAUtility rsa = new RSAUtility();
-                            rsa.set_public_key(buffer_modulus,exponent);
-                            //encrypt simmetric key and send
-                            //TODO change CIAO to pawword for AES
-                            ASCIIEncoding asen = new ASCIIEncoding();
-                            byte[] sim_key_to_send = rsa.RSAEncrypt(asen.GetBytes("CIAO!"), false);
-                            if (sim_key_to_send == null) { throw new System.Exception("Error in ecnryption"); }
-                            s.Send(sim_key_to_send);
-                            aes = new AESUtility(asen.GetBytes("CIAO!"));//TODO change CIAO to pawword for AES
-
+                            aes=Networking.keyExchangeTcpServer(s);
                             bool exit = false;
                             while (!exit) { exit=get_cmd(s); }
                         }
@@ -184,11 +157,12 @@ namespace Server
             byte[] buffer_command = new byte[4];
             int b = s.Receive(buffer_command);
             if (b != 4) { throw new System.Exception("Wrong command bytes"); }
-            CONNECTION_CODES code = (CONNECTION_CODES)BitConverter.ToUInt32(buffer_command, 0);
+            Networking.CONNECTION_CODES code = (Networking.CONNECTION_CODES)BitConverter.ToUInt32(buffer_command, 0);
             switch (code) {
-                case CONNECTION_CODES.EXIT: return false ; 
-                case CONNECTION_CODES.NEW_REG: register(s); break;
-                case CONNECTION_CODES.AUTH: authenticate(s); break;
+                case Networking.CONNECTION_CODES.EXIT: return false;
+                case Networking.CONNECTION_CODES.NEW_REG:  break;
+                case Networking.CONNECTION_CODES.AUTH: long sid = Networking.authenticationTcpServer(aes, s); this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new update_ui_delegate(updateUI_msg), "SESSION ID:"+sid);
+                    break;
                 
 
             }
@@ -196,7 +170,7 @@ namespace Server
             return true;
         }
 
-        private void register(Socket s) {
+     /*   private void register(Socket s) {
             byte[] buffer_name = new byte[256];
             byte[] buffer_pwd = new byte[256];
             int b=s.Receive(buffer_name);
@@ -209,39 +183,17 @@ namespace Server
             string pass = System.Text.Encoding.Default.GetString(pwd);
 
             if (!DBmanager.register(id, pass)) {
-                s.Send(BitConverter.GetBytes((UInt32)CONNECTION_CODES.ERR));
+                s.Send(BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.ERR));
                 throw new Exception("Error during register");   
             }
         }
-
-        private void authenticate(Socket s) {
-            byte[] buffer_id = new byte[256];
-            int b = s.Receive(buffer_id);
-            if (b != 256) { throw new System.Exception("Wrong size"); }
-            byte[] id = aes.AES_Decrypt(buffer_id);
-            String user = System.Text.Encoding.Default.GetString(id);
-            //make RANDOM challange
-            String chlg = RandomString(10);
-            ASCIIEncoding asen = new ASCIIEncoding();
-            byte[] chlg_aes=aes.AES_Encrypt(asen.GetBytes(chlg));
-            s.Send(chlg_aes);
-
-            String hash=DBmanager.find_user(user);
-            //TODO RECEIVE R & Calcolate R'
-
-
+        */
+       
         
-        }
 
   
 
-        public static string RandomString(int length)
-        {
-            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-            var random = new Random();
-            return new string(Enumerable.Repeat(chars, length)
-              .Select(s => s[random.Next(s.Length)]).ToArray());
-        }
+        
 
     }
 }
