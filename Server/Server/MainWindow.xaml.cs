@@ -109,6 +109,9 @@ namespace Server
                                     case Networking.CONNECTION_CODES.EXIT:
                                         exit = true;
                                         break;
+                                    case Networking.CONNECTION_CODES.NEW_REG:
+                                        exit = true;
+                                        break;
                                     default: break;
                                 }
                             }
@@ -173,7 +176,7 @@ namespace Server
             this.text_label.Content = msg;
         }
 
-        private bool get_cmd(Socket s) {
+      /*  private bool get_cmd(Socket s) {
             byte[] buffer_command = new byte[4];
             int b = s.Receive(buffer_command);
             if (b != 4) { throw new System.Exception("Wrong command bytes"); }
@@ -190,7 +193,7 @@ namespace Server
             }
 
             return true;
-        }
+        }*/
 
      /*   private void register(Socket s) {
             byte[] buffer_name = new byte[256];
@@ -210,9 +213,6 @@ namespace Server
             }
         }
         */
-       
-        
-
   
 
         
