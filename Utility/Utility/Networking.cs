@@ -259,7 +259,7 @@ namespace Utility
             return -1;  //db or network failure
         }
 
-        public void registrationTcpServer(Aes aes, Socket client)
+        public static void registrationTcpServer(Aes aes, Socket client)
         {
             byte[] encryptedData = my_recv(16, client);
             byte[] command = new byte[4];
