@@ -257,3 +257,7 @@ no such column: admin
    in System.Net.Sockets.Socket.Accept()
    in System.Net.Sockets.TcpListener.AcceptSocket()
    in Server.MainWindow.start_server(String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:riga 82
+11/02/2016 19:20:15 ***Fatal Error***  A blocking operation was interrupted by a call to WSACancelBlockingCall
+   at System.Net.Sockets.Socket.Accept()
+   at System.Net.Sockets.TcpListener.AcceptSocket()
+   at Server.MainWindow.start_server(String port) in c:\Users\John\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:line 84
