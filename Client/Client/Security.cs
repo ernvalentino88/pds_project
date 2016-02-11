@@ -14,7 +14,7 @@ namespace Utility
         {
             RSACryptoServiceProvider rsa = new RSACryptoServiceProvider(2048);
             RSAParameters param = rsa.ExportParameters(false);
-            //param.Exponent = new byte[] {1, 0, 1};
+            param.Exponent = new byte[] {1, 0, 1};
 
             return rsa;
         }

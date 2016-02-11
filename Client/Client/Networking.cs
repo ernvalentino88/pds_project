@@ -170,64 +170,6 @@ namespace Utility
             return -1;
         }
 
-        public static Int64 authenticationTcpClient(Aes aes, String username, String pwd, String address, Int32 port)
-        {
-            TcpClient tcpclnt = new TcpClient();
-            tcpclnt.Connect(address, port);
-            Stream stm = tcpclnt.GetStream();
-            byte[] command = new byte[4];
-            command = BitConverter.GetBytes((UInt32)CONNECTION_CODES.AUTH);
-            stm.Write(command, 0, command.Length);
-
-            byte[] encrypted = Security.AESEncrypt(aes, username);
-            stm.Write(encrypted, 0, encrypted.Length);
-            command = my_recv(4, tcpclnt.Client);
-            if (command != null && (
-                    ((CONNECTION_CODES)BitConverter.ToUInt32(command, 0) == CONNECTION_CODES.OK)))
-            {
-                byte[] recvBuf = new byte[16];
-                recvBuf = my_recv(16, tcpclnt.Client);
-                if (recvBuf != null)
-                {
-                    byte[] challenge = Security.AESDecrypt(aes, recvBuf);
-                    SHA1 sha = new SHA1CryptoServiceProvider();
-                    byte[] p = Encoding.UTF8.GetBytes(Security.CalculateMD5Hash(pwd));
-                    byte[] hash = sha.ComputeHash(Security.XOR(p, challenge));
-                    stm.Write(hash, 0, 20);
-                    command = my_recv(4, tcpclnt.Client);
-                    if (command != null && (
-                            ((CONNECTION_CODES)BitConverter.ToUInt32(command, 0) == CONNECTION_CODES.OK)))
-                    {
-                        recvBuf = new byte[16];
-                        recvBuf = my_recv(16, tcpclnt.Client);
-                        if (recvBuf != null)
-                        {
-                            byte[] id = Security.AESDecrypt(aes, recvBuf);
-                            Int64 sessionID = BitConverter.ToInt64(id, 0);
-                            command = BitConverter.GetBytes((UInt32)CONNECTION_CODES.OK);
-                            stm.Write(command, 0, command.Length);
-                            tcpclnt.Close();
-                            return sessionID;
-                        }
-                    }
-                    if (((CONNECTION_CODES)BitConverter.ToUInt32(command, 0) == CONNECTION_CODES.AUTH_FAILURE))
-                    {
-                        //password not correct
-                        tcpclnt.Close();
-                        return -2;
-                    }
-                }
-            }
-            if (((CONNECTION_CODES)BitConverter.ToUInt32(command, 0) == CONNECTION_CODES.AUTH_FAILURE))
-            {
-                //Error: username is not valid
-                tcpclnt.Close();
-                return -2;
-            }
-            tcpclnt.Close();
-            return -1;
-        }
-
         public static Int64 authenticationTcpServer(Aes aes, Socket client)
         {
             byte[] command = new byte[4];

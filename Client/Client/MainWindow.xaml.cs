@@ -19,7 +19,6 @@ using MahApps.Metro.Controls.Dialogs;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
-using System.Security.Cryptography;
 using Utility;
 
 namespace Client
@@ -67,21 +66,7 @@ namespace Client
                     connected = true;
                     String msg = "Trying to connect to the server . . .";
                     this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegate(updateUI_progressBar), msg);
-                    AesCryptoServiceProvider aes = Networking.keyExchangeTcpClient(address, portInt);
-                    if (aes == null)
-                    {
-                        connected = false;
-                        msg = "Log in to the remote server";
-                        this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegate(updateUI), msg);
-                        return;
-                    }
-
-                    Int64 sessionID = Networking.authenticationTcpClient(aes, "admin", "12345", address, portInt);
-                    if (sessionID >= 0)
-                    {
-                        msg = "Login successfull: "+sessionID;
-                        this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegate(updateUI), msg);
-                    }
+                    
                 }
                 catch (SocketException se)
                 {
