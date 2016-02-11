@@ -227,7 +227,7 @@ namespace Utility
             return 0;
         }
 
-        public int registrationTcpClient(Aes aes, TcpClient tcpclnt, String username, String pwd)
+        public static int registrationTcpClient(Aes aes, TcpClient tcpclnt, String username, String pwd)
         {
             Stream stm = tcpclnt.GetStream();
             byte[] command = new byte[4];

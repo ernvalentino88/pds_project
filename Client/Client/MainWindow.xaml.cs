@@ -29,7 +29,7 @@ namespace Client
     /// </summary>
     public partial class MainWindow : MetroWindow
     {
-        private delegate void ConnectDelegate(String address, String port);
+        private delegate void ConnectDelegate(String address, String port, String username, String pwd);
         private delegate void RegisterDelegate(String address, String port, String user, String pwd1, String pwd2);
         private delegate void UpdateDelegate(String msg);
         private delegate Task UpdateDelegateAsync(String msg, String bannerTitle, String bannerMsg);
@@ -44,13 +44,14 @@ namespace Client
         private void Connect_button_Click(object sender, RoutedEventArgs e)
         {
             ConnectDelegate cd = new ConnectDelegate(connect);
-            cd.BeginInvoke(this.Text_ip.Text, this.Text_port.Text,null, null);
+            cd.BeginInvoke(this.Text_ip.Text, this.Text_port.Text,this.Text_user.Text,this.Box_pwd.Password,null, null);
         }
 
-        private void connect(String address, String port)
+        private void connect(String address, String port, String username, String pwd)
         {
             if (address.Equals(String.Empty) || port.Equals(String.Empty) ||
-                 address == null || port == null)
+                 username.Equals(String.Empty) || pwd.Equals(String.Empty) || 
+                 address == null || port == null || username == null || pwd == null)
                 return;
             if (connected)
             {
@@ -68,10 +69,9 @@ namespace Client
                     String msg = "Trying to connect to the server . . .";
                     this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegate(updateUI_progressBar), msg);
                     AesCryptoServiceProvider aes = Networking.keyExchangeTcpClient(address, portInt, ref socket);
-                    //IPEndPoint server = new IPEndPoint(IPAddress.Parse(address), portInt);
                     if (aes != null)
                     {
-                        Int64 sessionId = Networking.authenticationTcpClient(aes, "admin", "12345", socket);
+                        Int64 sessionId = Networking.authenticationTcpClient(aes, username, pwd, socket);
                         msg = "" + sessionId;
                         this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegate(updateUI), msg);
                     }
@@ -118,71 +118,31 @@ namespace Client
 
         private void register(String address, String port, String user, String pwd1, String pwd2)
         {
-            //if (address.Equals(String.Empty) || port.Equals(String.Empty) ||
-            //     user.Equals(String.Empty) || pwd1.Equals(String.Empty) || pwd2.Equals(String.Empty) ||
-            //     address == null || port == null || user == null || pwd1 == null || pwd2 == null)
-            //    return;
-            //if (!(pwd1.Equals(pwd2)))
-            //{
-            //    String msg = "Create account";
-            //    String title = "Registration Failed";
-            //    String msgBanner = "The passwords inserted are different";
-            //    this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, 
-            //        new UpdateDelegateAsync(updateUI_regBanner), msg, title, msgBanner);
-            //}
-            TcpClient tcpclnt = new TcpClient();
+            if (address.Equals(String.Empty) || port.Equals(String.Empty) ||
+                 user.Equals(String.Empty) || pwd1.Equals(String.Empty) || pwd2.Equals(String.Empty) ||
+                 address == null || port == null || user == null || pwd1 == null || pwd2 == null)
+                return;
+            if (!(pwd1.Equals(pwd2)))
+            {
+                String msg = "Create account";
+                String title = "Registration Failed";
+                String msgBanner = "The passwords inserted are different";
+                this.Dispatcher.BeginInvoke(DispatcherPriority.Normal,
+                    new UpdateDelegateAsync(updateUI_regBanner), msg, title, msgBanner);
+            }
+            TcpClient socket = new TcpClient();
             try
             {
                 Int32 portInt = Int32.Parse(port);
+                connected = true;
                 String msg = "Trying to connect to the server . . .";
-                this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, 
-                    new UpdateDelegate(updateUI_progressBarReg), msg);
-                tcpclnt.Connect(address, portInt);
-                
-                Stream stm = tcpclnt.GetStream();
-                String str = "ar.pdf";
-
-                Console.WriteLine("Sending file infos...");
-
-                Console.WriteLine("Transmitting file size.....");
-                FileInfo file = new FileInfo("C:\\Users\\Ernesto\\Documents\\ar.pdf");
-                byte[] fileLen = BitConverter.GetBytes(file.Length);
-
-                stm.Write(fileLen, 0, fileLen.Length);
-
-                ASCIIEncoding asen = new ASCIIEncoding();
-                byte[] ba = asen.GetBytes(str);
-                Console.WriteLine("Transmitting file name.....");
-
-                stm.Write(ba, 0, ba.Length);
-
-                byte[] bb = new byte[100];
-                int k = stm.Read(bb, 0, 100);
-
-                if (k > 0)
+                this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegate(updateUI_progressBar), msg);
+                AesCryptoServiceProvider aes = Networking.keyExchangeTcpClient(address, portInt, ref socket);
+                if (aes != null)
                 {
-                    for (int i = 0; i < k; i++)
-                        Console.Write(Convert.ToChar(bb[i]));
-
-                    Console.WriteLine("Sending file.....");
-                    FileStream fr = File.OpenRead("C:\\Users\\Ernesto\\Documents\\ar.pdf");
-
-                    byte[] fileBytes = new byte[1024];
-                    int byteRead = 0;
-                    while ((byteRead = fr.Read(fileBytes, 0, fileBytes.Length)) > 0)
-                    {
-                        stm.Write(fileBytes, 0, byteRead);
-                    }
-                    fr.Close();
-                    Console.WriteLine("File sent");
-
-                    bb = new byte[100];
-                    k = stm.Read(bb, 0, 100);
-
-                    for (int i = 0; i < k; i++)
-                        Console.Write(Convert.ToChar(bb[i]));
-
-
+                    int ret = Networking.registrationTcpClient(aes, socket, user, pwd1);
+                    msg = "" + ret;
+                    this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegate(updateUI), msg);
                 }
             }
             catch (SocketException se)
@@ -210,7 +170,7 @@ namespace Client
             }
             finally
             {
-                tcpclnt.Close();
+                socket.Close();
             }
         }
 

@@ -365,3 +365,8 @@ Nome parametro: value
    in Utility.Security.XOR(Byte[] a, Byte[] b) in c:\Users\Ernesto\Documents\GitHub\pds_project\Utility\Utility\Security.cs:riga 215
    in Utility.Networking.authenticationTcpClient(Aes aes, String username, String pwd, IPEndPoint server) in c:\Users\Ernesto\Documents\GitHub\pds_project\Utility\Utility\Networking.cs:riga 137
    in Client.MainWindow.connect(String address, String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 74
+11/02/2016 19:19:31 ***Fatal Error***  Il valore non può essere null.
+Nome parametro: value
+   in System.BitConverter.ToUInt32(Byte[] value, Int32 startIndex)
+   in Utility.Networking.registrationTcpClient(Aes aes, TcpClient tcpclnt, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Utility\Utility\Networking.cs:riga 256
+   in Client.MainWindow.register(String address, String port, String user, String pwd1, String pwd2) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 143
