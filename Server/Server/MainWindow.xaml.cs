@@ -32,7 +32,7 @@ namespace Server
     public partial class MainWindow : MetroWindow
     {
         public static int receive_timeout = 1000 * 10;
-        public static int send_timoute = 1000 * 10;
+        public static int send_timeout = 1000 * 10;
 
         public delegate void start_server_delegate(String port);
         public delegate void update_ui_delegate(String msg);
@@ -81,7 +81,7 @@ namespace Server
                         //TODO uscire correttamente dal while
                         Socket s = myList.AcceptSocket();
                         s.ReceiveTimeout = receive_timeout;
-                        s.SendTimeout =send_timoute;
+                        s.SendTimeout =send_timeout;
                         msg = "Connection accpeted from " + s.RemoteEndPoint;
                         this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new update_ui_delegate(updateUI_msg), msg);
                         //connection done
