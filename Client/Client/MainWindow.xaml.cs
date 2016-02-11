@@ -60,18 +60,18 @@ namespace Client
             }
             else
             {
-                TcpClient tcpclnt = new TcpClient();
+                TcpClient socket = null;
                 try
                 {
                     Int32 portInt = Int32.Parse(port);
                     connected = true;
                     String msg = "Trying to connect to the server . . .";
                     this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegate(updateUI_progressBar), msg);
-                    AesCryptoServiceProvider aes = Networking.keyExchangeTcpClient(address, portInt);
-                    IPEndPoint server = new IPEndPoint(IPAddress.Parse(address), portInt);
+                    AesCryptoServiceProvider aes = Networking.keyExchangeTcpClient(address, portInt, ref socket);
+                    //IPEndPoint server = new IPEndPoint(IPAddress.Parse(address), portInt);
                     if (aes != null)
                     {
-                        Int64 sessionId = Networking.authenticationTcpClient(aes, "admin", "12345", server);
+                        Int64 sessionId = Networking.authenticationTcpClient(aes, "admin", "12345", socket);
                         msg = "" + sessionId;
                         this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegate(updateUI), msg);
                     }
@@ -80,18 +80,18 @@ namespace Client
                 {
                     connected = false;
                     String msg = "Log in to the remote server";
-                    StreamWriter sw = new StreamWriter("client_log.txt",true);
+                    StreamWriter sw = new StreamWriter("client_log.txt", true);
                     sw.Write(DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss"));
                     sw.WriteLine(" ***Fatal Error***  " + se.Message);
                     sw.WriteLine(se.StackTrace);
                     sw.Close();
-                    this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegateAsync(updateUI_banner), msg, "Server Unreachable",se.Message);
+                    this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegateAsync(updateUI_banner), msg, "Server Unreachable", se.Message);
                 }
                 catch (Exception exc)
                 {
                     connected = false;
                     String msg = "Log in to the remote server";
-                    StreamWriter sw = new StreamWriter("client_log.txt",true);
+                    StreamWriter sw = new StreamWriter("client_log.txt", true);
                     sw.Write(DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss"));
                     sw.WriteLine(" ***Fatal Error***  " + exc.Message);
                     sw.WriteLine(exc.StackTrace);
@@ -100,7 +100,8 @@ namespace Client
                 }
                 finally
                 {
-                    tcpclnt.Close();
+                    if (socket != null)
+                        socket.Close();
                 }
             }
         }

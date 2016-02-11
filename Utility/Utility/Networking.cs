@@ -27,7 +27,7 @@ namespace Utility
             AUTH = 9
         };
 
-        public static AesCryptoServiceProvider keyExchangeTcpClient(String ipAddress, Int32 port)
+        public static AesCryptoServiceProvider keyExchangeTcpClient(String ipAddress, Int32 port, ref TcpClient client)
         {
             TcpClient tcpclnt = new TcpClient();
             tcpclnt.Connect(ipAddress, port);
@@ -59,8 +59,7 @@ namespace Utility
                     AesCryptoServiceProvider aes = Security.getAESKey(Key, IV);
                     command = BitConverter.GetBytes((UInt32)CONNECTION_CODES.OK);
                     stm.Write(command, 0, command.Length);
-
-                    tcpclnt.Close();
+                    client = tcpclnt;
                     return aes;
                 }
                 else
@@ -111,10 +110,8 @@ namespace Utility
             return null;
         }
 
-        public static Int64 authenticationTcpClient(Aes aes, String username, String pwd, IPEndPoint server)
+        public static Int64 authenticationTcpClient(Aes aes, String username, String pwd, TcpClient tcpclnt)
         {
-            TcpClient tcpclnt = new TcpClient();
-            tcpclnt.Connect(server);
             Stream stm = tcpclnt.GetStream();
             byte[] command = new byte[4];
             command = BitConverter.GetBytes((UInt32)CONNECTION_CODES.AUTH);
@@ -147,14 +144,12 @@ namespace Utility
                             Int64 sessionID = BitConverter.ToInt64(id, 0);
                             command = BitConverter.GetBytes((UInt32)CONNECTION_CODES.OK);
                             stm.Write(command, 0, command.Length);
-                            tcpclnt.Close();
                             return sessionID;
                         }
                     }
                     if ( ((CONNECTION_CODES)BitConverter.ToUInt32(command, 0) == CONNECTION_CODES.AUTH_FAILURE) )
                     {
                         //password not correct
-                        tcpclnt.Close();
                         return -2;
                     }
                 }
@@ -162,10 +157,8 @@ namespace Utility
             if ( ((CONNECTION_CODES)BitConverter.ToUInt32(command, 0) == CONNECTION_CODES.AUTH_FAILURE) )
             {
                 //Error: username is not valid
-                tcpclnt.Close();
                 return -2;
             }
-            tcpclnt.Close();
             return -1;
         }
 
@@ -232,6 +225,73 @@ namespace Utility
             }
             //client.Close();
             return 0;
+        }
+
+        public int registrationTcpClient(Aes aes, TcpClient tcpclnt, String username, String pwd)
+        {
+            Stream stm = tcpclnt.GetStream();
+            byte[] command = new byte[4];
+            command = BitConverter.GetBytes((UInt32)CONNECTION_CODES.NEW_REG);
+            stm.Write(command, 0, command.Length);
+            
+            byte[] encrypted = Security.AESEncrypt(aes, username);
+            stm.Write(encrypted, 0, encrypted.Length);
+            command = my_recv(4, tcpclnt.Client);
+            if (command != null && (
+                    ((CONNECTION_CODES)BitConverter.ToUInt32(command, 0) == CONNECTION_CODES.OK)))
+            {
+                encrypted = Security.AESEncrypt(aes, username);
+                Int32 pwdSize = encrypted.Length;
+                stm.Write(BitConverter.GetBytes(pwdSize), 0, 4);
+                stm.Write(encrypted, 0, encrypted.Length);
+                command = my_recv(4, tcpclnt.Client);
+                if (command != null && (
+                        ((CONNECTION_CODES)BitConverter.ToUInt32(command, 0) == CONNECTION_CODES.OK)))
+                {
+                    return 1; //ok
+                }
+                else
+                    return -1; //db or network failure
+            }
+            if ( (CONNECTION_CODES)BitConverter.ToUInt32(command, 0) == CONNECTION_CODES.AUTH_FAILURE )
+                return 0;  //userid is yet present
+
+            return -1;  //db or network failure
+        }
+
+        public void registrationTcpServer(Aes aes, Socket client)
+        {
+            byte[] encryptedData = my_recv(16, client);
+            byte[] command = new byte[4];
+
+            if (encryptedData != null)
+            {
+                byte[] decryptedData = Security.AESDecrypt(aes, encryptedData);
+                String userid = Encoding.UTF8.GetString(decryptedData);
+                String pwd = DBmanager.find_user(userid);
+                if (pwd != null)
+                {
+                    //user yet present
+                    command = BitConverter.GetBytes((UInt32)CONNECTION_CODES.REG_FAILURE);
+                    client.Send(command);
+                    return;
+                }
+                byte[] pwdSize = my_recv(4, client);
+                if (pwdSize != null)
+                {
+                    int size = BitConverter.ToInt32(pwdSize, 0);
+                    encryptedData = my_recv(size, client);
+                    decryptedData = Security.AESDecrypt(aes, encryptedData);
+                    if (DBmanager.register(userid,Encoding.UTF8.GetString(decryptedData)))
+                    {
+                        command = BitConverter.GetBytes((UInt32)CONNECTION_CODES.OK);
+                        client.Send(command);
+                        return;
+                    }
+                    command = BitConverter.GetBytes((UInt32)CONNECTION_CODES.REG_FAILURE);
+                    client.Send(command);
+                }
+            }
         }
 
         private static byte[] my_recv(int size, Socket s)
