@@ -103,13 +103,19 @@ namespace Server
                                         if (aes == null) { exit = true; }
                                         break;
                                     case Networking.CONNECTION_CODES.AUTH:
-                                        sessionId = Networking.authenticationTcpServer(aes, s);
-                                        if (sessionId <=0) { exit = true; }
+                                        if (aes != null)
+                                        {
+                                            sessionId = Networking.authenticationTcpServer(aes, s);
+                                            if (sessionId <= 0) { exit = true; }
+                                        }
                                         break;
                                     case Networking.CONNECTION_CODES.EXIT:
                                         exit = true;
                                         break;
                                     case Networking.CONNECTION_CODES.NEW_REG:
+                                        if (aes != null) {
+                                            Networking.registrationTcpServer(aes, s);
+                                        }
                                         exit = true;
                                         break;
                                     default: break;
