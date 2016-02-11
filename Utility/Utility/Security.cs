@@ -8,7 +8,7 @@ using System.Security.Cryptography;
 
 namespace Utility
 {
-    class Security
+    public class Security
     {
         public static RSACryptoServiceProvider generateRSAKey()
         {

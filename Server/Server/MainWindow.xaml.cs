@@ -161,7 +161,9 @@ namespace Server
             switch (code) {
                 case Networking.CONNECTION_CODES.EXIT: return false;
                 case Networking.CONNECTION_CODES.NEW_REG:  break;
-                case Networking.CONNECTION_CODES.AUTH: long sid = Networking.authenticationTcpServer(aes, s); this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new update_ui_delegate(updateUI_msg), "SESSION ID:"+sid);
+                case Networking.CONNECTION_CODES.AUTH: 
+                    long sid = Networking.authenticationTcpServer(aes, s); 
+                    this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new update_ui_delegate(updateUI_msg), "SESSION ID:"+sid);
                     break;
                 
 

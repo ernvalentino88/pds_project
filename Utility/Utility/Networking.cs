@@ -10,7 +10,7 @@ using System.Security.Cryptography;
 
 namespace Utility
 {
-    class Networking
+    public class Networking
     {
         public static int TIME_OUT = 10 * 1000;
 

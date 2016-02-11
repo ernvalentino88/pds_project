@@ -190,7 +190,7 @@ namespace Client
             }
             catch (Exception exc)
             {
-                String msg = "Create Account";
+                //String msg = "Create Account";
                 StreamWriter sw = new StreamWriter("client_log.txt", true);
                 sw.Write(DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss"));
                 sw.WriteLine(" ***Fatal Error***  " + exc.Message);

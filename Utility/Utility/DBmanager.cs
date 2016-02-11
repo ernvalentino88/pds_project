@@ -8,7 +8,7 @@ using System.Security.Cryptography;
 
 namespace Utility
 {
-    class DBmanager
+    public class DBmanager
     {
 
         private static SQLiteConnection connect_db()
@@ -55,7 +55,7 @@ namespace Utility
                 SQLiteCommand command = new SQLiteCommand(sql, con);
                 command.ExecuteNonQuery();
             }
-            catch (System.Data.SQLite.SQLiteException ex)
+            catch (System.Data.SQLite.SQLiteException)
             {
                 return false;
             }
