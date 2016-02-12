@@ -89,10 +89,11 @@ namespace Server
                         {
                             s.ReceiveTimeout = receive_timeout_long;
                             s.SendTimeout =send_timeout_short;
-                            byte[] buffer_command = new byte[4];
-                            int b = s.Receive(buffer_command);
+                            //byte[] buffer_command = new byte[4];
+                            //int b = s.Receive(buffer_command);
+                            byte[] buffer_command = Utility.Networking.my_recv(4,s);
                             s.ReceiveTimeout = receive_timeout_short;
-                            if (b == 4)
+                            if (buffer_command!=null)
                             {
                                 Networking.CONNECTION_CODES code = (Networking.CONNECTION_CODES)BitConverter.ToUInt32(buffer_command, 0);
                                 switch (code)
@@ -117,6 +118,7 @@ namespace Server
                                         break;
                                     case Networking.CONNECTION_CODES.NEW_REG:
                                         if (cs != null) {
+                                            Console.Write("ok");
                                             server.registrationTcpServer(cs);
                                         }
                                         exit = true;

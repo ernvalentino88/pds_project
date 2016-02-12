@@ -73,7 +73,7 @@ namespace Server {
         [System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [System.CodeDom.Compiler.GeneratedCodeAttribute("PresentationBuildTasks", "4.0.0.0")]
         public static void Main() {
-            ServerUtility.App app = new ServerUtility.App();
+            Server.App app = new Server.App();
             app.InitializeComponent();
             app.Run();
         }

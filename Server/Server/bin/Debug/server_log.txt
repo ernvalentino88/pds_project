@@ -288,3 +288,11 @@ no such column: admin
    at Utility.Security.AESDecrypt(Aes aes, Byte[] dataToDecrypt) in c:\Users\Ernesto\Documents\GitHub\pds_project\Utility\Utility\Security.cs:line 128
    at Server.ServerUtility.authenticationTcpServer(ClientSession clientSession) in c:\Users\John\Documents\GitHub\pds_project\Server\Server\Server.cs:line 85
    at Server.MainWindow.start_server(String port) in c:\Users\John\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:line 109
+12/02/2016 19:15:07 ***Fatal Error***  A blocking operation was interrupted by a call to WSACancelBlockingCall
+   at System.Net.Sockets.Socket.Accept()
+   at System.Net.Sockets.TcpListener.AcceptSocket()
+   at Server.MainWindow.start_server(String port) in c:\Users\John\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:line 82
+12/02/2016 19:23:22 ***Fatal Error***  A blocking operation was interrupted by a call to WSACancelBlockingCall
+   at System.Net.Sockets.Socket.Accept()
+   at System.Net.Sockets.TcpListener.AcceptSocket()
+   at Server.MainWindow.start_server(String port) in c:\Users\John\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:line 82
