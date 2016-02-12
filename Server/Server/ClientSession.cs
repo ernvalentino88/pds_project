@@ -12,22 +12,22 @@ namespace Server
 {
     class ClientSession
     {
-        private Int64 sessionId
+        public Int64 SessionId
         {
             get;
             set;
         }
-        private Socket socket
+        public Socket Socket
         {
             get;
             set;
         }
-        private User user
+        public User User
         {
             get;
             set;
         }
-        private AesCryptoServiceProvider aesKey
+        public AesCryptoServiceProvider AESKey
         {
             get;
             set;
