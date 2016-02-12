@@ -40,13 +40,13 @@ namespace Server
         public delegate Task UpdateDelegateAsync(String msg, String bannerTitle, String bannerMsg);
         private TcpListener myList;
         private Boolean connected;
-        private Server server;
+        private ServerUtility server;
        
         public MainWindow()
         {
             InitializeComponent();
             connected = false;
-            server = new Server();
+            server = new ServerUtility();
         }
 
         private void launch_button_Click(object sender, RoutedEventArgs e)

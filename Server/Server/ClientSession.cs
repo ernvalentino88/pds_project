@@ -12,34 +12,28 @@ namespace Server
 {
     class ClientSession
     {
-        private Int64 sessionId;
-        private Socket socket;
-        private User user;
-        private AesCryptoServiceProvider aesKey;
-
-        public Int64 SessionId
+        private Int64 sessionId
+        {
+            get;
+            set;
+        }
+        private Socket socket
+        {
+            get;
+            set;
+        }
+        private User user
+        {
+            get;
+            set;
+        }
+        private AesCryptoServiceProvider aesKey
         {
             get;
             set;
         }
 
-        public Socket Socket
-        {
-            get;
-            set;
-        }
-
-        public User User
-        {
-            get;
-            set;
-        }
-
-        public AesCryptoServiceProvider AESKey
-        {
-            get;
-            set;
-        }
+        
 
     }
 }

@@ -13,7 +13,7 @@ using System.Threading;
 
 namespace Server
 {
-    class Server
+    class ServerUtility
     {
         private ConcurrentDictionary<Int64, ClientSession> id2client;
         private Int64 sessionIdCounter;
@@ -24,10 +24,10 @@ namespace Server
             {
                 return Interlocked.Read(ref this.sessionIdCounter);
             }
-            private set  { }
+            private set { sessionIdCounter = value; }
         }
 
-        public Server()
+        public ServerUtility()
         {
             this.sessionIdCounter = 0;
             this.id2client = new ConcurrentDictionary<long, ClientSession>();

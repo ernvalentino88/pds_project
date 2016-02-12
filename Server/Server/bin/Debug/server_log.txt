@@ -261,3 +261,30 @@ no such column: admin
    at System.Net.Sockets.Socket.Accept()
    at System.Net.Sockets.TcpListener.AcceptSocket()
    at Server.MainWindow.start_server(String port) in c:\Users\John\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:line 84
+12/02/2016 17:43:27 ***Fatal Error***  An existing connection was forcibly closed by the remote host
+   at System.Net.Sockets.Socket.Receive(Byte[] buffer, Int32 offset, Int32 size, SocketFlags socketFlags)
+   at System.Net.Sockets.Socket.Receive(Byte[] buffer)
+   at Server.MainWindow.start_server(String port) in c:\Users\John\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:line 93
+12/02/2016 17:47:37 ***Fatal Error***  Only one usage of each socket address (protocol/network address/port) is normally permitted
+   at System.Net.Sockets.Socket.DoBind(EndPoint endPointSnapshot, SocketAddress socketAddress)
+   at System.Net.Sockets.Socket.Bind(EndPoint localEP)
+   at System.Net.Sockets.TcpListener.Start(Int32 backlog)
+   at System.Net.Sockets.TcpListener.Start()
+   at Server.MainWindow.start_server(String port) in c:\Users\John\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:line 74
+12/02/2016 18:22:59 ***Fatal Error***  An existing connection was forcibly closed by the remote host
+   at System.Net.Sockets.Socket.Receive(Byte[] buffer, Int32 offset, Int32 size, SocketFlags socketFlags)
+   at System.Net.Sockets.Socket.Receive(Byte[] buffer)
+   at Server.MainWindow.start_server(String port) in c:\Users\John\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:line 93
+12/02/2016 18:26:45 ***Fatal Error***  An existing connection was forcibly closed by the remote host
+   at System.Net.Sockets.Socket.Receive(Byte[] buffer, Int32 offset, Int32 size, SocketFlags socketFlags)
+   at System.Net.Sockets.Socket.Receive(Byte[] buffer)
+   at Server.MainWindow.start_server(String port) in c:\Users\John\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:line 93
+12/02/2016 18:32:59 ***Fatal Error***  Padding is invalid and cannot be removed.
+   at System.Security.Cryptography.CapiSymmetricAlgorithm.DepadBlock(Byte[] block, Int32 offset, Int32 count)
+   at System.Security.Cryptography.CapiSymmetricAlgorithm.TransformFinalBlock(Byte[] inputBuffer, Int32 inputOffset, Int32 inputCount)
+   at System.Security.Cryptography.CryptoStream.FlushFinalBlock()
+   at System.Security.Cryptography.CryptoStream.Dispose(Boolean disposing)
+   at System.IO.Stream.Close()
+   at Utility.Security.AESDecrypt(Aes aes, Byte[] dataToDecrypt) in c:\Users\Ernesto\Documents\GitHub\pds_project\Utility\Utility\Security.cs:line 128
+   at Server.ServerUtility.authenticationTcpServer(ClientSession clientSession) in c:\Users\John\Documents\GitHub\pds_project\Server\Server\Server.cs:line 85
+   at Server.MainWindow.start_server(String port) in c:\Users\John\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:line 109
