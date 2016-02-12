@@ -13,7 +13,7 @@ namespace Server
     class ClientSession
     {
         private Int64 sessionId;
-        private Socket client;
+        private Socket socket;
         private User user;
         private AesCryptoServiceProvider aesKey;
 
@@ -23,7 +23,7 @@ namespace Server
             set;
         }
 
-        public Socket Client
+        public Socket Socket
         {
             get;
             set;

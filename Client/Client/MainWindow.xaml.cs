@@ -34,11 +34,13 @@ namespace Client
         private delegate void UpdateDelegate(String msg);
         private delegate Task UpdateDelegateAsync(String msg, String bannerTitle, String bannerMsg);
         private Boolean connected;
+        private Client client;
 
         public MainWindow()
         {
             InitializeComponent();
             connected = false;
+            client = new Client();
         }
 
         private void Connect_button_Click(object sender, RoutedEventArgs e)
@@ -68,10 +70,10 @@ namespace Client
                     connected = true;
                     String msg = "Trying to connect to the server . . .";
                     this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegate(updateUI_progressBar), msg);
-                    AesCryptoServiceProvider aes = Networking.keyExchangeTcpClient(address, portInt, ref socket);
-                    if (aes != null)
+                    client.keyExchangeTcpClient(address, portInt);
+                    if (client.AESKey != null)
                     {
-                        Int64 sessionId = Networking.authenticationTcpClient(aes, username, pwd, socket);
+                        Int64 sessionId = client.authenticationTcpClient(username, pwd);
                         msg = "" + sessionId;
                         this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegate(updateUI), msg);
                     }
@@ -130,19 +132,17 @@ namespace Client
                 this.Dispatcher.BeginInvoke(DispatcherPriority.Normal,
                     new UpdateDelegateAsync(updateUI_regBanner), msg, title, msgBanner);
             }
-            TcpClient socket = new TcpClient();
             try
             {
                 Int32 portInt = Int32.Parse(port);
-                connected = true;
                 String msg = "Trying to connect to the server . . .";
-                this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegate(updateUI_progressBar), msg);
-                AesCryptoServiceProvider aes = Networking.keyExchangeTcpClient(address, portInt, ref socket);
-                if (aes != null)
+                this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegate(updateUI_progressBarReg), msg);
+                client.keyExchangeTcpClient(address, portInt);
+                if (client.AESKey != null)
                 {
-                    int ret = Networking.registrationTcpClient(aes, socket, user, pwd1);
+                    int ret = client.registrationTcpClient(user, pwd1);
                     msg = "" + ret;
-                    this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegate(updateUI), msg);
+                    this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegateAsync(updateUI_regBanner), msg);
                 }
             }
             catch (SocketException se)
@@ -170,7 +170,8 @@ namespace Client
             }
             finally
             {
-                socket.Close();
+                client.TcpClient.Client.Close();
+                client = new Client();
             }
         }
 

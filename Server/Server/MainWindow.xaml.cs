@@ -40,15 +40,13 @@ namespace Server
         public delegate Task UpdateDelegateAsync(String msg, String bannerTitle, String bannerMsg);
         private TcpListener myList;
         private Boolean connected;
-        AesCryptoServiceProvider aes;
-        Int64 sessionId;
-        
+        private Server server;
        
         public MainWindow()
         {
             InitializeComponent();
             connected = false;
-            
+            server = new Server();
         }
 
         private void launch_button_Click(object sender, RoutedEventArgs e)
@@ -84,6 +82,7 @@ namespace Server
                         s = myList.AcceptSocket();
                         msg = "Connection accpeted from " + s.RemoteEndPoint;
                         this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new update_ui_delegate(updateUI_msg), msg);
+                        ClientSession cs = null;
                         //connection done
                         bool exit = false;
                         while (!exit)
@@ -99,22 +98,26 @@ namespace Server
                                 switch (code)
                                 {
                                     case Networking.CONNECTION_CODES.KEY_EXC:
-                                        aes = Networking.keyExchangeTcpServer(s);
-                                        if (aes == null) { exit = true; }
+                                        cs = server.keyExchangeTcpServer(s);
+                                        if (cs == null) { 
+                                            exit = true; 
+                                        }
                                         break;
                                     case Networking.CONNECTION_CODES.AUTH:
-                                        if (aes != null)
+                                        if (cs != null)
                                         {
-                                            sessionId = Networking.authenticationTcpServer(aes, s);
-                                            if (sessionId <= 0) { exit = true; }
+                                            Int64 sessionId = server.authenticationTcpServer(cs);                         
+                                            if (sessionId <= 0) { 
+                                                exit = true; 
+                                            }
                                         }
                                         break;
                                     case Networking.CONNECTION_CODES.EXIT:
                                         exit = true;
                                         break;
                                     case Networking.CONNECTION_CODES.NEW_REG:
-                                        if (aes != null) {
-                                            Networking.registrationTcpServer(aes, s);
+                                        if (cs != null) {
+                                            server.registrationTcpServer(cs);
                                         }
                                         exit = true;
                                         break;

@@ -24,7 +24,7 @@ namespace Server
             {
                 return Interlocked.Read(ref this.sessionIdCounter);
             }
-            private set;
+            private set  { }
         }
 
         public Server()
@@ -33,12 +33,12 @@ namespace Server
             this.id2client = new ConcurrentDictionary<long, ClientSession>();
         }
 
-        public ClientSession keyExchangeTcpServer(Socket client)
+        public ClientSession keyExchangeTcpServer(Socket s)
         {
             byte[] recvBuf = new byte[259];
             byte[] command = new byte[4];
 
-            recvBuf = Networking.my_recv(259, client);
+            recvBuf = Networking.my_recv(259, s);
             if (recvBuf != null)
             {
                 byte[] modulus = new byte[256];
@@ -56,8 +56,8 @@ namespace Server
 
                 if (encrypted != null)
                 {
-                    client.Send(encrypted);
-                    command = Networking.my_recv(4, client);
+                    s.Send(encrypted);
+                    command = Networking.my_recv(4, s);
                     if (command != null && (
                          ((Networking.CONNECTION_CODES)BitConverter.ToUInt32(command, 0) == 
                                 Networking.CONNECTION_CODES.OK)))
@@ -65,7 +65,7 @@ namespace Server
                         //client.Close();
                         ClientSession clientSession = new ClientSession();
                         clientSession.AESKey = aes;
-                        clientSession.Client = client;
+                        clientSession.Socket = s;
                         return clientSession;
                     }
                 }
@@ -77,9 +77,9 @@ namespace Server
         public Int64 authenticationTcpServer(ClientSession clientSession)
         {
             byte[] command = new byte[4];
-            Socket client = clientSession.Client;
+            Socket s = clientSession.Socket;
             AesCryptoServiceProvider aes = clientSession.AESKey;
-            byte[] recvBuf = Networking.my_recv(16, client);
+            byte[] recvBuf = Networking.my_recv(16, s);
             if (recvBuf != null)
             {
                 byte[] decryptedData = Security.AESDecrypt(aes, recvBuf);
@@ -88,26 +88,26 @@ namespace Server
                 if (pwd != null)
                 {
                     command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.OK);
-                    client.Send(command);
+                    s.Send(command);
                     Random r = new Random();
                     byte[] challenge = new byte[8];
                     r.NextBytes(challenge);
                     byte[] encryptedData = Security.AESEncrypt(aes, challenge);
-                    client.Send(encryptedData);
+                    s.Send(encryptedData);
                     SHA1 sha = new SHA1CryptoServiceProvider();
                     byte[] p = Encoding.UTF8.GetBytes(pwd);
                     byte[] hash = sha.ComputeHash(Security.XOR(p, challenge));
-                    byte[] hashClient = Networking.my_recv(20, client);
+                    byte[] hashClient = Networking.my_recv(20, s);
                     if (hashClient != null)
                     {
                         if (hash.SequenceEqual(hashClient))
                         {
                             command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.OK);
-                            client.Send(command);
+                            s.Send(command);
                             Int64 sessionID = incrementAndGetIdCounter();
                             encryptedData = Security.AESEncrypt(aes, BitConverter.GetBytes(sessionID));
-                            client.Send(encryptedData);
-                            command = Networking.my_recv(4, client);
+                            s.Send(encryptedData);
+                            command = Networking.my_recv(4, s);
                             if (command != null && (
                                 ((Networking.CONNECTION_CODES)BitConverter.ToUInt32(command, 0) == 
                                         Networking.CONNECTION_CODES.OK)))
@@ -128,7 +128,7 @@ namespace Server
                         {
                             //auth failed: pwd error
                             command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.AUTH_FAILURE);
-                            client.Send(command);
+                            s.Send(command);
                             return -2;
                         }
                     }
@@ -137,7 +137,7 @@ namespace Server
                 {
                     //auth failed: user not existent
                     command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.AUTH_FAILURE);
-                    client.Send(command);
+                    s.Send(command);
                     return -3;
                 }
             }
@@ -147,9 +147,9 @@ namespace Server
 
         public void registrationTcpServer(ClientSession clientSession)
         {
-            Socket client = clientSession.Client;
+            Socket s = clientSession.Socket;
             AesCryptoServiceProvider aes = clientSession.AESKey;
-            byte[] encryptedData = Networking.my_recv(16, client);
+            byte[] encryptedData = Networking.my_recv(16, s);
             byte[] command = new byte[4];
 
             if (encryptedData != null)
@@ -161,23 +161,23 @@ namespace Server
                 {
                     //user yet present
                     command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.REG_FAILURE);
-                    client.Send(command);
+                    s.Send(command);
                     return;
                 }
-                byte[] pwdSize = Networking.my_recv(4, client);
+                byte[] pwdSize = Networking.my_recv(4, s);
                 if (pwdSize != null)
                 {
                     int size = BitConverter.ToInt32(pwdSize, 0);
-                    encryptedData = Networking.my_recv(size, client);
+                    encryptedData = Networking.my_recv(size, s);
                     decryptedData = Security.AESDecrypt(aes, encryptedData);
                     if (DBmanager.register(userid, Encoding.UTF8.GetString(decryptedData)))
                     {
                         command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.OK);
-                        client.Send(command);
+                        s.Send(command);
                         return;
                     }
                     command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.REG_FAILURE);
-                    client.Send(command);
+                    s.Send(command);
                 }
             }
         }
