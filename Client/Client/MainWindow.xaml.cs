@@ -34,13 +34,13 @@ namespace Client
         private delegate void UpdateDelegate(String msg);
         private delegate Task UpdateDelegateAsync(String msg, String bannerTitle, String bannerMsg);
         private Boolean connected;
-        private Client client;
+        private ClientApp client;
 
         public MainWindow()
         {
             InitializeComponent();
             connected = false;
-            client = new Client();
+            client = new ClientApp();
         }
 
         private void Connect_button_Click(object sender, RoutedEventArgs e)
@@ -63,7 +63,6 @@ namespace Client
             }
             else
             {
-                TcpClient socket = null;
                 try
                 {
                     Int32 portInt = Int32.Parse(port);
@@ -102,8 +101,7 @@ namespace Client
                 }
                 finally
                 {
-                    if (socket != null)
-                        socket.Close();
+                    
                 }
             }
         }
@@ -170,8 +168,8 @@ namespace Client
             }
             finally
             {
-                client.TcpClient.Client.Close();
-                client = new Client();
+                client.TcpClient.Close();
+                client = new ClientApp();
             }
         }
 

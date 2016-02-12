@@ -73,7 +73,7 @@ namespace Client {
         [System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [System.CodeDom.Compiler.GeneratedCodeAttribute("PresentationBuildTasks", "4.0.0.0")]
         public static void Main() {
-            Client.App app = new Client.App();
+            ClientApp.App app = new ClientApp.App();
             app.InitializeComponent();
             app.Run();
         }

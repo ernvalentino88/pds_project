@@ -305,7 +305,7 @@ namespace Utility
             {
                 while (left > 0)
                 {
-                    byte[] buffer = new byte[256];
+                    byte[] buffer = new byte[left];
                     b = s.Receive(buffer);
                     if (b <= 0)
                     {

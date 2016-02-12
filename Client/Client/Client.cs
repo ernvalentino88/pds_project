@@ -8,40 +8,72 @@ using System.Net;
 using System.Net.Sockets;
 using System.Security.Cryptography;
 using Utility;
-using Utility.Networking;
 
 namespace Client
 {
-    class Client
+    class ClientApp
     {
         private TcpClient tcpClient;
         private AesCryptoServiceProvider aesKey;
         private RSACryptoServiceProvider rsaKey;
         private UInt64 sessionId;
 
-        public TcpClient TcpClient { 
-            get; set;
+        public TcpClient TcpClient {
+            get 
+            { 
+                return tcpClient; 
+            }
+            set 
+            { 
+                tcpClient = value; 
+            }
         }
 
         public AesCryptoServiceProvider AESKey {
-            get; set;
+            get
+            {
+                return aesKey;
+            }
+            set
+            {
+                aesKey = value;
+            }
         }
 
         public RSACryptoServiceProvider RSAKey {
-            get; set;
+            get
+            {
+                return rsaKey;
+            }
+            set
+            {
+                rsaKey = value;
+            }
         }
 
         public UInt64 SessionId {
-            get; set;
+            get
+            {
+                return sessionId;
+            }
+            set
+            {
+                sessionId = value;
+            }
+        }
+
+        public ClientApp()
+        {
+            tcpClient = new TcpClient();
+            aesKey = new AesCryptoServiceProvider();
         }
 
         public void keyExchangeTcpClient(String ipAddress, Int32 port)
         {
-            TcpClient tcpclnt = new TcpClient();
-            tcpclnt.Connect(ipAddress, port);
-            tcpclnt.ReceiveTimeout = Networking.TIME_OUT;
-            tcpclnt.SendTimeout = Networking.TIME_OUT;
-            Stream stm = tcpclnt.GetStream();
+            tcpClient.Connect(ipAddress, port);
+            tcpClient.ReceiveTimeout = Networking.TIME_OUT;
+            tcpClient.SendTimeout = Networking.TIME_OUT;
+            Stream stm = tcpClient.GetStream();
             byte[] command = new byte[4];
             command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.KEY_EXC);
             stm.Write(command, 0, command.Length);
@@ -52,7 +84,7 @@ namespace Client
             stm.Write(modulus, 0, modulus.Length);
             stm.Write(exp, 0, exp.Length);
 
-            byte[] recvBuf = Networking.my_recv(256, tcpclnt.Client);
+            byte[] recvBuf = Networking.my_recv(256, tcpClient.Client);
             if (recvBuf != null)
             {
                 byte[] decryptedData = Security.RSADecrypt(rsa, recvBuf, false);
@@ -64,11 +96,9 @@ namespace Client
 
                 if (Key != null && IV != null)
                 {
-                    AesCryptoServiceProvider aes = Security.getAESKey(Key, IV);
+                    aesKey = Security.getAESKey(Key, IV);
                     command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.OK);
                     stm.Write(command, 0, command.Length);
-                    tcpClient = tcpclnt;
-                    aesKey = aes;
                     return;
                 }
                 else
@@ -77,7 +107,7 @@ namespace Client
                     stm.Write(command, 0, command.Length);
                 }
             }
-            tcpclnt.Close();
+            tcpClient.Close();
         }
 
         public int authenticationTcpClient(String username, String pwd)

@@ -370,3 +370,32 @@ Nome parametro: value
    in System.BitConverter.ToUInt32(Byte[] value, Int32 startIndex)
    in Utility.Networking.registrationTcpClient(Aes aes, TcpClient tcpclnt, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Utility\Utility\Networking.cs:riga 256
    in Client.MainWindow.register(String address, String port, String user, String pwd1, String pwd2) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 143
+12/02/2016 18:22:18 ***Fatal Error***  Impossibile accedere a un oggetto eliminato.
+Nome oggetto: 'System.Net.Sockets.TcpClient'.
+   in System.Net.Sockets.TcpClient.Connect(String hostname, Int32 port)
+   in Client.ClientApp.keyExchangeTcpClient(String ipAddress, Int32 port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\Client.cs:riga 45
+   in Client.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 72
+12/02/2016 18:22:20 ***Fatal Error***  Impossibile accedere a un oggetto eliminato.
+Nome oggetto: 'System.Net.Sockets.TcpClient'.
+   in System.Net.Sockets.TcpClient.Connect(String hostname, Int32 port)
+   in Client.ClientApp.keyExchangeTcpClient(String ipAddress, Int32 port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\Client.cs:riga 45
+   in Client.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 72
+12/02/2016 18:22:21 ***Fatal Error***  Impossibile accedere a un oggetto eliminato.
+Nome oggetto: 'System.Net.Sockets.TcpClient'.
+   in System.Net.Sockets.TcpClient.Connect(String hostname, Int32 port)
+   in Client.ClientApp.keyExchangeTcpClient(String ipAddress, Int32 port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\Client.cs:riga 45
+   in Client.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 72
+12/02/2016 18:33:00 ***Fatal Error***  Il valore non può essere null.
+Nome parametro: value
+   in System.BitConverter.ToUInt32(Byte[] value, Int32 startIndex)
+   in Client.ClientApp.authenticationTcpClient(String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\Client.cs:riga 133
+   in Client.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 76
+12/02/2016 18:49:01 ***Fatal Error***  Impossibile stabilire la connessione. Risposta non corretta della parte connessa dopo l'intervallo di tempo oppure mancata risposta dall'host collegato 192.168.1.134:8001
+   in System.Net.Sockets.TcpClient.Connect(String hostname, Int32 port)
+   in Client.ClientApp.keyExchangeTcpClient(String ipAddress, Int32 port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\Client.cs:riga 73
+   in Client.MainWindow.register(String address, String port, String user, String pwd1, String pwd2) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 138
+12/02/2016 18:49:37 ***Fatal Error***  Il valore non può essere null.
+Nome parametro: value
+   in System.BitConverter.ToUInt32(Byte[] value, Int32 startIndex)
+   in Client.ClientApp.registrationTcpClient(String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\Client.cs:riga 196
+   in Client.MainWindow.register(String address, String port, String user, String pwd1, String pwd2) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 141
