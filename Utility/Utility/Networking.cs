@@ -294,7 +294,7 @@ namespace Utility
             }
         }
 
-        private static byte[] my_recv(int size, Socket s)
+        public static byte[] my_recv(int size, Socket s)
         {
             int left = size;
             int b;
