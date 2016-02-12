@@ -22,5 +22,11 @@ namespace Server
             get;
             set;
         }
+
+        public User(String userId, String pwdHash)
+        {
+            this.userId = userId;
+            this.hashedPassword = pwdHash;
+        }
     }
 }

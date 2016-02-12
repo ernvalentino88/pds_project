@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,14 +15,8 @@ namespace Server
 {
     class Server
     {
-        private ClientSession clientSession;
+        private ConcurrentDictionary<Int64, ClientSession> id2client;
         private Int64 sessionIdCounter;
-
-        public ClientSession ClientSession
-        {
-            get;
-            set;
-        }
 
         public Int64 SessionIdCounter
         {
@@ -35,6 +30,7 @@ namespace Server
         public Server()
         {
             this.sessionIdCounter = 0;
+            this.id2client = new ConcurrentDictionary<long, ClientSession>();
         }
 
         public ClientSession keyExchangeTcpServer(Socket client)
@@ -67,7 +63,7 @@ namespace Server
                                 Networking.CONNECTION_CODES.OK)))
                     {
                         //client.Close();
-                        clientSession = new ClientSession();
+                        ClientSession clientSession = new ClientSession();
                         clientSession.AESKey = aes;
                         clientSession.Client = client;
                         return clientSession;
@@ -87,7 +83,8 @@ namespace Server
             if (recvBuf != null)
             {
                 byte[] decryptedData = Security.AESDecrypt(aes, recvBuf);
-                String pwd = DBmanager.find_user(Encoding.UTF8.GetString(decryptedData));
+                String userId = Encoding.UTF8.GetString(decryptedData);
+                String pwd = DBmanager.find_user(userId);
                 if (pwd != null)
                 {
                     command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.OK);
@@ -107,7 +104,7 @@ namespace Server
                         {
                             command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.OK);
                             client.Send(command);
-                            Int64 sessionID = r.Next();
+                            Int64 sessionID = incrementAndGetIdCounter();
                             encryptedData = Security.AESEncrypt(aes, BitConverter.GetBytes(sessionID));
                             client.Send(encryptedData);
                             command = Networking.my_recv(4, client);
@@ -117,6 +114,8 @@ namespace Server
                             {
                                 //client.Close();
                                 clientSession.SessionId = sessionID;
+                                clientSession.User = new User(userId, pwd);
+                                id2client.GetOrAdd(sessionID, clientSession);
                                 return sessionID;
                             }
                             else
@@ -185,6 +184,11 @@ namespace Server
 
         public Int64 incrementAndGetIdCounter()
         {
+            lock (this)
+            {
+                if (this.sessionIdCounter == Int64.MaxValue)
+                    this.sessionIdCounter = 0;
+            }
             return Interlocked.Increment(ref this.sessionIdCounter);
         }
     }

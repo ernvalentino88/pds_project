@@ -82,6 +82,7 @@
     </ApplicationDefinition>
     <Compile Include="ClientSession.cs" />
     <Compile Include="Server.cs" />
+    <Compile Include="ServerInstance.cs" />
     <Compile Include="User.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
