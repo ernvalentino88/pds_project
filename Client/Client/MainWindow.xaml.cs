@@ -22,7 +22,7 @@ using System.Net;
 using System.Net.Sockets;
 using Utility;
 
-namespace Client
+namespace ClientApp
 {
     /// <summary>
     /// Logica di interazione per MainWindow.xaml
@@ -34,13 +34,12 @@ namespace Client
         private delegate void UpdateDelegate(String msg);
         private delegate Task UpdateDelegateAsync(String msg, String bannerTitle, String bannerMsg);
         private Boolean connected;
-        private ClientApp client;
+        private Client client;
 
         public MainWindow()
         {
             InitializeComponent();
             connected = false;
-            client = new ClientApp();
         }
 
         private void Connect_button_Click(object sender, RoutedEventArgs e)
@@ -58,6 +57,7 @@ namespace Client
             if (connected)
             {
                 connected = false;
+                client.closeConnectionTcpClient();
                 String msg = "Log in to the remote server";
                 this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegate(updateUI), msg);
             }
@@ -65,6 +65,7 @@ namespace Client
             {
                 try
                 {
+                    client = new Client();
                     Int32 portInt = Int32.Parse(port);
                     connected = true;
                     String msg = "Trying to connect to the server . . .";
@@ -80,6 +81,8 @@ namespace Client
                 catch (SocketException se)
                 {
                     connected = false;
+                    if (client.TcpClient != null && client.TcpClient.Connected)
+                        client.TcpClient.Close();
                     String msg = "Log in to the remote server";
                     StreamWriter sw = new StreamWriter("client_log.txt", true);
                     sw.Write(DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss"));
@@ -87,10 +90,13 @@ namespace Client
                     sw.WriteLine(se.StackTrace);
                     sw.Close();
                     this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegateAsync(updateUI_banner), msg, "Server Unreachable", se.Message);
+                    
                 }
                 catch (Exception exc)
                 {
                     connected = false;
+                    if (client.TcpClient != null && client.TcpClient.Connected)
+                        client.TcpClient.Close();
                     String msg = "Log in to the remote server";
                     StreamWriter sw = new StreamWriter("client_log.txt", true);
                     sw.Write(DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss"));
@@ -98,10 +104,6 @@ namespace Client
                     sw.WriteLine(exc.StackTrace);
                     sw.Close();
                     this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegate(updateUI), msg);
-                }
-                finally
-                {
-                    
                 }
             }
         }
@@ -132,6 +134,7 @@ namespace Client
             }
             try
             {
+                client = new Client();
                 Int32 portInt = Int32.Parse(port);
                 String msg = "Trying to connect to the server . . .";
                 this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegate(updateUI_progressBarReg), msg);
@@ -139,8 +142,10 @@ namespace Client
                 if (client.AESKey != null)
                 {
                     int ret = client.registrationTcpClient(user, pwd1);
-                    msg = "" + ret;
-                    this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegateAsync(updateUI_regBanner), msg);
+                    msg = "Create account";
+                    String title = "Registration result";
+                    String bannerMsg = "" + ret;
+                    this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegateAsync(updateUI_regBanner), msg, title, bannerMsg);
                 }
             }
             catch (SocketException se)
@@ -168,8 +173,10 @@ namespace Client
             }
             finally
             {
-                client.TcpClient.Close();
-                client = new ClientApp();
+                if (client.TcpClient != null)
+                {
+                    client.TcpClient.Close();
+                }
             }
         }
 

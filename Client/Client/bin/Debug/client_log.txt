@@ -399,3 +399,55 @@ Nome parametro: value
    in System.BitConverter.ToUInt32(Byte[] value, Int32 startIndex)
    in Client.ClientApp.registrationTcpClient(String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\Client.cs:riga 196
    in Client.MainWindow.register(String address, String port, String user, String pwd1, String pwd2) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 141
+12/02/2016 20:26:34 ***Fatal Error***  Richiesta di connessione inoltrata ad un socket già connesso
+   in System.Net.Sockets.TcpClient.Connect(String hostname, Int32 port)
+   in Client.ClientApp.keyExchangeTcpClient(String ipAddress, Int32 port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\Client.cs:riga 73
+   in Client.MainWindow.register(String address, String port, String user, String pwd1, String pwd2) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 138
+12/02/2016 20:30:18 ***Fatal Error***  Il valore non può essere null.
+Nome parametro: value
+   in System.BitConverter.ToUInt32(Byte[] value, Int32 startIndex)
+   in Client.ClientApp.registrationTcpClient(String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\Client.cs:riga 196
+   in Client.MainWindow.register(String address, String port, String user, String pwd1, String pwd2) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 141
+12/02/2016 20:43:32 ***Fatal Error***  Il valore non può essere null.
+Nome parametro: value
+   in System.BitConverter.ToUInt32(Byte[] value, Int32 startIndex)
+   in Client.ClientApp.registrationTcpClient(String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\Client.cs:riga 196
+   in Client.MainWindow.register(String address, String port, String user, String pwd1, String pwd2) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 141
+12/02/2016 20:47:55 ***Fatal Error***  Il valore non può essere null.
+Nome parametro: value
+   in System.BitConverter.ToUInt32(Byte[] value, Int32 startIndex)
+   in Client.ClientApp.registrationTcpClient(String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\Client.cs:riga 196
+   in Client.MainWindow.register(String address, String port, String user, String pwd1, String pwd2) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 141
+12/02/2016 20:54:05 ***Fatal Error***  Il valore non può essere null.
+Nome parametro: value
+   in System.BitConverter.ToUInt32(Byte[] value, Int32 startIndex)
+   in Client.ClientApp.registrationTcpClient(String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\Client.cs:riga 196
+   in Client.MainWindow.register(String address, String port, String user, String pwd1, String pwd2) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 141
+12/02/2016 21:20:46 ***Fatal Error***  Impossibile stabilire la connessione. Rifiuto persistente del computer di destinazione 127.0.0.1:8001
+   in System.Net.Sockets.TcpClient.Connect(String hostname, Int32 port)
+   in Client.ClientApp.keyExchangeTcpClient(String ipAddress, Int32 port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\Client.cs:riga 73
+   in Client.MainWindow.register(String address, String port, String user, String pwd1, String pwd2) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 138
+13/02/2016 10:17:51 ***Fatal Error***  Impossibile stabilire la connessione. Rifiuto persistente del computer di destinazione 127.0.0.1:8001
+   in System.Net.Sockets.TcpClient.Connect(String hostname, Int32 port)
+   in Client.ClientApp.keyExchangeTcpClient(String ipAddress, Int32 port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\Client.cs:riga 73
+   in Client.MainWindow.register(String address, String port, String user, String pwd1, String pwd2) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 142
+13/02/2016 13:32:56 ***Fatal Error***  Impossibile scrivere dati sulla connessione di trasporto: Connessione interrotta dal software del computer host.
+   in System.Net.Sockets.NetworkStream.Write(Byte[] buffer, Int32 offset, Int32 size)
+   in ClientApp.Client.registrationTcpClient(String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\Client.cs:riga 180
+   in ClientApp.MainWindow.register(String address, String port, String user, String pwd1, String pwd2) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 145
+13/02/2016 13:36:09 ***Fatal Error***  Impossibile scrivere dati sulla connessione di trasporto: Connessione interrotta dal software del computer host.
+   in System.Net.Sockets.NetworkStream.Write(Byte[] buffer, Int32 offset, Int32 size)
+   in ClientApp.Client.registrationTcpClient(String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\Client.cs:riga 180
+   in ClientApp.MainWindow.register(String address, String port, String user, String pwd1, String pwd2) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 145
+14/02/2016 00:42:53 ***Fatal Error***  Impossibile stabilire la connessione. Rifiuto persistente del computer di destinazione 127.0.0.1:8001
+   in System.Net.Sockets.TcpClient.Connect(String hostname, Int32 port)
+   in ClientApp.Client.keyExchangeTcpClient(String ipAddress, Int32 port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\Client.cs:riga 68
+   in ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 73
+14/02/2016 01:10:44 ***Fatal Error***  Impossibile stabilire la connessione. Rifiuto persistente del computer di destinazione 127.0.0.1:8001
+   in System.Net.Sockets.TcpClient.Connect(String hostname, Int32 port)
+   in ClientApp.Client.keyExchangeTcpClient(String ipAddress, Int32 port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\Client.cs:riga 68
+   in ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 73
+14/02/2016 01:10:47 ***Fatal Error***  Impossibile stabilire la connessione. Rifiuto persistente del computer di destinazione 127.0.0.1:8001
+   in System.Net.Sockets.TcpClient.Connect(String hostname, Int32 port)
+   in ClientApp.Client.keyExchangeTcpClient(String ipAddress, Int32 port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\Client.cs:riga 68
+   in ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 73

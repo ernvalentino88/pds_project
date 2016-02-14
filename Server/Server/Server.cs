@@ -11,9 +11,9 @@ using System.Security.Cryptography;
 using Utility;
 using System.Threading;
 
-namespace Server
+namespace ServerApp
 {
-    class ServerUtility
+    class Server
     {
         private ConcurrentDictionary<Int64, ClientSession> id2client;
         private Int64 sessionIdCounter;
@@ -24,10 +24,9 @@ namespace Server
             {
                 return Interlocked.Read(ref this.sessionIdCounter);
             }
-            private set { sessionIdCounter = value; }
         }
 
-        public ServerUtility()
+        public Server()
         {
             this.sessionIdCounter = 0;
             this.id2client = new ConcurrentDictionary<long, ClientSession>();
@@ -105,6 +104,7 @@ namespace Server
                             command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.OK);
                             s.Send(command);
                             Int64 sessionID = incrementAndGetIdCounter();
+                            Console.WriteLine(sessionID);
                             encryptedData = Security.AESEncrypt(aes, BitConverter.GetBytes(sessionID));
                             s.Send(encryptedData);
                             command = Networking.my_recv(4, s);
@@ -147,11 +147,10 @@ namespace Server
 
         public void registrationTcpServer(ClientSession clientSession)
         {
+            byte[] command = new byte[4];
             Socket s = clientSession.Socket;
             AesCryptoServiceProvider aes = clientSession.AESKey;
             byte[] encryptedData = Networking.my_recv(16, s);
-            byte[] command = new byte[4];
-
             if (encryptedData != null)
             {
                 byte[] decryptedData = Security.AESDecrypt(aes, encryptedData);
@@ -164,6 +163,8 @@ namespace Server
                     s.Send(command);
                     return;
                 }
+                command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.OK);
+                s.Send(command);
                 byte[] pwdSize = Networking.my_recv(4, s);
                 if (pwdSize != null)
                 {

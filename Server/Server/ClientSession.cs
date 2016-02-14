@@ -8,29 +8,58 @@ using System.Net.Sockets;
 using System.Security.Cryptography;
 using Utility;
 
-namespace Server
+namespace ServerApp
 {
     class ClientSession
     {
+        private Int64 sessionId;
+        private Socket socket;
+        private User user;
+        private AesCryptoServiceProvider aesKey;
+
         public Int64 SessionId
         {
-            get;
-            set;
+            get
+            {
+                return sessionId;
+            }
+            set
+            {
+                sessionId = value;
+            }
         }
         public Socket Socket
         {
-            get;
-            set;
+            get
+            {
+                return socket;
+            }
+            set
+            {
+                socket = value;
+            }
         }
         public User User
         {
-            get;
-            set;
+            get
+            {
+                return user;
+            }
+            set
+            {
+                user = value;
+            }
         }
         public AesCryptoServiceProvider AESKey
         {
-            get;
-            set;
+            get
+            {
+                return aesKey;
+            }
+            set
+            {
+                aesKey = value;
+            }
         }
 
         

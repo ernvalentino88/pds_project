@@ -23,7 +23,7 @@ using System.Data.SQLite;
 using System.Security.Cryptography;
 using Utility;
 
-namespace Server
+namespace ServerApp
 {
     /// <summary>
     /// Logica di interazione per MainWindow.xaml
@@ -40,13 +40,13 @@ namespace Server
         public delegate Task UpdateDelegateAsync(String msg, String bannerTitle, String bannerMsg);
         private TcpListener myList;
         private Boolean connected;
-        private ServerUtility server;
+        private Server server;
        
         public MainWindow()
         {
             InitializeComponent();
             connected = false;
-            server = new ServerUtility();
+            server = new Server();
         }
 
         private void launch_button_Click(object sender, RoutedEventArgs e)
@@ -58,18 +58,19 @@ namespace Server
 
         public void start_server(String port) 
         {
+            Socket s = null;
             if (connected)
             {
                 connected = false;
                 this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new update_ui_delegate(updateUI), "Insert port number for listening to ingress connection");
+                myList.Server.Close();
                 myList.Stop();
             }
             else
             {
-                Socket s = null;
                 try
                 {
-             
+
                     myList = new TcpListener(IPAddress.Any, Int32.Parse(port));
                     myList.Start();
                     connected = true;
@@ -80,69 +81,72 @@ namespace Server
                     {
                         //TODO uscire correttamente dal while
                         s = myList.AcceptSocket();
+                        ThreadPool.QueueUserWorkItem(new WaitCallback(clientHandler), s);
                         msg = "Connection accpeted from " + s.RemoteEndPoint;
                         this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new update_ui_delegate(updateUI_msg), msg);
-                        ClientSession cs = null;
-                        //connection done
-                        bool exit = false;
-                        while (!exit)
-                        {
-                            s.ReceiveTimeout = receive_timeout_long;
-                            s.SendTimeout =send_timeout_short;
-                            //byte[] buffer_command = new byte[4];
-                            //int b = s.Receive(buffer_command);
-                            byte[] buffer_command = Utility.Networking.my_recv(4,s);
-                            s.ReceiveTimeout = receive_timeout_short;
-                            if (buffer_command!=null)
-                            {
-                                Networking.CONNECTION_CODES code = (Networking.CONNECTION_CODES)BitConverter.ToUInt32(buffer_command, 0);
-                                switch (code)
-                                {
-                                    case Networking.CONNECTION_CODES.KEY_EXC:
-                                        cs = server.keyExchangeTcpServer(s);
-                                        if (cs == null) { 
-                                            exit = true; 
-                                        }
-                                        break;
-                                    case Networking.CONNECTION_CODES.AUTH:
-                                        if (cs != null)
-                                        {
-                                            Int64 sessionId = server.authenticationTcpServer(cs);                         
-                                            if (sessionId <= 0) { 
-                                                exit = true; 
-                                            }
-                                        }
-                                        break;
-                                    case Networking.CONNECTION_CODES.EXIT:
-                                        exit = true;
-                                        break;
-                                    case Networking.CONNECTION_CODES.NEW_REG:
-                                        if (cs != null) {
-                                            Console.Write("ok");
-                                            server.registrationTcpServer(cs);
-                                        }
-                                        exit = true;
-                                        break;
-                                    default: break;
-                                }
-                            }
-                        }
-                        s.Close();
-                        
+                        //ClientSession cs = null;
+                        //bool exit = false;
+                        //while (!exit)
+                        //{
+                        //    int timeout_default = s.ReceiveTimeout;
+                        //    s.ReceiveTimeout = Networking.TIME_OUT_LONG;
+                        //    byte[] buffer_command = Utility.Networking.my_recv(4, s);
+                        //    if (buffer_command != null)
+                        //    {
+                        //        s.ReceiveTimeout = timeout_default;
+                        //        Networking.CONNECTION_CODES code = (Networking.CONNECTION_CODES)BitConverter.ToUInt32(buffer_command, 0);
+                        //        switch (code)
+                        //        {
+                        //            case Networking.CONNECTION_CODES.KEY_EXC:
+                        //                cs = server.keyExchangeTcpServer(s);
+                        //                if (cs == null)
+                        //                {
+                        //                    exit = true;
+                        //                }
+                        //                break;
+                        //            case Networking.CONNECTION_CODES.AUTH:
+                        //                if (cs != null)
+                        //                {
+                        //                    Int64 sessionId = server.authenticationTcpServer(cs);
+                        //                    if (sessionId <= 0)
+                        //                    {
+                        //                        exit = true;
+                        //                    }
+                        //                }
+                        //                break;
+                        //            case Networking.CONNECTION_CODES.EXIT:
+                        //                exit = true;
+                        //                break;
+                        //            case Networking.CONNECTION_CODES.NEW_REG:
+                        //                if (cs != null)
+                        //                {
+                        //                    server.registrationTcpServer(cs);
+                        //                }
+                        //                exit = true;
+                        //                break;
+                        //            default: 
+                        //                exit = true;
+                        //                break;
+                        //        }
+                        //    }
+                        //    else
+                        //        exit = true;
+                        //}
+                        //s.Close();
                     }
                 }
                 catch (SocketException se)
                 {
                     connected = false;
-                    String msg = "Insert port number for listening to ingress connection";
-                    StreamWriter sw = new StreamWriter("server_log.txt", true);
-                    sw.Write(DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss"));
-                    sw.WriteLine(" ***Fatal Error***  " + se.Message);
-                    sw.WriteLine(se.StackTrace);
-                    sw.Close();
-                    this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegateAsync(updateUI_banner), msg, "Network Error", se.Message);
-                    if (s != null) {
-                        s.Close();
+                    if (se.SocketErrorCode != SocketError.Interrupted)
+                    {
+                        String msg = "Insert port number for listening to ingress connection";
+                        StreamWriter sw = new StreamWriter("server_log.txt", true);
+                        sw.Write(DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss"));
+                        sw.WriteLine(" ***Fatal Error***  " + se.Message);
+                        sw.WriteLine(se.StackTrace);
+                        sw.Close();
+                        this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegateAsync(updateUI_banner), msg, "Network Error", se.Message);
                     }
                 }
                 catch (Exception ex)
@@ -156,7 +160,68 @@ namespace Server
                     sw.Close();
                     this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegateAsync(updateUI_banner), msg, "Unexpected Error", ex.Message);
                 }
+                finally
+                {
+                    if (s != null && s.Connected)
+                    {
+                        s.Close();
+                    }
+                }
             }
+        }
+
+        private void clientHandler(Object state)
+        {
+            Socket s = (Socket)state;
+            ClientSession cs = null;
+            bool exit = false;
+            while (!exit)
+            {
+                int timeout_default = s.ReceiveTimeout;
+                s.ReceiveTimeout = Networking.TIME_OUT_LONG;
+                byte[] buffer_command = Utility.Networking.my_recv(4, s);
+                if (buffer_command != null)
+                {
+                    s.ReceiveTimeout = timeout_default;
+                    Networking.CONNECTION_CODES code = (Networking.CONNECTION_CODES)BitConverter.ToUInt32(buffer_command, 0);
+                    switch (code)
+                    {
+                        case Networking.CONNECTION_CODES.KEY_EXC:
+                            cs = server.keyExchangeTcpServer(s);
+                            if (cs == null)
+                            {
+                                exit = true;
+                            }
+                            break;
+                        case Networking.CONNECTION_CODES.AUTH:
+                            if (cs != null)
+                            {
+                                Int64 sessionId = server.authenticationTcpServer(cs);
+                                if (sessionId <= 0)
+                                {
+                                    exit = true;
+                                }
+                            }
+                            break;
+                        case Networking.CONNECTION_CODES.EXIT:
+                            exit = true;
+                            break;
+                        case Networking.CONNECTION_CODES.NEW_REG:
+                            if (cs != null)
+                            {
+                                server.registrationTcpServer(cs);
+                            }
+                            exit = true;
+                            break;
+                        default:
+                            exit = true;
+                            break;
+                    }
+                }
+                else
+                    exit = true;
+            }
+            s.Close();
         }
 
         private void updateUI_msg(String msg)

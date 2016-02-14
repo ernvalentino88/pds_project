@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Server
+namespace ServerApp
 {
     class User
     {
@@ -13,14 +13,26 @@ namespace Server
 
         public String UserId
         {
-            get;
-            set;
+            get
+            {
+                return userId;
+            }
+            set
+            {
+                userId = value;
+            }
         }
 
         public String HashedPassword
         {
-            get;
-            set;
+            get
+            {
+                return hashedPassword;
+            }
+            set
+            {
+                hashedPassword = value;
+            }
         }
 
         public User(String userId, String pwdHash)

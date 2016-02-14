@@ -6,7 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 
-namespace Client
+namespace ClientApp
 {
     /// <summary>
     /// Logica di interazione per App.xaml

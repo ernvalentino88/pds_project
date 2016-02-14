@@ -1,5 +1,5 @@
 ﻿<Controls:MetroWindow 
-        x:Class="Client.MainWindow"
+        x:Class="ClientApp.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Client" Height="437" Width="354"

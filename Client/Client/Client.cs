@@ -9,14 +9,14 @@ using System.Net.Sockets;
 using System.Security.Cryptography;
 using Utility;
 
-namespace Client
+namespace ClientApp
 {
-    class ClientApp
+    class Client
     {
         private TcpClient tcpClient;
         private AesCryptoServiceProvider aesKey;
         private RSACryptoServiceProvider rsaKey;
-        private UInt64 sessionId;
+        private Int64 sessionId;
 
         public TcpClient TcpClient {
             get 
@@ -51,7 +51,7 @@ namespace Client
             }
         }
 
-        public UInt64 SessionId {
+        public Int64 SessionId {
             get
             {
                 return sessionId;
@@ -62,17 +62,10 @@ namespace Client
             }
         }
 
-        public ClientApp()
-        {
-            tcpClient = new TcpClient();
-            aesKey = new AesCryptoServiceProvider();
-        }
-
         public void keyExchangeTcpClient(String ipAddress, Int32 port)
         {
+            tcpClient = new TcpClient();
             tcpClient.Connect(ipAddress, port);
-            tcpClient.ReceiveTimeout = Networking.TIME_OUT;
-            tcpClient.SendTimeout = Networking.TIME_OUT;
             Stream stm = tcpClient.GetStream();
             byte[] command = new byte[4];
             command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.KEY_EXC);
@@ -107,10 +100,9 @@ namespace Client
                     stm.Write(command, 0, command.Length);
                 }
             }
-            tcpClient.Close();
         }
 
-        public int authenticationTcpClient(String username, String pwd)
+        public Int64 authenticationTcpClient(String username, String pwd)
         {
             Stream stm = tcpClient.GetStream();
             byte[] command = new byte[4];
@@ -143,18 +135,18 @@ namespace Client
                         if (recvBuf != null)
                         {
                             byte[] id = Security.AESDecrypt(aesKey, recvBuf);
-                            UInt64 sessionID = BitConverter.ToUInt64(id, 0);
+                            Int64 sessionID = BitConverter.ToInt64(id, 0);
                             command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.OK);
                             stm.Write(command, 0, command.Length);
-                            sessionId = sessionID;
-                            return 1;
+                            this.sessionId = sessionID;
+                            return sessionId;
                         }
                     }
                     if (((Networking.CONNECTION_CODES)BitConverter.ToUInt32(command, 0) == 
                                 Networking.CONNECTION_CODES.AUTH_FAILURE))
                     {
                         //password not correct
-                        return -2;
+                        return -3;
                     }
                 }
             }
@@ -180,7 +172,7 @@ namespace Client
             if (command != null && (
                     ((Networking.CONNECTION_CODES)BitConverter.ToUInt32(command, 0) == Networking.CONNECTION_CODES.OK)))
             {
-                encrypted = Security.AESEncrypt(aesKey, username);
+                encrypted = Security.AESEncrypt(aesKey, pwd);
                 Int32 pwdSize = encrypted.Length;
                 stm.Write(BitConverter.GetBytes(pwdSize), 0, 4);
                 stm.Write(encrypted, 0, encrypted.Length);
@@ -193,10 +185,28 @@ namespace Client
                 else
                     return -1; //db or network failure
             }
-            if ((Networking.CONNECTION_CODES)BitConverter.ToUInt32(command, 0) == Networking.CONNECTION_CODES.AUTH_FAILURE)
+            if ( command != null && (
+                ((Networking.CONNECTION_CODES)BitConverter.ToUInt32(command, 0) == Networking.CONNECTION_CODES.REG_FAILURE)))
                 return 0;  //userid is yet present
 
-            return -1;  //db or network failure
+            return -2;  //db or network failure
+        }
+
+        public void closeConnectionTcpClient()
+        {
+            try
+            {
+                Stream stm = tcpClient.GetStream();
+                byte[] command = new byte[4];
+                command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.EXIT);
+                stm.Write(command, 0, command.Length);
+                tcpClient.Close();
+            }
+            catch (Exception)
+            {
+                //socket is not connected
+                return;
+            }
         }
     }
 }

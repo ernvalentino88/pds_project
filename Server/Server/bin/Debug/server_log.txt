@@ -296,3 +296,122 @@ no such column: admin
    at System.Net.Sockets.Socket.Accept()
    at System.Net.Sockets.TcpListener.AcceptSocket()
    at Server.MainWindow.start_server(String port) in c:\Users\John\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:line 82
+12/02/2016 20:32:09 ***Fatal Error***  Operazione di blocco interrotta da una chiamata a WSACancelBlockingCall
+   in System.Net.Sockets.Socket.Accept()
+   in System.Net.Sockets.TcpListener.AcceptSocket()
+   in Server.MainWindow.start_server(String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:riga 82
+12/02/2016 20:43:58 ***Fatal Error***  Operazione di blocco interrotta da una chiamata a WSACancelBlockingCall
+   in System.Net.Sockets.Socket.Accept()
+   in System.Net.Sockets.TcpListener.AcceptSocket()
+   in Server.MainWindow.start_server(String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:riga 82
+12/02/2016 21:17:10 ***Fatal Error***  Operazione di blocco interrotta da una chiamata a WSACancelBlockingCall
+   in System.Net.Sockets.Socket.Accept()
+   in System.Net.Sockets.TcpListener.AcceptSocket()
+   in Server.MainWindow.start_server(String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:riga 82
+12/02/2016 21:19:46 ***Fatal Error***  Operazione di blocco interrotta da una chiamata a WSACancelBlockingCall
+   in System.Net.Sockets.Socket.Accept()
+   in System.Net.Sockets.TcpListener.AcceptSocket()
+   in Server.MainWindow.start_server(String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:riga 82
+12/02/2016 21:22:14 ***Fatal Error***  Operazione di blocco interrotta da una chiamata a WSACancelBlockingCall
+   in System.Net.Sockets.Socket.Accept()
+   in System.Net.Sockets.TcpListener.AcceptSocket()
+   in Server.MainWindow.start_server(String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:riga 82
+12/02/2016 21:24:57 ***Fatal Error***  Connessione in corso interrotta forzatamente dall'host remoto
+   in System.Net.Sockets.Socket.Send(Byte[] buffer, Int32 offset, Int32 size, SocketFlags socketFlags)
+   in System.Net.Sockets.Socket.Send(Byte[] buffer)
+   in Server.ServerUtility.registrationTcpServer(ClientSession clientSession) in c:\Users\Ernesto\Documents\GitHub\pds_project\Server\Server\Server.cs:riga 180
+   in Server.MainWindow.start_server(String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:riga 121
+12/02/2016 21:30:02 ***Fatal Error***  Connessione in corso interrotta forzatamente dall'host remoto
+   in System.Net.Sockets.Socket.Send(Byte[] buffer, Int32 offset, Int32 size, SocketFlags socketFlags)
+   in System.Net.Sockets.Socket.Send(Byte[] buffer)
+   in Server.ServerUtility.registrationTcpServer(ClientSession clientSession) in c:\Users\Ernesto\Documents\GitHub\pds_project\Server\Server\Server.cs:riga 184
+   in Server.MainWindow.start_server(String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:riga 121
+13/02/2016 10:09:12 ***Fatal Error***  Operazione di blocco interrotta da una chiamata a WSACancelBlockingCall
+   in System.Net.Sockets.Socket.Accept()
+   in System.Net.Sockets.TcpListener.AcceptSocket()
+   in Server.MainWindow.start_server(String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:riga 82
+13/02/2016 10:40:14 ***Fatal Error***  Operazione di blocco interrotta da una chiamata a WSACancelBlockingCall
+   in System.Net.Sockets.Socket.Accept()
+   in System.Net.Sockets.TcpListener.AcceptSocket()
+   in Server.MainWindow.start_server(String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:riga 82
+13/02/2016 10:44:15 ***Fatal Error***  Operazione di blocco interrotta da una chiamata a WSACancelBlockingCall
+   in System.Net.Sockets.Socket.Accept()
+   in System.Net.Sockets.TcpListener.AcceptSocket()
+   in Server.MainWindow.start_server(String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:riga 82
+13/02/2016 10:55:23 ***Fatal Error***  Operazione di blocco interrotta da una chiamata a WSACancelBlockingCall
+   in System.Net.Sockets.Socket.Accept()
+   in System.Net.Sockets.TcpListener.AcceptSocket()
+   in Server.MainWindow.start_server(String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:riga 82
+13/02/2016 11:26:11 ***Fatal Error***  Operazione di blocco interrotta da una chiamata a WSACancelBlockingCall
+   in System.Net.Sockets.Socket.Accept()
+   in System.Net.Sockets.TcpListener.AcceptSocket()
+   in ServerApp.MainWindow.start_server(String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:riga 86
+13/02/2016 11:41:10 ***Fatal Error***  Operazione di blocco interrotta da una chiamata a WSACancelBlockingCall
+   in System.Net.Sockets.Socket.Accept()
+   in System.Net.Sockets.TcpListener.AcceptSocket()
+   in ServerApp.MainWindow.start_server(String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:riga 86
+13/02/2016 11:47:55 ***Fatal Error***  Operazione di blocco interrotta da una chiamata a WSACancelBlockingCall
+   in System.Net.Sockets.Socket.Accept()
+   in System.Net.Sockets.TcpListener.AcceptSocket()
+   in ServerApp.MainWindow.start_server(String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:riga 86
+13/02/2016 12:39:51 ***Fatal Error***  Non in ascolto. Prima di chiamare questo metodo è necessario chiamare il metodo Start().
+   in System.Net.Sockets.TcpListener.AcceptSocket()
+   in ServerApp.MainWindow.start_server(String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:riga 82
+13/02/2016 14:09:16 ***Fatal Error***  Operazione di blocco interrotta da una chiamata a WSACancelBlockingCall
+   in System.Net.Sockets.Socket.Accept()
+   in System.Net.Sockets.TcpListener.AcceptSocket()
+   in ServerApp.MainWindow.start_server(String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:riga 82
+13/02/2016 15:32:03 ***Fatal Error***  Impossibile accedere a un oggetto eliminato.
+Nome oggetto: 'SQLiteConnection'.
+   in System.Data.SQLite.SQLiteConnection.CheckDisposed()
+   in System.Data.SQLite.SQLiteConnection.get_State()
+   in Utility.DBmanager.find_user(String id) in c:\Users\Ernesto\Documents\GitHub\pds_project\Utility\Utility\DBmanager.cs:riga 49
+   in ServerApp.Server.registrationTcpServer(ClientSession clientSession) in c:\Users\Ernesto\Documents\GitHub\pds_project\Server\Server\Server.cs:riga 157
+   in ServerApp.MainWindow.start_server(String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:riga 122
+13/02/2016 15:34:17 ***Fatal Error***  Database is not open
+   in System.Data.SQLite.SQLiteCommand.InitializeForReader()
+   in System.Data.SQLite.SQLiteCommand.ExecuteReader(CommandBehavior behavior)
+   in System.Data.SQLite.SQLiteCommand.ExecuteReader()
+   in Utility.DBmanager.find_user(String id) in c:\Users\Ernesto\Documents\GitHub\pds_project\Utility\Utility\DBmanager.cs:riga 28
+   in ServerApp.Server.registrationTcpServer(ClientSession clientSession) in c:\Users\Ernesto\Documents\GitHub\pds_project\Server\Server\Server.cs:riga 157
+   in ServerApp.MainWindow.start_server(String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:riga 122
+13/02/2016 19:43:54 ***Fatal Error***  Operazione di blocco interrotta da una chiamata a WSACancelBlockingCall
+   in System.Net.Sockets.Socket.Accept()
+   in System.Net.Sockets.TcpListener.AcceptSocket()
+   in ServerApp.MainWindow.start_server(String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:riga 82
+13/02/2016 19:49:36 ***Fatal Error***  Operazione di blocco interrotta da una chiamata a WSACancelBlockingCall
+   in System.Net.Sockets.Socket.Accept()
+   in System.Net.Sockets.TcpListener.AcceptSocket()
+   in ServerApp.MainWindow.start_server(String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:riga 82
+13/02/2016 20:10:57 ***Fatal Error***  Operazione di blocco interrotta da una chiamata a WSACancelBlockingCall
+   in System.Net.Sockets.Socket.Accept()
+   in System.Net.Sockets.TcpListener.AcceptSocket()
+   in ServerApp.MainWindow.start_server(String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:riga 82
+13/02/2016 20:21:36 ***Fatal Error***  Operazione di blocco interrotta da una chiamata a WSACancelBlockingCall
+   in System.Net.Sockets.Socket.Accept()
+   in System.Net.Sockets.TcpListener.AcceptSocket()
+   in ServerApp.MainWindow.start_server(String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:riga 82
+14/02/2016 00:40:40 ***Fatal Error***  Operazione di blocco interrotta da una chiamata a WSACancelBlockingCall
+   in System.Net.Sockets.Socket.Accept()
+   in System.Net.Sockets.TcpListener.AcceptSocket()
+   in ServerApp.MainWindow.start_server(String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:riga 82
+14/02/2016 00:42:45 ***Fatal Error***  Operazione di blocco interrotta da una chiamata a WSACancelBlockingCall
+   in System.Net.Sockets.Socket.Accept()
+   in System.Net.Sockets.TcpListener.AcceptSocket()
+   in ServerApp.MainWindow.start_server(String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:riga 82
+14/02/2016 00:43:10 ***Fatal Error***  Operazione di blocco interrotta da una chiamata a WSACancelBlockingCall
+   in System.Net.Sockets.Socket.Accept()
+   in System.Net.Sockets.TcpListener.AcceptSocket()
+   in ServerApp.MainWindow.start_server(String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:riga 82
+14/02/2016 00:46:22 ***Fatal Error***  Operazione di blocco interrotta da una chiamata a WSACancelBlockingCall
+   in System.Net.Sockets.Socket.Accept()
+   in System.Net.Sockets.TcpListener.AcceptSocket()
+   in ServerApp.MainWindow.start_server(String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:riga 82
+14/02/2016 00:53:22 ***Fatal Error***  Operazione di blocco interrotta da una chiamata a WSACancelBlockingCall
+   in System.Net.Sockets.Socket.Accept()
+   in System.Net.Sockets.TcpListener.AcceptSocket()
+   in ServerApp.MainWindow.start_server(String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:riga 83
+14/02/2016 00:53:30 ***Fatal Error***  Operazione di blocco interrotta da una chiamata a WSACancelBlockingCall
+   in System.Net.Sockets.Socket.Accept()
+   in System.Net.Sockets.TcpListener.AcceptSocket()
+   in ServerApp.MainWindow.start_server(String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:riga 83
