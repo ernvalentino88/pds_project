@@ -41,6 +41,7 @@ namespace ServerApp
         private TcpListener myList;
         private Boolean connected;
         private Server server;
+        private List<Socket> all_sockets = new List<Socket>();
        
         public MainWindow()
         {
@@ -63,6 +64,7 @@ namespace ServerApp
             {
                 connected = false;
                 this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new update_ui_delegate(updateUI), "Insert port number for listening to ingress connection");
+                close_all();
                 myList.Server.Close();
                 myList.Stop();
             }
@@ -80,6 +82,7 @@ namespace ServerApp
                     while (true)
                     {
                         s = myList.AcceptSocket();
+                        all_sockets.Add(s);
                         ThreadPool.QueueUserWorkItem(new WaitCallback(clientHandler), s);
                         msg = "Connection accpeted from " + s.RemoteEndPoint;
                         this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new update_ui_delegate(updateUI_msg), msg);
@@ -114,6 +117,7 @@ namespace ServerApp
                 {
                     if (s != null && s.Connected)
                     {
+                        all_sockets.Remove(s);
                         s.Close();
                     }
                 }
@@ -178,7 +182,8 @@ namespace ServerApp
                 else
                     exit = true;
             }
-            s.Close();
+            all_sockets.Remove(s);
+            s.Close(); 
         }
 
         private void updateUI_msg(String msg)
@@ -207,6 +212,16 @@ namespace ServerApp
             this.launch_button.Content = "launch";
             this.text_port.Visibility = Visibility.Visible;
             this.text_label.Content = msg;
+        }
+
+        private void close_all() {
+            foreach (Socket s in all_sockets) {
+                if (s.Connected)
+                {
+                    s.Close();
+                }
+                all_sockets.Remove(s);
+            }
         }
 
       /*  private bool get_cmd(Socket s) {
