@@ -167,6 +167,7 @@ namespace ServerApp
                 {
                     if (s != null && s.Connected)
                     {
+                        all_sockets.Remove(s);
                         s.Close();
                     }
                 }
@@ -258,7 +259,10 @@ namespace ServerApp
 
         private void close_all() {
             foreach (Socket s in all_sockets) {
-                s.Close();
+                if (s.Connected)
+                {
+                    s.Close();
+                }
                 all_sockets.Remove(s);
             }
         }
