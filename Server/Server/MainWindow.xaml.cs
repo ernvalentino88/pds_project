@@ -224,7 +224,8 @@ namespace ServerApp
                 else
                     exit = true;
             }
-            s.Close();
+            all_sockets.Remove(s);
+            s.Close(); 
         }
 
         private void updateUI_msg(String msg)
