@@ -110,7 +110,8 @@ namespace ClientApp
                     sw.WriteLine(" ***Fatal Error***  " + se.Message);
                     sw.WriteLine(se.StackTrace);
                     sw.Close();
-                    this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegateAsync(updateUI_banner), msg, "Server Unreachable", se.Message);
+                    this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, 
+                        new UpdateDelegateAsync(updateUI_banner), msg, "Server Unreachable", se.Message);
                     
                 }
                 catch (Exception exc)
@@ -124,7 +125,8 @@ namespace ClientApp
                     sw.WriteLine(" ***Fatal Error***  " + exc.Message);
                     sw.WriteLine(exc.StackTrace);
                     sw.Close();
-                    this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegate(updateUI), msg);
+                    this.Dispatcher.BeginInvoke(DispatcherPriority.Normal,
+                        new UpdateDelegateAsync(updateUI_banner), msg, "An error occurred", exc.Message);
                 }
             }
         }
@@ -152,6 +154,16 @@ namespace ClientApp
                 String msgBanner = "The passwords inserted are different";
                 this.Dispatcher.BeginInvoke(DispatcherPriority.Normal,
                     new UpdateDelegateAsync(updateUI_regBanner), msg, title, msgBanner);
+                return;
+            }
+            if (user.Length > 16)
+            {
+                String msg = "Create account";
+                String title = "Registration Failed";
+                String msgBanner = "The username must be up to 16 characters";
+                this.Dispatcher.BeginInvoke(DispatcherPriority.Normal,
+                    new UpdateDelegateAsync(updateUI_regBanner), msg, title, msgBanner);
+                return;
             }
             try
             {
@@ -171,7 +183,8 @@ namespace ClientApp
                     msg = "Create account";
                     String title = "Registration result";
                     String bannerMsg = "" + ret;
-                    this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegateAsync(updateUI_regBanner), msg, title, bannerMsg);
+                    this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, 
+                        new UpdateDelegateAsync(updateUI_regBanner), msg, title, bannerMsg);
                 }
             }
             catch (SocketException se)
@@ -188,14 +201,15 @@ namespace ClientApp
             }
             catch (Exception exc)
             {
-                //String msg = "Create Account";
+                String msg = "Create Account";
                 StreamWriter sw = new StreamWriter("client_log.txt", true);
                 sw.Write(DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss"));
                 sw.WriteLine(" ***Fatal Error***  " + exc.Message);
                 sw.WriteLine(exc.StackTrace);
                 sw.Close();
-                //this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, 
-                //    new UpdateDelegate(updateUI), msg);
+                this.Dispatcher.BeginInvoke(DispatcherPriority.Normal,
+                    new UpdateDelegateAsync(updateUI_regBanner), msg,
+                    "An error occurred", exc.Message);
             }
             finally
             {
