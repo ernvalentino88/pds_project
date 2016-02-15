@@ -70,12 +70,33 @@ namespace ClientApp
                     connected = true;
                     String msg = "Trying to connect to the server . . .";
                     this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegate(updateUI_progressBar), msg);
-                    client.keyExchangeTcpClient(address, portInt);
-                    if (client.AESKey != null)
+                    TcpClient tcpClient = new TcpClient();
+                    tcpClient.Connect(address, portInt);
+                    tcpClient.ReceiveTimeout = Networking.TIME_OUT_SHORT;
+                    tcpClient.SendTimeout = Networking.TIME_OUT_SHORT;
+                    client.TcpClient = tcpClient;
+
+                    if (client.keyExchangeTcpClient())
                     {
                         Int64 sessionId = client.authenticationTcpClient(username, pwd);
                         msg = "" + sessionId;
                         this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegate(updateUI), msg);
+                        client.Server = new IPEndPoint(IPAddress.Parse(address), portInt);
+                        Thread.Sleep(1000 * 40);
+                        
+                        if (client.resumeSession())
+                        {
+                            msg = "resumed: " + client.SessionId;
+                            this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegate(updateUI), msg);
+                        }
+                        else
+                        {
+                            connected = false;
+                            msg = "Log in to the remote server";
+                            String title = "You were disconncted";
+                            String bannerMsg = "Your session is expired, please login again";
+                            this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegateAsync(updateUI_banner), msg, title, bannerMsg);
+                        }
                     }
                 }
                 catch (SocketException se)
@@ -138,8 +159,13 @@ namespace ClientApp
                 Int32 portInt = Int32.Parse(port);
                 String msg = "Trying to connect to the server . . .";
                 this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegate(updateUI_progressBarReg), msg);
-                client.keyExchangeTcpClient(address, portInt);
-                if (client.AESKey != null)
+                TcpClient tcpClient = new TcpClient();
+                tcpClient.Connect(address, portInt);
+                tcpClient.ReceiveTimeout = Networking.TIME_OUT_SHORT;
+                tcpClient.SendTimeout = Networking.TIME_OUT_SHORT;
+                client.TcpClient = tcpClient;
+                
+                if (client.keyExchangeTcpClient())
                 {
                     int ret = client.registrationTcpClient(user, pwd1);
                     msg = "Create account";

@@ -451,3 +451,18 @@ Nome parametro: value
    in System.Net.Sockets.TcpClient.Connect(String hostname, Int32 port)
    in ClientApp.Client.keyExchangeTcpClient(String ipAddress, Int32 port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\Client.cs:riga 68
    in ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 73
+14/02/2016 18:09:12 ***Fatal Error***  Impossibile stabilire la connessione. Rifiuto persistente del computer di destinazione 127.0.0.1:8001
+   in System.Net.Sockets.TcpClient.Connect(String hostname, Int32 port)
+   in ClientApp.Client.keyExchangeTcpClient(String ipAddress, Int32 port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\Client.cs:riga 68
+   in ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 73
+14/02/2016 18:09:17 ***Fatal Error***  Impossibile stabilire la connessione. Rifiuto persistente del computer di destinazione 127.0.0.1:8001
+   in System.Net.Sockets.TcpClient.Connect(String hostname, Int32 port)
+   in ClientApp.Client.keyExchangeTcpClient(String ipAddress, Int32 port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\Client.cs:riga 68
+   in ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 73
+15/02/2016 04:42:38 ***Fatal Error***  Impossibile stabilire la connessione. Rifiuto persistente del computer di destinazione 127.0.0.1:8001
+   in System.Net.Sockets.TcpClient.Connect(String hostname, Int32 port)
+   in ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 74
+15/02/2016 04:47:19 ***Fatal Error***  Riferimento a un oggetto non impostato su un'istanza di oggetto.
+   in Utility.Security.XOR(Byte[] a, Byte[] b) in c:\Users\Ernesto\Documents\GitHub\pds_project\Utility\Utility\Security.cs:riga 213
+   in ClientApp.Client.resumeSession() in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\Client.cs:riga 232
+   in ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 86

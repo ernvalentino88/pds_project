@@ -16,6 +16,7 @@ namespace ServerApp
         private Socket socket;
         private User user;
         private AesCryptoServiceProvider aesKey;
+        private DateTime lastActivationTime;
 
         public Int64 SessionId
         {
@@ -28,6 +29,7 @@ namespace ServerApp
                 sessionId = value;
             }
         }
+
         public Socket Socket
         {
             get
@@ -39,6 +41,7 @@ namespace ServerApp
                 socket = value;
             }
         }
+
         public User User
         {
             get
@@ -50,6 +53,7 @@ namespace ServerApp
                 user = value;
             }
         }
+
         public AesCryptoServiceProvider AESKey
         {
             get
@@ -62,6 +66,17 @@ namespace ServerApp
             }
         }
 
+        public DateTime LastActivationTime
+        {
+            get
+            {
+                return lastActivationTime;
+            }
+            set
+            {
+                lastActivationTime = value;
+            }
+        }
         
 
     }

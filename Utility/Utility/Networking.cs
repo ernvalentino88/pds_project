@@ -12,7 +12,7 @@ namespace Utility
 {
     public class Networking
     {
-        public static int TIME_OUT_SHORT = 10 * 1000;
+        public static int TIME_OUT_SHORT = 30 * 1000;
         public static int TIME_OUT_LONG = 5 * 60 * 1000;
 
         public enum CONNECTION_CODES
@@ -25,7 +25,8 @@ namespace Utility
             NEW_REG = 6,
             KEY_EXC = 7,
             EXIT = 8,
-            AUTH = 9
+            AUTH = 9,
+            SESSION = 10
         };
 
         public static byte[] my_recv(int size, Socket s)

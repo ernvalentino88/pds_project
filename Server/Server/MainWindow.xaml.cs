@@ -79,60 +79,10 @@ namespace ServerApp
 
                     while (true)
                     {
-                        //TODO uscire correttamente dal while
                         s = myList.AcceptSocket();
                         ThreadPool.QueueUserWorkItem(new WaitCallback(clientHandler), s);
                         msg = "Connection accpeted from " + s.RemoteEndPoint;
                         this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new update_ui_delegate(updateUI_msg), msg);
-                        //ClientSession cs = null;
-                        //bool exit = false;
-                        //while (!exit)
-                        //{
-                        //    int timeout_default = s.ReceiveTimeout;
-                        //    s.ReceiveTimeout = Networking.TIME_OUT_LONG;
-                        //    byte[] buffer_command = Utility.Networking.my_recv(4, s);
-                        //    if (buffer_command != null)
-                        //    {
-                        //        s.ReceiveTimeout = timeout_default;
-                        //        Networking.CONNECTION_CODES code = (Networking.CONNECTION_CODES)BitConverter.ToUInt32(buffer_command, 0);
-                        //        switch (code)
-                        //        {
-                        //            case Networking.CONNECTION_CODES.KEY_EXC:
-                        //                cs = server.keyExchangeTcpServer(s);
-                        //                if (cs == null)
-                        //                {
-                        //                    exit = true;
-                        //                }
-                        //                break;
-                        //            case Networking.CONNECTION_CODES.AUTH:
-                        //                if (cs != null)
-                        //                {
-                        //                    Int64 sessionId = server.authenticationTcpServer(cs);
-                        //                    if (sessionId <= 0)
-                        //                    {
-                        //                        exit = true;
-                        //                    }
-                        //                }
-                        //                break;
-                        //            case Networking.CONNECTION_CODES.EXIT:
-                        //                exit = true;
-                        //                break;
-                        //            case Networking.CONNECTION_CODES.NEW_REG:
-                        //                if (cs != null)
-                        //                {
-                        //                    server.registrationTcpServer(cs);
-                        //                }
-                        //                exit = true;
-                        //                break;
-                        //            default: 
-                        //                exit = true;
-                        //                break;
-                        //        }
-                        //    }
-                        //    else
-                        //        exit = true;
-                        //}
-                        //s.Close();
                     }
                 }
                 catch (SocketException se)
@@ -177,12 +127,12 @@ namespace ServerApp
             bool exit = false;
             while (!exit)
             {
-                int timeout_default = s.ReceiveTimeout;
-                s.ReceiveTimeout = Networking.TIME_OUT_LONG;
+                s.ReceiveTimeout = Networking.TIME_OUT_SHORT;
+                s.SendTimeout = Networking.TIME_OUT_SHORT;
                 byte[] buffer_command = Utility.Networking.my_recv(4, s);
                 if (buffer_command != null)
                 {
-                    s.ReceiveTimeout = timeout_default;
+                    //s.ReceiveTimeout = Networking.TIME_OUT_SHORT;
                     Networking.CONNECTION_CODES code = (Networking.CONNECTION_CODES)BitConverter.ToUInt32(buffer_command, 0);
                     switch (code)
                     {
@@ -203,14 +153,21 @@ namespace ServerApp
                                 }
                             }
                             break;
-                        case Networking.CONNECTION_CODES.EXIT:
-                            exit = true;
-                            break;
                         case Networking.CONNECTION_CODES.NEW_REG:
                             if (cs != null)
                             {
                                 server.registrationTcpServer(cs);
                             }
+                            exit = true;
+                            break;
+                        case Networking.CONNECTION_CODES.SESSION:
+                            if (!server.resumeSession(ref cs, s))
+                                exit = true;
+                            break;
+                        case Networking.CONNECTION_CODES.HELLO:
+                            server.Hello(s);
+                            break;
+                        case Networking.CONNECTION_CODES.EXIT:
                             exit = true;
                             break;
                         default:
