@@ -286,9 +286,21 @@ namespace ClientApp
                     {
                         retry++;
                     }
+                    if (se.SocketErrorCode == SocketError.ConnectionAborted)
+                    {
+                        tcpClient = new TcpClient();
+                        tcpClient.Connect(server);
+                        tcpClient.ReceiveTimeout = 5 * 1000;
+                        retry++;
+                    }
                     else
                     {
                         //server unreachable
+                        StreamWriter sw = new StreamWriter("client_log.txt", true);
+                        sw.Write(DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss"));
+                        sw.WriteLine(" ***Fatal Error***  " + se.Message + " code: " + se.SocketErrorCode);
+                        sw.WriteLine(se.StackTrace);
+                        sw.Close();
                         return false;
                     }
                 }

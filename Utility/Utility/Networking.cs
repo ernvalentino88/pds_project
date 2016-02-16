@@ -34,10 +34,9 @@ namespace Utility
             int left = size;
             int b;
             byte[] received = new byte[size];
-            
-            MemoryStream ms = new MemoryStream(received);
             try
             {
+                MemoryStream ms = new MemoryStream(received);
                 while (left > 0)
                 {
                     byte[] buffer = new byte[left];

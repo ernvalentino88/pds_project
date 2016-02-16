@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Security.Cryptography;
 using System.Windows;
+using System.Windows.Forms;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
@@ -33,6 +34,7 @@ namespace ClientApp
         private delegate void RegisterDelegate(String address, String port, String user, String pwd1, String pwd2);
         private delegate void UpdateDelegate(String msg);
         private delegate Task UpdateDelegateAsync(String msg, String bannerTitle, String bannerMsg);
+        private delegate String LoginDelegate();
         private Boolean connected;
         private Client client;
 
@@ -82,12 +84,17 @@ namespace ClientApp
                         msg = "" + sessionId;
                         this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegate(updateUI), msg);
                         client.Server = new IPEndPoint(IPAddress.Parse(address), portInt);
-                        Thread.Sleep(1000 * 40);
+                        //Thread.Sleep(1000 * 40);
                         
                         if (client.resumeSession())
                         {
-                            msg = "resumed: " + client.SessionId;
+                            msg = "resumed: " + sessionId;
                             this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegate(updateUI), msg);
+                            Thread.Sleep(3000);
+                            DispatcherOperation result = this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new LoginDelegate(updateUI_logged));
+                            result.Wait();
+                            String folder = (String)result.Result;
+                            Console.WriteLine(folder);
                         }
                         else
                         {
@@ -129,6 +136,16 @@ namespace ClientApp
                         new UpdateDelegateAsync(updateUI_banner), msg, "An error occurred", exc.Message);
                 }
             }
+        }
+
+        private String updateUI_logged()
+        {
+            this.Grid_initial.Visibility = Visibility.Collapsed;
+            this.Grid_logged.Visibility = Visibility.Visible;
+            FolderBrowserDialog dlg = new FolderBrowserDialog();
+            dlg.Description = "Choose the folder you want to start synchronize";
+            dlg.ShowDialog();
+            return dlg.SelectedPath;
         }
 
         private void Register_button_Click(object sender, RoutedEventArgs e)
@@ -232,10 +249,12 @@ namespace ClientApp
             }
             else
             {
+                this.Grid_logged.Visibility = Visibility.Collapsed;
                 this.Text_ip.Visibility = Visibility.Visible;
                 this.Text_port.Visibility = Visibility.Visible;
                 this.Text_user.Visibility = Visibility.Visible;
                 this.Box_pwd.Visibility = Visibility.Visible;
+                this.Grid_initial.Visibility = Visibility.Visible; 
                 this.Connect_button.Content = "connect";
             }
             this.progress_bar.Visibility = Visibility.Hidden;
@@ -288,6 +307,15 @@ namespace ClientApp
             this.Register_button.Visibility = Visibility.Hidden;
             this.progressBar_reg.Visibility = Visibility.Visible;
             this.label_regMsg.Content = msg;
+        }
+
+        private void close(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            if (connected)
+            {
+                connected = false;
+                client.closeConnectionTcpClient();
+            }
         }
 
     }

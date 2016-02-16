@@ -81,6 +81,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="ClientSession.cs" />
+    <Compile Include="CurrentStatus.cs" />
     <Compile Include="Server.cs" />
     <Compile Include="ServerInstance.cs" />
     <Compile Include="User.cs" />

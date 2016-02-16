@@ -475,3 +475,37 @@ Nome parametro: value
 15/02/2016 12:45:34 ***Fatal Error***  Impossibile stabilire la connessione. Risposta non corretta della parte connessa dopo l'intervallo di tempo oppure mancata risposta dall'host collegato 10.0.0.1:8001
    in System.Net.Sockets.TcpClient.Connect(String hostname, Int32 port)
    in ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 74
+15/02/2016 14:23:54 ***Fatal Error***  Connessione interrotta dal software del computer host
+   in System.Net.Sockets.Socket.Receive(Byte[] buffer, Int32 offset, Int32 size, SocketFlags socketFlags)
+   in System.Net.Sockets.Socket.Receive(Byte[] buffer)
+   in Utility.Networking.my_recv(Int32 size, Socket s) in c:\Users\Ernesto\Documents\GitHub\pds_project\Utility\Utility\Networking.cs:riga 42
+   in ClientApp.Client.keepAlive() in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\Client.cs:riga 295
+   in ClientApp.Client.resumeSession() in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\Client.cs:riga 253
+   in ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 89
+15/02/2016 14:33:20 ***Fatal Error***  Connessione interrotta dal software del computer host
+   in System.Net.Sockets.Socket.Receive(Byte[] buffer, Int32 offset, Int32 size, SocketFlags socketFlags)
+   in System.Net.Sockets.Socket.Receive(Byte[] buffer)
+   in Utility.Networking.my_recv(Int32 size, Socket s) in c:\Users\Ernesto\Documents\GitHub\pds_project\Utility\Utility\Networking.cs:riga 42
+   in ClientApp.Client.keepAlive() in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\Client.cs:riga 270
+15/02/2016 14:40:03 ***Fatal Error***  Connessione interrotta dal software del computer host code: ConnectionAborted
+   in System.Net.Sockets.Socket.Receive(Byte[] buffer, Int32 offset, Int32 size, SocketFlags socketFlags)
+   in System.Net.Sockets.Socket.Receive(Byte[] buffer)
+   in Utility.Networking.my_recv(Int32 size, Socket s) in c:\Users\Ernesto\Documents\GitHub\pds_project\Utility\Utility\Networking.cs:riga 42
+   in ClientApp.Client.keepAlive() in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\Client.cs:riga 270
+15/02/2016 14:44:11 ***Fatal Error***  Specificato un indirizzo IP non valido.
+   in System.Net.IPAddress.InternalParse(String ipString, Boolean tryParse)
+   in System.Net.IPAddress.Parse(String ipString)
+   in ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 86
+15/02/2016 15:07:26 ***Fatal Error***  Impossibile stabilire la connessione. Risposta non corretta della parte connessa dopo l'intervallo di tempo oppure mancata risposta dall'host collegato code: TimedOut
+   in System.Net.Sockets.Socket.Receive(Byte[] buffer, Int32 offset, Int32 size, SocketFlags socketFlags)
+   in System.Net.Sockets.Socket.Receive(Byte[] buffer)
+   in Utility.Networking.my_recv(Int32 size, Socket s) in c:\Users\Ernesto\Documents\GitHub\pds_project\Utility\Utility\Networking.cs:riga 42
+   in ClientApp.Client.keepAlive() in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\Client.cs:riga 270
+15/02/2016 15:25:09 ***Fatal Error***  Impossibile stabilire la connessione. Risposta non corretta della parte connessa dopo l'intervallo di tempo oppure mancata risposta dall'host collegato code: TimedOut
+   in System.Net.Sockets.Socket.Receive(Byte[] buffer, Int32 offset, Int32 size, SocketFlags socketFlags)
+   in System.Net.Sockets.Socket.Receive(Byte[] buffer)
+   in Utility.Networking.my_recv(Int32 size, Socket s) in c:\Users\Ernesto\Documents\GitHub\pds_project\Utility\Utility\Networking.cs:riga 54
+   in ClientApp.Client.keepAlive() in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\Client.cs:riga 270
+15/02/2016 15:25:34 ***Fatal Error***  Impossibile stabilire la connessione. Rifiuto persistente del computer di destinazione 127.0.0.1:8001
+   in System.Net.Sockets.TcpClient.Connect(String hostname, Int32 port)
+   in ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 76
