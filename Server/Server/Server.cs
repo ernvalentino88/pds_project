@@ -10,6 +10,7 @@ using System.Net.Sockets;
 using System.Security.Cryptography;
 using Utility;
 using System.Threading;
+using System.Data.SQLite;
 
 namespace ServerApp
 {
@@ -17,6 +18,7 @@ namespace ServerApp
     {
         private ConcurrentDictionary<Int64, ClientSession> id2client;
         private Int64 sessionIdCounter;
+        private static String con_string = @"Data Source=C:\Users\John\Desktop\SQLiteStudio\PDS.db;Version=3;";
 
         public Int64 SessionIdCounter
         {
@@ -283,6 +285,58 @@ namespace ServerApp
                     this.sessionIdCounter = 0;
             }
             return Interlocked.Increment(ref this.sessionIdCounter);
+        }
+
+        public bool StartTransferSession(Socket s)
+        {
+            byte[] command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.OK);
+            s.Send(command);
+            //receive number of files
+            byte[] qnt_byte = Networking.my_recv(4, s);
+            if(qnt_byte==null){ 
+                return false;
+            }
+            int qnt = BitConverter.ToInt32(qnt_byte,0);
+            if (qnt > 0)
+            {   SQLiteConnection con=null;
+                try
+                {
+                    con = new SQLiteConnection(con_string);
+                    con.Open();
+                    SQLiteTransaction tr = con.BeginTransaction();
+                    SQLiteCommand cmd = con.CreateCommand();
+                    cmd.Transaction = tr;
+                    //get last max id from DB
+                    int last_id = DBmanager.getMaxFileId(con);
+                    if (last_id >= 0)
+                    {
+                        for (int i = qnt; i > 0; i--, ++last_id)
+                        {
+                            //get file size
+                            byte[] size_byte = Networking.my_recv(4, s);
+                            if (size_byte != null)
+                            {
+                                int file_size = BitConverter.ToInt32(size_byte, 0);
+                                //get path
+                                //get mod_Date
+                                //get content
+                                //insert into files
+                                //insert into  session (fileId==last_d)
+
+
+                            }
+                        }
+                    }
+                    else { con.Close(); return false; }
+                    tr.Commit();
+                    con.Close();
+                }
+                catch (SQLiteException) {
+                    if(con_string !=null){ con.Close(); }
+                    return false;
+                }
+            }
+                return true;
         }
     }
 }

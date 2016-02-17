@@ -174,6 +174,15 @@ namespace ServerApp
                         case Networking.CONNECTION_CODES.EXIT:
                             exit = true;
                             break;
+                        case Networking.CONNECTION_CODES.TRANS:
+                            //if connected{
+                            //server.StartTransferSession(s);
+                            //}   
+                            //if (not connected){
+                            //byte[] command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.ERR);
+                            //s.Send(command);
+                            //}
+                            break;
                         default:
                             exit = true;
                             break;

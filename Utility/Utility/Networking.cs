@@ -26,7 +26,9 @@ namespace Utility
             KEY_EXC = 7,
             EXIT = 8,
             AUTH = 9,
-            SESSION = 10
+            SESSION = 10,
+            TRANS=11
+
         };
 
         public static byte[] my_recv(int size, Socket s)
