@@ -8,12 +8,15 @@ using System.Net;
 using System.Net.Sockets;
 using System.Security.Cryptography;
 
+
 namespace Utility
 {
     public class Networking
     {
         public static int TIME_OUT_SHORT = 30 * 1000;
         public static int TIME_OUT_LONG = 5 * 60 * 1000;
+        public static String date_format = "dd/MM/yyyy-HH:mm:ss";
+     
 
         public enum CONNECTION_CODES
         {
