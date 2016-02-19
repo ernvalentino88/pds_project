@@ -10,6 +10,7 @@ using System.Net.Sockets;
 using System.Security.Cryptography;
 using Utility;
 using System.Threading;
+using System.Data.SQLite;
 
 namespace ServerApp
 {
@@ -17,6 +18,7 @@ namespace ServerApp
     {
         private ConcurrentDictionary<Int64, ClientSession> id2client;
         private Int64 sessionIdCounter;
+        private static String con_string = @"Data Source=C:\Users\John\Desktop\SQLiteStudio\PDS.db;Version=3;";
 
         public Int64 SessionIdCounter
         {
@@ -283,6 +285,95 @@ namespace ServerApp
                     this.sessionIdCounter = 0;
             }
             return Interlocked.Increment(ref this.sessionIdCounter);
+        }
+
+        public bool StartTransferSession(ClientSession clientSession)
+        {
+            Socket s = clientSession.Socket;
+            AesCryptoServiceProvider aes = clientSession.AESKey;
+            byte[] command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.OK);
+            s.Send(command);
+            //receive number of files(in chiaro)
+            byte[] qnt_byte = Networking.my_recv(4, s);
+            if(qnt_byte==null){ 
+                return false;
+            }
+            int qnt = BitConverter.ToInt32(qnt_byte,0);
+            if (qnt > 0)
+            {   SQLiteConnection con=null;
+                try
+                {
+                    con = new SQLiteConnection(con_string);
+                    con.Open();
+                    SQLiteTransaction tr = con.BeginTransaction();
+                    SQLiteCommand cmd = con.CreateCommand();
+                    cmd.Transaction = tr;
+                    //get last max id from DB
+                    int last_id = DBmanager.getMaxFileId(con);
+                    if (last_id >= 0)
+                    {
+                        for (int i = qnt; i > 0; i--, ++last_id)
+                        {
+                            //get path length(in chiaro)
+                            byte[] length_byte = Networking.my_recv(4, s);
+                            if (length_byte != null)
+                            {
+                                int path_len = BitConverter.ToInt32(length_byte, 0);
+                                //get path(aes)
+                               byte[] encryptedData = Networking.my_recv(path_len, s);
+                               if (encryptedData != null)
+                               {
+                                   byte[] decryptedData = Security.AESDecrypt(aes, encryptedData);
+                                   String path = Encoding.UTF8.GetString(decryptedData);
+                                   //get mod_Date(in chiaro)
+                                   //format dd/MM/yyyy-HH:mm:ss (19byte) type string
+                                   byte[] mod_byte = Networking.my_recv(19, s);
+                                   if (mod_byte != null)
+                                   {
+                                       String mod_date = Encoding.UTF8.GetString(mod_byte);
+                                       //get file size (in chiaro)
+                                        byte[] size_byte = Networking.my_recv(4, s);
+                                        if (size_byte != null)
+                                        {
+                                            int size = BitConverter.ToInt32(size_byte, 0);
+                                            //get content(aes)
+                                            encryptedData = Networking.my_recv(size, s);
+                                            if (encryptedData != null)
+                                            {
+                                                byte[] FILE= Security.AESDecrypt(aes, encryptedData);
+                                                //insert into files
+                                                cmd.CommandText = "INSERT INTO files (fileId,path,content,mod_date) values('"+last_id+"','"+path+"','"+FILE+"','"+mod_date+"')";
+                                                cmd.ExecuteNonQuery();
+                                                //insert into  session (fileId==last_d)
+                                                DateTime now = DateTime.Now;
+                                                String now_str = now.ToString(Networking.date_format);
+                                                cmd.CommandText = "INSERT INTO session (user,fileId,creation,checksum,path) values('" + clientSession.User + "','" +last_id + "','" + now_str+ "','" +Security.CalculateMD5HashFile(FILE) +"','" +path +"')";
+                                                cmd.ExecuteNonQuery();
+
+                                            }
+                                            else { con.Close(); return false; }
+                                        }
+                                        else { con.Close(); return false; }
+                                   }
+                                   else { con.Close(); return false; }
+                               }
+                               else { con.Close(); return false; }
+
+                            }
+                            else { con.Close(); return false; }
+                        }
+                    }
+                    else { con.Close(); return false; }
+                    tr.Commit();
+                    con.Close();
+                    return true;
+                }
+                catch (SQLiteException) {
+                    if(con_string !=null){ con.Close(); }
+                    return false;
+                }
+            }
+                return false;
         }
     }
 }
