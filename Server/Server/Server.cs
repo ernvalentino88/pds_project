@@ -19,6 +19,7 @@ namespace ServerApp
         private ConcurrentDictionary<Int64, ClientSession> id2client;
         private Int64 sessionIdCounter;
         private static String con_string = @"Data Source=C:\Users\John\Desktop\SQLiteStudio\PDS.db;Version=3;";
+        public static String date_format = "dd/MM/yyyy-HH:mm:ss";
 
         public Int64 SessionIdCounter
         {
@@ -287,6 +288,287 @@ namespace ServerApp
             return Interlocked.Increment(ref this.sessionIdCounter);
         }
 
+        public bool synchronizationSession(ClientSession clientSession, DateTime creationTime)
+        {
+            bool exit = false;
+            SQLiteConnection con = new SQLiteConnection(DBmanager.connectionString);
+            con.Open();
+            SQLiteTransaction transaction = con.BeginTransaction();
+
+            while (!exit)
+            {
+                byte[] command = Utility.Networking.my_recv(4, clientSession.Socket);
+                if (command != null)
+                {
+                    Networking.CONNECTION_CODES code = (Networking.CONNECTION_CODES)BitConverter.ToUInt32(command, 0);
+                    DirectoryStatus newStatus = new DirectoryStatus();
+                    newStatus.FolderPath = clientSession.CurrentStatus.FolderPath;
+                    newStatus.Username = clientSession.CurrentStatus.Username;
+                    
+                    switch (code)
+                    {
+                        case Networking.CONNECTION_CODES.ADD :
+                            if (!this.addFile(con, clientSession, newStatus))
+                                exit = true;
+                            break;
+                        case Networking.CONNECTION_CODES.UPD :
+                            if (!this.updateFile(con, clientSession, newStatus))
+                                exit = true;
+                            break;
+                        case Networking.CONNECTION_CODES.DEL :
+                            if (!this.deleteFile(con, clientSession, newStatus))
+                                exit = true;
+                            break;
+                        case Networking.CONNECTION_CODES.END_SYNCH:
+                            if (!this.insertUnchanged(con, clientSession.CurrentStatus, newStatus))
+                                exit = true;
+                            else
+                            {
+                                //success: commit and dispose objects
+                                transaction.Commit();
+                                transaction.Dispose();
+                                con.Dispose();
+                                return true;
+                            }
+                            break;
+                        default :
+                            exit = true;
+                            break;
+                    }
+                }
+            }
+            //failure: rollback and dispose objects
+            transaction.Rollback();
+            transaction.Dispose();
+            con.Dispose();
+            return false;
+        }
+
+        private bool insertUnchanged(SQLiteConnection conn, DirectoryStatus oldStatus, DirectoryStatus newStatus)
+        {
+            try
+            {
+                Dictionary<String, DirectoryFile> diff;
+                diff = oldStatus.Files.Where(x => !newStatus.Files.ContainsKey(x.Key)).ToDictionary(x => x.Key, x => x.Value);
+                foreach (var item in diff)
+                {
+                    using (SQLiteCommand cmd = conn.CreateCommand())
+                    {
+                        DirectoryFile file = item.Value;
+                        cmd.CommandText = @"insert into snapshots (user_id,file_id,creation_time,checksum,path,deleted) values"
+                            + " @user, @fileId, @creationTime, @checksum, @path, @deleted";
+                        cmd.Parameters.AddWithValue("@user", file.UserId);
+                        cmd.Parameters.AddWithValue("@fileId", file.Id);
+                        cmd.Parameters.AddWithValue("@creation_time", newStatus.CreationTime.ToString(date_format));
+                        cmd.Parameters.AddWithValue("@checksum", file.Checksum);
+                        cmd.Parameters.AddWithValue("@path", file.Filename);
+                        cmd.Parameters.AddWithValue("@deleted", file.Deleted);
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+                return true;
+            }
+            catch (SQLiteException) { }
+            return false;
+        }
+
+        private bool deleteFile(SQLiteConnection conn, ClientSession clientSession, DirectoryStatus newStatus)
+        {
+            Socket s = clientSession.Socket;
+            AesCryptoServiceProvider aes = clientSession.AESKey;
+            try
+            {
+                byte[] recvBuf = Networking.my_recv(4, s);
+                if (recvBuf == null)
+                    return false;
+                byte[] encryptedData = Networking.my_recv(BitConverter.ToInt32(recvBuf, 0), s);
+                if (encryptedData == null)
+                    return false;
+                String filename = Encoding.UTF8.GetString(Security.AESDecrypt(aes, encryptedData));
+                byte[] command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.OK);
+                s.Send(command);
+                DirectoryFile file = clientSession.CurrentStatus.Files[filename];
+                using (SQLiteCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"insert into snapshots (user_id,file_id,creation_time,checksum,path,deleted) values"
+                        + " @user, @fileId, @creationTime, @checksum, @path, @deleted";
+                    cmd.Parameters.AddWithValue("@user", file.UserId);
+                    cmd.Parameters.AddWithValue("@fileId", file.Id);
+                    cmd.Parameters.AddWithValue("@creation_time", newStatus.CreationTime.ToString(date_format));
+                    cmd.Parameters.AddWithValue("@checksum", file.Checksum);
+                    cmd.Parameters.AddWithValue("@path", file.Filename);
+                    cmd.Parameters.AddWithValue("@deleted", true);
+                    cmd.ExecuteNonQuery();
+                }
+                DirectoryFile dirFile = new DirectoryFile(file.Id, filename, file.UserId, file.Checksum, file.LastModificationTime);
+                file.Deleted = true;
+                newStatus.Files[filename] = dirFile;
+                return true;
+            }
+            catch (SocketException) { }
+            catch (SQLiteException) { }
+            return false;
+        }
+
+        private bool updateFile(SQLiteConnection conn, ClientSession clientSession, DirectoryStatus newStatus)
+        {
+            Socket s = clientSession.Socket;
+            AesCryptoServiceProvider aes = clientSession.AESKey;
+            try
+            {
+                byte[] recvBuf = Networking.my_recv(4, s);
+                if (recvBuf == null)
+                    return false;
+                byte[] encryptedData = Networking.my_recv(BitConverter.ToInt32(recvBuf, 0), s);
+                if (encryptedData == null)
+                    return false;
+                String filename = Encoding.UTF8.GetString(Security.AESDecrypt(aes, encryptedData));
+                recvBuf = Networking.my_recv(8, s);
+                if (recvBuf == null)
+                    return false;
+                DateTime lastModTime = DateTime.FromBinary(BitConverter.ToInt64(recvBuf, 0));
+                byte[] command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.OK);
+                s.Send(command);
+                recvBuf = Networking.my_recv(8, s);
+                if (recvBuf == null)
+                    return false;
+                encryptedData = Networking.my_recv(BitConverter.ToInt64(recvBuf, 0), s);
+                if (encryptedData != null)
+                    return false;
+                byte[] file = Security.AESDecrypt(aes, encryptedData);
+                if (file == null)
+                    return false;
+
+                using (SQLiteCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"insert into files (user_id,path,content,last_mod_time) values"
+                            + " @user, @path, @content, @lastModTime";
+                    cmd.Parameters.AddWithValue("@user", newStatus.Username);
+                    cmd.Parameters.AddWithValue("@path", filename);
+                    cmd.Parameters.AddWithValue("@content", file);
+                    cmd.Parameters.AddWithValue("@lastModTime", lastModTime.ToString(date_format));
+                    cmd.ExecuteNonQuery();
+                }
+                Int64? fileId = -1;
+                using (SQLiteCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = "select file_id from files where user_id = @user and path = @path and"
+                            + " last_mod_time = @lastModTime";
+                    cmd.Parameters.AddWithValue("@user", newStatus.Username);
+                    cmd.Parameters.AddWithValue("@path", filename);
+                    cmd.Parameters.AddWithValue("@lastModTime", lastModTime.ToString(date_format));
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            fileId = (Int64?)reader[0];
+                        }
+                    }
+                }
+                if (fileId == null || fileId <= 0)
+                    return false;
+                String checksum = Security.CalculateMD5Hash(file);
+                using (SQLiteCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"insert into snapshots (user_id,file_id,creation_time,checksum,path) values"
+                        + " @user, @fileId, @creationTime, @checksum, @path";
+                    cmd.Parameters.AddWithValue("@user", newStatus.Username);
+                    cmd.Parameters.AddWithValue("@fileId", fileId);
+                    cmd.Parameters.AddWithValue("@creation_time", newStatus.CreationTime.ToString(date_format));
+                    cmd.Parameters.AddWithValue("@checksum", checksum);
+                    cmd.Parameters.AddWithValue("@path", filename);
+                    cmd.ExecuteNonQuery();
+                }
+                //update file
+                DirectoryFile dirFile = new DirectoryFile((Int64)fileId, filename, newStatus.Username, checksum, lastModTime);
+                newStatus.Files[filename] = dirFile;
+                return true;
+            }
+            catch (SocketException) { }
+            catch (SQLiteException) { }
+            return false;
+        }
+
+        private bool addFile(SQLiteConnection conn, ClientSession clientSession, DirectoryStatus newStatus)
+        {
+            Socket s = clientSession.Socket;
+            AesCryptoServiceProvider aes = clientSession.AESKey;
+            
+            try
+            {
+                byte[] recvBuf = Networking.my_recv(4, s);
+                if (recvBuf == null)
+                    return false;
+                byte[] encryptedData = Networking.my_recv(BitConverter.ToInt32(recvBuf, 0), s);
+                if (encryptedData == null)
+                    return false;
+                String filename = Encoding.UTF8.GetString(Security.AESDecrypt(aes, encryptedData));
+                recvBuf = Networking.my_recv(8, s);
+                if (recvBuf == null)
+                    return false;
+                DateTime lastModTime = DateTime.FromBinary(BitConverter.ToInt64(recvBuf, 0));
+                byte[] command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.OK);
+                s.Send(command);
+                recvBuf = Networking.my_recv(8, s);
+                if (recvBuf == null)
+                    return false;
+                encryptedData = Networking.my_recv(BitConverter.ToInt64(recvBuf, 0), s);
+                if (encryptedData != null)
+                    return false;
+                byte[] file = Security.AESDecrypt(aes, encryptedData);
+                if (file == null)
+                    return false;
+
+                using (SQLiteCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"insert into files (user_id,path,content,last_mod_time) values"
+                            + " @user, @path, @content, @lastModTime";
+                    cmd.Parameters.AddWithValue("@user", newStatus.Username);
+                    cmd.Parameters.AddWithValue("@path", filename);
+                    cmd.Parameters.AddWithValue("@content", file);
+                    cmd.Parameters.AddWithValue("@lastModTime", lastModTime.ToString(date_format));
+                    cmd.ExecuteNonQuery();
+                }
+                Int64? fileId = -1;
+                using (SQLiteCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = "select file_id from files where user_id = @user and path = @path and"
+                            + " last_mod_time = @lastModTime";
+                    cmd.Parameters.AddWithValue("@user", newStatus.Username);
+                    cmd.Parameters.AddWithValue("@path", filename);
+                    cmd.Parameters.AddWithValue("@lastModTime", lastModTime.ToString(date_format));
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            fileId = (Int64?)reader[0];
+                        }
+                    }
+                }
+                if (fileId == null || fileId <= 0)
+                    return false;
+                String checksum = Security.CalculateMD5Hash(file);
+                using (SQLiteCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"insert into snapshots (user_id,file_id,creation_time,checksum,path) values"
+                        + " @user, @fileId, @creationTime, @checksum, @path";
+                    cmd.Parameters.AddWithValue("@user", newStatus.Username);
+                    cmd.Parameters.AddWithValue("@fileId", fileId);
+                    cmd.Parameters.AddWithValue("@creation_time", newStatus.CreationTime.ToString(date_format));
+                    cmd.Parameters.AddWithValue("@checksum", checksum);
+                    cmd.Parameters.AddWithValue("@path", filename);
+                    cmd.ExecuteNonQuery();
+                }
+                //add file
+                DirectoryFile dirFile = new DirectoryFile((Int64)fileId, filename, newStatus.Username, checksum, lastModTime);
+                newStatus.Files[filename] = dirFile;
+                return true;
+            }
+            catch (SocketException) { }
+            catch (SQLiteException) { }
+            return false;
+        }
+
         public bool StartTransferSession(ClientSession clientSession)
         {
             Socket s = clientSession.Socket;
@@ -346,8 +628,8 @@ namespace ServerApp
                                                 cmd.ExecuteNonQuery();
                                                 //insert into  session (fileId==last_d)
                                                 DateTime now = DateTime.Now;
-                                                String now_str = now.ToString(Networking.date_format);
-                                                cmd.CommandText = "INSERT INTO session (user,fileId,creation,checksum,path) values('" + clientSession.User + "','" +last_id + "','" + now_str+ "','" +Security.CalculateMD5HashFile(FILE) +"','" +path +"')";
+                                                String now_str = now.ToString(date_format);
+                                                cmd.CommandText = "INSERT INTO session (user,fileId,creation,checksum,path) values('" + clientSession.User + "','" +last_id + "','" + now_str+ "','" +Security.CalculateMD5Hash(FILE) +"','" +path +"')";
                                                 cmd.ExecuteNonQuery();
 
                                             }
@@ -375,5 +657,6 @@ namespace ServerApp
             }
                 return false;
         }
+
     }
 }

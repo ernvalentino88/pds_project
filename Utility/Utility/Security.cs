@@ -247,7 +247,7 @@ namespace Utility
             return sb.ToString();
         }
 
-        public static String CalculateMD5HashFile(byte[] inputBytes)
+        public static String CalculateMD5Hash(byte[] inputBytes)
         {
             // step 1, calculate MD5 hash from input
             MD5 md5 = MD5.Create();

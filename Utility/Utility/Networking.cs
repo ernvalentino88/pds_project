@@ -15,8 +15,6 @@ namespace Utility
     {
         public static int TIME_OUT_SHORT = 30 * 1000;
         public static int TIME_OUT_LONG = 5 * 60 * 1000;
-        public static String date_format = "dd/MM/yyyy-HH:mm:ss";
-     
 
         public enum CONNECTION_CODES
         {
@@ -30,8 +28,13 @@ namespace Utility
             EXIT = 8,
             AUTH = 9,
             SESSION = 10,
-            TRANS=11
-
+            START_SYNCH = 11,
+            END_SYNCH = 12,
+            ADD = 13,
+            UPD = 14,
+            DEL = 15,
+            INIT_SYNCH = 16,
+            DIR = 17
         };
 
         public static byte[] my_recv(int size, Socket s)
@@ -41,17 +44,49 @@ namespace Utility
             byte[] received = new byte[size];
             try
             {
-                MemoryStream ms = new MemoryStream(received);
-                while (left > 0)
+                using (MemoryStream ms = new MemoryStream(received))
                 {
-                    byte[] buffer = new byte[left];
-                    b = s.Receive(buffer);
-                    if (b <= 0)
+                    while (left > 0)
                     {
-                        return null;
+                        byte[] buffer = new byte[left];
+                        b = s.Receive(buffer);
+                        if (b <= 0)
+                        {
+                            return null;
+                        }
+                        ms.Write(buffer, 0, b);
+                        left -= b;
                     }
-                    ms.Write(buffer, 0, b);
-                    left -= b;
+                }
+            }
+            catch (SocketException)
+            {
+                return null;
+            }
+            return received;
+        }
+
+        public static byte[] my_recv(Int64 size, Socket s)
+        {
+            Int64 left = size;
+            int b;
+            byte[] received = new byte[size];
+            try
+            {
+                using (MemoryStream ms = new MemoryStream(received))
+                {
+                    while (left > 0)
+                    {
+                        Int64 dim = (left > 4096) ? 4096 : left;
+                        byte[] buffer = new byte[dim];
+                        b = s.Receive(buffer);
+                        if (b <= 0)
+                        {
+                            return null;
+                        }
+                        ms.Write(buffer, 0, b);
+                        left -= b;
+                    }
                 }
             }
             catch (SocketException)

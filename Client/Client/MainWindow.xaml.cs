@@ -84,26 +84,40 @@ namespace ClientApp
                         msg = "" + sessionId;
                         this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegate(updateUI), msg);
                         client.Server = new IPEndPoint(IPAddress.Parse(address), portInt);
-                        //Thread.Sleep(1000 * 40);
-                        
-                        if (client.resumeSession())
-                        {
-                            msg = "resumed: " + sessionId;
-                            this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegate(updateUI), msg);
-                            Thread.Sleep(3000);
-                            DispatcherOperation result = this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new LoginDelegate(updateUI_logged));
-                            result.Wait();
-                            String folder = (String)result.Result;
-                            Console.WriteLine(folder);
-                        }
-                        else
+                        client.UserId = username;
+                        DispatcherOperation result = this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new LoginDelegate(updateUI_logged));
+                        result.Wait();
+                        String directory = (String)result.Result;
+
+                        if (!client.resumeSession())
                         {
                             connected = false;
+                            tcpClient.Close();
                             msg = "Log in to the remote server";
                             String title = "You were disconncted";
                             String bannerMsg = "Your session is expired, please login again";
                             this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegateAsync(updateUI_banner), msg, title, bannerMsg);
                         }
+                        msg = "resumed: " + sessionId;
+                        this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegate(updateUI), msg);
+                        if (!client.sendDirectory(directory))
+                        {
+                            connected = false;
+                            tcpClient.Close();
+                            msg = "Log in to the remote server";
+                            String title = "You were disconncted";
+                            String bannerMsg = "Your session is expired, please login again";
+                            this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegateAsync(updateUI_banner), msg, title, bannerMsg);
+                        }
+                        DirectoryStatus local = new DirectoryStatus();
+                        local.FolderPath = directory;
+                        local.Username = username;
+                        client.fillDirectoryStatus(local, directory);
+                        DirectoryStatus remote = client.startSynch();
+                        remote.Username = username;
+                        remote.FolderPath = directory;
+                        client.synchronize(local, remote);
+
                     }
                 }
                 catch (SocketException se)

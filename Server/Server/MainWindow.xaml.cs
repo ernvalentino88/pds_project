@@ -82,7 +82,7 @@ namespace ServerApp
                     while (true)
                     {
                         s = myList.AcceptSocket();
-                        all_sockets.Add(s);
+                        //all_sockets.Add(s);
                         ThreadPool.QueueUserWorkItem(new WaitCallback(clientHandler), s);
                         msg = "Connection accpeted from " + s.RemoteEndPoint;
                         this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new update_ui_delegate(updateUI_msg), msg);
@@ -117,7 +117,7 @@ namespace ServerApp
                 {
                     if (s != null && s.Connected)
                     {
-                        all_sockets.Remove(s);
+                        //all_sockets.Remove(s);
                         s.Close();
                     }
                 }
@@ -168,20 +168,18 @@ namespace ServerApp
                             if (!server.resumeSession(ref cs, s))
                                 exit = true;
                             break;
+                        case Networking.CONNECTION_CODES.START_SYNCH:
+                            if (cs != null)
+                            {
+                                if (!server.synchronizationSession(cs, DateTime.Now))
+                                    exit = true;
+                            }
+                            break;
                         case Networking.CONNECTION_CODES.HELLO:
                             server.Hello(s);
                             break;
                         case Networking.CONNECTION_CODES.EXIT:
                             exit = true;
-                            break;
-                        case Networking.CONNECTION_CODES.TRANS:
-                            //if connected{
-                            //server.StartTransferSession(s);
-                            //}   
-                            //if (not connected){
-                            //byte[] command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.ERR);
-                            //s.Send(command);
-                            //}
                             break;
                         default:
                             exit = true;
@@ -191,7 +189,7 @@ namespace ServerApp
                 else
                     exit = true;
             }
-            all_sockets.Remove(s);
+            //all_sockets.Remove(s);
             s.Close(); 
         }
 

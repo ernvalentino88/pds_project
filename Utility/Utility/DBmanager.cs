@@ -11,15 +11,15 @@ namespace Utility
     public class DBmanager
     {
         //pc alex
-        private static String con_string = @"Data Source=C:\Users\John\Desktop\SQLiteStudio\PDS.db;Version=3;";
+        public static String connectionString = @"Data Source=C:\Users\John\Desktop\SQLiteStudio\PDS.db;Version=3;";
         //pc ernesto
-        //private static String con_string = @"Data Source=C:\Users\Ernesto\Documents\SQLiteStudio\pds.db;Version=3;";
+        //public static String connectionString = @"Data Source=C:\Users\Ernesto\Documents\SQLiteStudio\pds.db;Version=3;";
 
         public static String find_user(String id)
         {
             try
             {
-                using ( var con = new SQLiteConnection(con_string) )
+                using ( var con = new SQLiteConnection(connectionString) )
                 {
                     con.Open();
                     using ( var cmd = con.CreateCommand() )
@@ -51,7 +51,7 @@ namespace Utility
         {
             try
             {
-                using (var con = new SQLiteConnection(con_string))
+                using (var con = new SQLiteConnection(connectionString))
                 {
                     con.Open();
                     using (var cmd = con.CreateCommand())
@@ -74,16 +74,18 @@ namespace Utility
 
         public static int getMaxFileId(SQLiteConnection connection) {
             int maxId=-1;
-            try{
+            try
+            {
                 string selectMaxId = "select max(fileId) from files";
                 SQLiteCommand selectMaxCmd = new SQLiteCommand(selectMaxId, connection);
                 object val = selectMaxCmd.ExecuteScalar();
                 maxId = int.Parse(val.ToString());
-            }catch(SQLiteException ){
+            } catch(SQLiteException)
+            {
                 return -1;
             }
             return maxId;
-            }
+        }
 
     }
 }

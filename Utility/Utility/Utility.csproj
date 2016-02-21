@@ -61,6 +61,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DBmanager.cs" />
+    <Compile Include="DirectoryFile.cs" />
+    <Compile Include="DirectoryStatus.cs" />
     <Compile Include="Networking.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Security.cs" />
