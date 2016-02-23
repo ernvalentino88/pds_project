@@ -509,3 +509,10 @@ Nome parametro: value
 15/02/2016 15:25:34 ***Fatal Error***  Impossibile stabilire la connessione. Rifiuto persistente del computer di destinazione 127.0.0.1:8001
    in System.Net.Sockets.TcpClient.Connect(String hostname, Int32 port)
    in ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 76
+22/02/2016 12:32:02 ***Fatal Error***  Formato del percorso non valido.
+   in System.IO.Path.NormalizePath(String path, Boolean fullCheck, Int32 maxPathLength, Boolean expandShortPaths)
+   in System.IO.Path.GetFullPathInternal(String path)
+   in System.IO.FileSystemEnumerableIterator`1..ctor(String path, String originalUserPath, String searchPattern, SearchOption searchOption, SearchResultHandler`1 resultHandler, Boolean checkHost)
+   in System.IO.Directory.EnumerateFileSystemEntries(String path)
+   in ClientApp.Client.fillDirectoryStatus(DirectoryStatus local, String directory) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\Client.cs:riga 404
+   in ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 116

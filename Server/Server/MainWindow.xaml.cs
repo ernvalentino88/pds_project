@@ -168,6 +168,14 @@ namespace ServerApp
                             if (!server.resumeSession(ref cs, s))
                                 exit = true;
                             break;
+                        case Networking.CONNECTION_CODES.DIR:
+                            if (!server.getDirectoryName(cs))
+                                exit = true;
+                            break;
+                        case Networking.CONNECTION_CODES.INIT_SYNCH:
+                            if (!server.beginSynchronization(cs))
+                                exit = true;
+                            break;
                         case Networking.CONNECTION_CODES.START_SYNCH:
                             if (cs != null)
                             {

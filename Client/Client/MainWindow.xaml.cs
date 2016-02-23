@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -35,6 +36,7 @@ namespace ClientApp
         private delegate void UpdateDelegate(String msg);
         private delegate Task UpdateDelegateAsync(String msg, String bannerTitle, String bannerMsg);
         private delegate String LoginDelegate();
+        private delegate void FillGrid(DirectoryStatus status);
         private Boolean connected;
         private Client client;
 
@@ -100,23 +102,28 @@ namespace ClientApp
                         }
                         msg = "resumed: " + sessionId;
                         this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegate(updateUI), msg);
-                        if (!client.sendDirectory(directory))
-                        {
-                            connected = false;
-                            tcpClient.Close();
-                            msg = "Log in to the remote server";
-                            String title = "You were disconncted";
-                            String bannerMsg = "Your session is expired, please login again";
-                            this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegateAsync(updateUI_banner), msg, title, bannerMsg);
-                        }
+                        //if (!client.sendDirectory(directory))
+                        //{
+                        //    connected = false;
+                        //    tcpClient.Close();
+                        //    msg = "Log in to the remote server";
+                        //    String title = "You were disconncted";
+                        //    String bannerMsg = "Your session is expired, please login again";
+                        //    this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegateAsync(updateUI_banner), msg, title, bannerMsg);
+                        //}
                         DirectoryStatus local = new DirectoryStatus();
                         local.FolderPath = directory;
                         local.Username = username;
                         client.fillDirectoryStatus(local, directory);
-                        DirectoryStatus remote = client.startSynch();
-                        remote.Username = username;
-                        remote.FolderPath = directory;
-                        client.synchronize(local, remote);
+                        this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new FillGrid(fill_grid), local);
+                        DirectoryStatus remote = new DirectoryStatus();
+                        //remote.Username = username;
+                        //remote.FolderPath = directory;
+                        //if (client.startSynch(remote) >= 0)
+                        //{
+
+                        //    client.synchronize(local, remote);
+                        //}
 
                     }
                 }
@@ -150,6 +157,12 @@ namespace ClientApp
                         new UpdateDelegateAsync(updateUI_banner), msg, "An error occurred", exc.Message);
                 }
             }
+        }
+
+        private void fill_grid(DirectoryStatus status)
+        {
+            ObservableCollection<DirectoryFile> obs = new ObservableCollection<DirectoryFile>(status.Files.Values);
+            this.fileGrid.ItemsSource = obs;
         }
 
         private String updateUI_logged()

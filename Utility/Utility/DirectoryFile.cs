@@ -10,25 +10,42 @@ namespace Utility
     {
         private Int64 id;
         private String filename;
+        private String path;
         private String userId;
         private String checksum;
         private DateTime lastModificationTime;
         private Boolean deleted;
+        private Boolean directory;
         private Int64 length;
+        private String fullname;
+        private DateTime lastModTime;
 
         public DirectoryFile() 
         {
             this.deleted = false;
+            this.directory = false;
         }
 
-        public DirectoryFile(Int64 id, String fname, String userId, String checksum, DateTime lasModtime)
+        public DirectoryFile(Int64 id, String path, String fname, String userId, String checksum, DateTime lasModtime)
         {
             this.id = id;
+            this.path = path;
             this.filename = fname;
+            this.fullname = System.IO.Path.Combine(path, fname);
             this.userId = userId;
             this.checksum = checksum;
             this.lastModificationTime = lasModtime;
             this.deleted = false;
+            this.directory = false;
+        }
+
+        public DirectoryFile(String path, String filename, String userId, Boolean isDirectory)
+        {
+            this.path = path;
+            this.filename = filename;
+            this.fullname = path;
+            this.userId = userId;
+            this.Directory = isDirectory;
         }
 
         public String Filename
@@ -40,6 +57,18 @@ namespace Utility
             set
             {
                 filename = value;
+            }
+        }
+
+        public String Path
+        {
+            get
+            {
+                return path;
+            }
+            set
+            {
+                path = value;
             }
         }
 
@@ -91,6 +120,18 @@ namespace Utility
             }
         }
 
+        public Boolean Directory
+        {
+            get
+            {
+                return directory;
+            }
+            set
+            {
+                directory = value;
+            }
+        }
+
         public Int64 Id
         {
             get
@@ -112,6 +153,17 @@ namespace Utility
             set
             {
                 length = value;
+            }
+        }
+        public string Fullname
+        {
+            get
+            {
+                return fullname;
+            }
+            set
+            {
+                fullname = value;
             }
         }
 

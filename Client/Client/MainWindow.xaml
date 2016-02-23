@@ -45,6 +45,11 @@
             </Grid>
             <Grid x:Name="Grid_logged" Height="697" Width="922" Visibility="Collapsed">
                 <Button HorizontalAlignment="Center" VerticalAlignment="Bottom" x:Name="Logout_button" Content="Logout" Style="{StaticResource AccentedSquareButtonStyle}" Height="35" Width="70" Click="Connect_button_Click" Margin="125,0"/>
+                <DataGrid x:Name="fileGrid" Margin="60,54,60,53"
+                  AutoGenerateColumns="False" ColumnHeaderHeight="50"
+                  Style="{StaticResource AzureDataGrid}">
+                    
+                </DataGrid>
             </Grid>
         </Grid>
     </Controls:WindowCommands>

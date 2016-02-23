@@ -19,7 +19,6 @@ namespace ServerApp
         private ConcurrentDictionary<Int64, ClientSession> id2client;
         private Int64 sessionIdCounter;
         private static String con_string = @"Data Source=C:\Users\John\Desktop\SQLiteStudio\PDS.db;Version=3;";
-        public static String date_format = "dd/MM/yyyy-HH:mm:ss";
 
         public Int64 SessionIdCounter
         {
@@ -320,7 +319,7 @@ namespace ServerApp
                                 exit = true;
                             break;
                         case Networking.CONNECTION_CODES.END_SYNCH:
-                            if (!this.insertUnchanged(con, clientSession.CurrentStatus, newStatus))
+                            if (!DBmanager.insertUnchanged(con, clientSession.CurrentStatus, newStatus))
                                 exit = true;
                             else
                             {
@@ -328,6 +327,8 @@ namespace ServerApp
                                 transaction.Commit();
                                 transaction.Dispose();
                                 con.Dispose();
+                                clientSession.CurrentStatus = null;
+                                clientSession.CurrentStatus = newStatus;
                                 return true;
                             }
                             break;
@@ -344,34 +345,6 @@ namespace ServerApp
             return false;
         }
 
-        private bool insertUnchanged(SQLiteConnection conn, DirectoryStatus oldStatus, DirectoryStatus newStatus)
-        {
-            try
-            {
-                Dictionary<String, DirectoryFile> diff;
-                diff = oldStatus.Files.Where(x => !newStatus.Files.ContainsKey(x.Key)).ToDictionary(x => x.Key, x => x.Value);
-                foreach (var item in diff)
-                {
-                    using (SQLiteCommand cmd = conn.CreateCommand())
-                    {
-                        DirectoryFile file = item.Value;
-                        cmd.CommandText = @"insert into snapshots (user_id,file_id,creation_time,checksum,path,deleted) values"
-                            + " @user, @fileId, @creationTime, @checksum, @path, @deleted";
-                        cmd.Parameters.AddWithValue("@user", file.UserId);
-                        cmd.Parameters.AddWithValue("@fileId", file.Id);
-                        cmd.Parameters.AddWithValue("@creation_time", newStatus.CreationTime.ToString(date_format));
-                        cmd.Parameters.AddWithValue("@checksum", file.Checksum);
-                        cmd.Parameters.AddWithValue("@path", file.Filename);
-                        cmd.Parameters.AddWithValue("@deleted", file.Deleted);
-                        cmd.ExecuteNonQuery();
-                    }
-                }
-                return true;
-            }
-            catch (SQLiteException) { }
-            return false;
-        }
-
         private bool deleteFile(SQLiteConnection conn, ClientSession clientSession, DirectoryStatus newStatus)
         {
             Socket s = clientSession.Socket;
@@ -385,32 +358,35 @@ namespace ServerApp
                 if (encryptedData == null)
                     return false;
                 String filename = Encoding.UTF8.GetString(Security.AESDecrypt(aes, encryptedData));
-                byte[] command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.OK);
-                s.Send(command);
-                DirectoryFile file = clientSession.CurrentStatus.Files[filename];
-                using (SQLiteCommand cmd = conn.CreateCommand())
+                recvBuf = Networking.my_recv(4, s);
+                if (recvBuf == null)
+                    return false;
+                encryptedData = Networking.my_recv(BitConverter.ToInt32(recvBuf, 0), s);
+                if (encryptedData == null)
+                    return false;
+                String path = Encoding.UTF8.GetString(Security.AESDecrypt(aes, encryptedData));
+                recvBuf = Networking.my_recv(1, s);
+                if (recvBuf == null)
+                    return false;
+                if (recvBuf[0] == 0)
                 {
-                    cmd.CommandText = @"insert into snapshots (user_id,file_id,creation_time,checksum,path,deleted) values"
-                        + " @user, @fileId, @creationTime, @checksum, @path, @deleted";
-                    cmd.Parameters.AddWithValue("@user", file.UserId);
-                    cmd.Parameters.AddWithValue("@fileId", file.Id);
-                    cmd.Parameters.AddWithValue("@creation_time", newStatus.CreationTime.ToString(date_format));
-                    cmd.Parameters.AddWithValue("@checksum", file.Checksum);
-                    cmd.Parameters.AddWithValue("@path", file.Filename);
-                    cmd.Parameters.AddWithValue("@deleted", true);
-                    cmd.ExecuteNonQuery();
+                    //directory
+                    return DBmanager.deleteDirectory(conn, newStatus, filename, path);
                 }
-                DirectoryFile dirFile = new DirectoryFile(file.Id, filename, file.UserId, file.Checksum, file.LastModificationTime);
-                file.Deleted = true;
-                newStatus.Files[filename] = dirFile;
-                return true;
+                if (recvBuf[0] == 1)
+                {
+                    //file
+                    String fullname = Path.Combine(path, filename);
+                    DirectoryFile file = clientSession.CurrentStatus.Files[fullname];
+                    return DBmanager.deleteFile(conn, file, newStatus);
+                }
+                
             }
             catch (SocketException) { }
-            catch (SQLiteException) { }
             return false;
         }
 
-        private bool updateFile(SQLiteConnection conn, ClientSession clientSession, DirectoryStatus newStatus)
+        private bool addFile(SQLiteConnection conn, ClientSession clientSession, DirectoryStatus newStatus)
         {
             Socket s = clientSession.Socket;
             AesCryptoServiceProvider aes = clientSession.AESKey;
@@ -423,73 +399,47 @@ namespace ServerApp
                 if (encryptedData == null)
                     return false;
                 String filename = Encoding.UTF8.GetString(Security.AESDecrypt(aes, encryptedData));
+                recvBuf = Networking.my_recv(4, s);
+                if (recvBuf == null)
+                    return false;
+                encryptedData = Networking.my_recv(BitConverter.ToInt32(recvBuf, 0), s);
+                if (encryptedData == null)
+                    return false;
+                String path = Encoding.UTF8.GetString(Security.AESDecrypt(aes, encryptedData));
                 recvBuf = Networking.my_recv(8, s);
                 if (recvBuf == null)
                     return false;
-                DateTime lastModTime = DateTime.FromBinary(BitConverter.ToInt64(recvBuf, 0));
-                byte[] command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.OK);
-                s.Send(command);
-                recvBuf = Networking.my_recv(8, s);
+                recvBuf = Networking.my_recv(1, s);
                 if (recvBuf == null)
                     return false;
-                encryptedData = Networking.my_recv(BitConverter.ToInt64(recvBuf, 0), s);
-                if (encryptedData != null)
-                    return false;
-                byte[] file = Security.AESDecrypt(aes, encryptedData);
-                if (file == null)
-                    return false;
-
-                using (SQLiteCommand cmd = conn.CreateCommand())
+                if (recvBuf[0] == 0)
                 {
-                    cmd.CommandText = @"insert into files (user_id,path,content,last_mod_time) values"
-                            + " @user, @path, @content, @lastModTime";
-                    cmd.Parameters.AddWithValue("@user", newStatus.Username);
-                    cmd.Parameters.AddWithValue("@path", filename);
-                    cmd.Parameters.AddWithValue("@content", file);
-                    cmd.Parameters.AddWithValue("@lastModTime", lastModTime.ToString(date_format));
-                    cmd.ExecuteNonQuery();
+                    //directory
+                    return DBmanager.insertDirectory(conn, newStatus, filename, path);
                 }
-                Int64? fileId = -1;
-                using (SQLiteCommand cmd = conn.CreateCommand())
+                if (recvBuf[0] == 1)
                 {
-                    cmd.CommandText = "select file_id from files where user_id = @user and path = @path and"
-                            + " last_mod_time = @lastModTime";
-                    cmd.Parameters.AddWithValue("@user", newStatus.Username);
-                    cmd.Parameters.AddWithValue("@path", filename);
-                    cmd.Parameters.AddWithValue("@lastModTime", lastModTime.ToString(date_format));
-                    using (var reader = cmd.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            fileId = (Int64?)reader[0];
-                        }
-                    }
+                    //file
+                    DateTime lastModTime = DateTime.FromBinary(BitConverter.ToInt64(recvBuf, 0));
+                    byte[] command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.OK);
+                    s.Send(command);
+                    recvBuf = Networking.my_recv(8, s);
+                    if (recvBuf == null)
+                        return false;
+                    encryptedData = Networking.my_recv(BitConverter.ToInt64(recvBuf, 0), s);
+                    if (encryptedData != null)
+                        return false;
+                    byte[] file = Security.AESDecrypt(aes, encryptedData);
+                    if (file == null)
+                        return false;
+                    return DBmanager.insertFile(conn, newStatus, filename, path, file, lastModTime);
                 }
-                if (fileId == null || fileId <= 0)
-                    return false;
-                String checksum = Security.CalculateMD5Hash(file);
-                using (SQLiteCommand cmd = conn.CreateCommand())
-                {
-                    cmd.CommandText = @"insert into snapshots (user_id,file_id,creation_time,checksum,path) values"
-                        + " @user, @fileId, @creationTime, @checksum, @path";
-                    cmd.Parameters.AddWithValue("@user", newStatus.Username);
-                    cmd.Parameters.AddWithValue("@fileId", fileId);
-                    cmd.Parameters.AddWithValue("@creation_time", newStatus.CreationTime.ToString(date_format));
-                    cmd.Parameters.AddWithValue("@checksum", checksum);
-                    cmd.Parameters.AddWithValue("@path", filename);
-                    cmd.ExecuteNonQuery();
-                }
-                //update file
-                DirectoryFile dirFile = new DirectoryFile((Int64)fileId, filename, newStatus.Username, checksum, lastModTime);
-                newStatus.Files[filename] = dirFile;
-                return true;
             }
             catch (SocketException) { }
-            catch (SQLiteException) { }
             return false;
         }
 
-        private bool addFile(SQLiteConnection conn, ClientSession clientSession, DirectoryStatus newStatus)
+        private bool updateFile(SQLiteConnection conn, ClientSession clientSession, DirectoryStatus newStatus)
         {
             Socket s = clientSession.Socket;
             AesCryptoServiceProvider aes = clientSession.AESKey;
@@ -503,6 +453,13 @@ namespace ServerApp
                 if (encryptedData == null)
                     return false;
                 String filename = Encoding.UTF8.GetString(Security.AESDecrypt(aes, encryptedData));
+                recvBuf = Networking.my_recv(4, s);
+                if (recvBuf == null)
+                    return false;
+                encryptedData = Networking.my_recv(BitConverter.ToInt32(recvBuf, 0), s);
+                if (encryptedData == null)
+                    return false;
+                String path = Encoding.UTF8.GetString(Security.AESDecrypt(aes, encryptedData));
                 recvBuf = Networking.my_recv(8, s);
                 if (recvBuf == null)
                     return false;
@@ -519,144 +476,88 @@ namespace ServerApp
                 if (file == null)
                     return false;
 
-                using (SQLiteCommand cmd = conn.CreateCommand())
-                {
-                    cmd.CommandText = @"insert into files (user_id,path,content,last_mod_time) values"
-                            + " @user, @path, @content, @lastModTime";
-                    cmd.Parameters.AddWithValue("@user", newStatus.Username);
-                    cmd.Parameters.AddWithValue("@path", filename);
-                    cmd.Parameters.AddWithValue("@content", file);
-                    cmd.Parameters.AddWithValue("@lastModTime", lastModTime.ToString(date_format));
-                    cmd.ExecuteNonQuery();
-                }
-                Int64? fileId = -1;
-                using (SQLiteCommand cmd = conn.CreateCommand())
-                {
-                    cmd.CommandText = "select file_id from files where user_id = @user and path = @path and"
-                            + " last_mod_time = @lastModTime";
-                    cmd.Parameters.AddWithValue("@user", newStatus.Username);
-                    cmd.Parameters.AddWithValue("@path", filename);
-                    cmd.Parameters.AddWithValue("@lastModTime", lastModTime.ToString(date_format));
-                    using (var reader = cmd.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            fileId = (Int64?)reader[0];
-                        }
-                    }
-                }
-                if (fileId == null || fileId <= 0)
-                    return false;
-                String checksum = Security.CalculateMD5Hash(file);
-                using (SQLiteCommand cmd = conn.CreateCommand())
-                {
-                    cmd.CommandText = @"insert into snapshots (user_id,file_id,creation_time,checksum,path) values"
-                        + " @user, @fileId, @creationTime, @checksum, @path";
-                    cmd.Parameters.AddWithValue("@user", newStatus.Username);
-                    cmd.Parameters.AddWithValue("@fileId", fileId);
-                    cmd.Parameters.AddWithValue("@creation_time", newStatus.CreationTime.ToString(date_format));
-                    cmd.Parameters.AddWithValue("@checksum", checksum);
-                    cmd.Parameters.AddWithValue("@path", filename);
-                    cmd.ExecuteNonQuery();
-                }
-                //add file
-                DirectoryFile dirFile = new DirectoryFile((Int64)fileId, filename, newStatus.Username, checksum, lastModTime);
-                newStatus.Files[filename] = dirFile;
-                return true;
+                return DBmanager.insertFile(conn, newStatus, filename, path, file, lastModTime);
             }
             catch (SocketException) { }
-            catch (SQLiteException) { }
             return false;
         }
 
-        public bool StartTransferSession(ClientSession clientSession)
+        public bool getDirectoryName(ClientSession clientSession)
         {
-            Socket s = clientSession.Socket;
-            AesCryptoServiceProvider aes = clientSession.AESKey;
-            byte[] command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.OK);
-            s.Send(command);
-            //receive number of files(in chiaro)
-            byte[] qnt_byte = Networking.my_recv(4, s);
-            if(qnt_byte==null){ 
-                return false;
-            }
-            int qnt = BitConverter.ToInt32(qnt_byte,0);
-            if (qnt > 0)
-            {   SQLiteConnection con=null;
-                try
+            try
+            {
+                Socket s = clientSession.Socket;
+                AesCryptoServiceProvider aes = clientSession.AESKey;
+                byte[] recvBuf = Networking.my_recv(4, s);
+                if (recvBuf != null)
                 {
-                    con = new SQLiteConnection(con_string);
-                    con.Open();
-                    SQLiteTransaction tr = con.BeginTransaction();
-                    SQLiteCommand cmd = con.CreateCommand();
-                    cmd.Transaction = tr;
-                    //get last max id from DB
-                    int last_id = DBmanager.getMaxFileId(con);
-                    if (last_id >= 0)
+                    int pathLen = BitConverter.ToInt32(recvBuf, 0);
+                    recvBuf = Networking.my_recv(pathLen, s);
+                    if (recvBuf != null)
                     {
-                        for (int i = qnt; i > 0; i--, ++last_id)
-                        {
-                            //get path length(in chiaro)
-                            byte[] length_byte = Networking.my_recv(4, s);
-                            if (length_byte != null)
-                            {
-                                int path_len = BitConverter.ToInt32(length_byte, 0);
-                                //get path(aes)
-                               byte[] encryptedData = Networking.my_recv(path_len, s);
-                               if (encryptedData != null)
-                               {
-                                   byte[] decryptedData = Security.AESDecrypt(aes, encryptedData);
-                                   String path = Encoding.UTF8.GetString(decryptedData);
-                                   //get mod_Date(in chiaro)
-                                   //format dd/MM/yyyy-HH:mm:ss (19byte) type string
-                                   byte[] mod_byte = Networking.my_recv(19, s);
-                                   if (mod_byte != null)
-                                   {
-                                       String mod_date = Encoding.UTF8.GetString(mod_byte);
-                                       //get file size (in chiaro)
-                                        byte[] size_byte = Networking.my_recv(4, s);
-                                        if (size_byte != null)
-                                        {
-                                            int size = BitConverter.ToInt32(size_byte, 0);
-                                            //get content(aes)
-                                            encryptedData = Networking.my_recv(size, s);
-                                            if (encryptedData != null)
-                                            {
-                                                byte[] FILE= Security.AESDecrypt(aes, encryptedData);
-                                                //insert into files
-                                                cmd.CommandText = "INSERT INTO files (fileId,path,content,mod_date) values('"+last_id+"','"+path+"','"+FILE+"','"+mod_date+"')";
-                                                cmd.ExecuteNonQuery();
-                                                //insert into  session (fileId==last_d)
-                                                DateTime now = DateTime.Now;
-                                                String now_str = now.ToString(date_format);
-                                                cmd.CommandText = "INSERT INTO session (user,fileId,creation,checksum,path) values('" + clientSession.User + "','" +last_id + "','" + now_str+ "','" +Security.CalculateMD5Hash(FILE) +"','" +path +"')";
-                                                cmd.ExecuteNonQuery();
-
-                                            }
-                                            else { con.Close(); return false; }
-                                        }
-                                        else { con.Close(); return false; }
-                                   }
-                                   else { con.Close(); return false; }
-                               }
-                               else { con.Close(); return false; }
-
-                            }
-                            else { con.Close(); return false; }
-                        }
+                        byte[] command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.OK);
+                        s.Send(command);
+                        return true;
                     }
-                    else { con.Close(); return false; }
-                    tr.Commit();
-                    con.Close();
-                    return true;
-                }
-                catch (SQLiteException) {
-                    if(con_string !=null){ con.Close(); }
-                    return false;
                 }
             }
-                return false;
+            catch (SocketException) { }
+            return false;
         }
 
+        public bool beginSynchronization(ClientSession clientSession)
+        {
+            try
+            {
+                Socket s = clientSession.Socket;
+                AesCryptoServiceProvider aes = clientSession.AESKey;
+                byte[] recvBuf = Networking.my_recv(4, s);
+                if (recvBuf != null)
+                {
+                    int len = BitConverter.ToInt32(recvBuf, 0);
+                    recvBuf = Networking.my_recv(len, s);
+                    if (recvBuf != null)
+                    {
+                        String dir = Encoding.UTF8.GetString(Security.AESDecrypt(aes, recvBuf));
+                        DirectoryStatus status = DBmanager.getLastSnapshot(dir, clientSession.User.UserId);
+                        clientSession.CurrentStatus = status;
+                        int count = status.Files.Count;
+                        byte[] buf = BitConverter.GetBytes(count);
+                        s.Send(buf);
+                        foreach (var item in status.Files)
+                        {
+                            DirectoryFile file = item.Value;
+                            buf = BitConverter.GetBytes(file.Id);
+                            s.Send(buf);
+                            buf = BitConverter.GetBytes(file.Path.Length);
+                            s.Send(buf);
+                            buf = Encoding.UTF8.GetBytes(file.Path);
+                            byte[] encryptedData = Security.AESEncrypt(aes, buf);
+                            s.Send(encryptedData);
+                            buf = BitConverter.GetBytes(file.Filename.Length);
+                            s.Send(buf);
+                            buf = Encoding.UTF8.GetBytes(file.Filename);
+                            encryptedData = Security.AESEncrypt(aes, buf);
+                            s.Send(encryptedData);
+                            if (file.Directory)
+                            {
+                                byte[] b = { 1 };
+                                s.Send(b);
+                            }
+                            else
+                            {
+                                byte[] b = { 0 };
+                                s.Send(b);
+                                buf = Encoding.UTF8.GetBytes(file.Checksum);
+                                encryptedData = Security.AESEncrypt(aes, buf);
+                                s.Send(encryptedData);
+                            }
+                        }
+                    }
+                }
+            }
+            catch (SocketException) { }
+            return false;
+        }
     }
 }

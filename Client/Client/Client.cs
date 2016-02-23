@@ -344,10 +344,12 @@ namespace ClientApp
                 Socket s = tcpClient.Client;
                 byte[] command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.DIR);
                 s.Send(command);
-                byte[] pathLen = BitConverter.GetBytes(directory.Length);
-                s.Send(pathLen);
-                byte[] dir = Encoding.UTF8.GetBytes(directory);
-                s.Send(dir);
+                int len = directory.Length;
+                len = (len % 16 == 0) ? len : (len + (16 - (len % 16)));
+                byte[] buf = BitConverter.GetBytes(len);
+                s.Send(buf);
+                buf = Security.AESEncrypt(aesKey, Encoding.UTF8.GetBytes(directory));
+                s.Send(buf);
                 command = Networking.my_recv(4, tcpClient.Client);
                 if (command != null && (
                         ((Networking.CONNECTION_CODES)BitConverter.ToUInt32(command, 0) == Networking.CONNECTION_CODES.OK)))
@@ -357,47 +359,75 @@ namespace ClientApp
             return false; 
         }
 
-        public DirectoryStatus startSynch()
+        public Int64 startSynch(DirectoryStatus remoteStatus)
         {
             try
             {
                 Socket s = tcpClient.Client;
-                DirectoryStatus remoteStat = new DirectoryStatus();
                 byte[] command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.INIT_SYNCH);
                 s.Send(command);
-                byte[] recvBuf = Networking.my_recv(8, s);
+                int len = remoteStatus.FolderPath.Length;
+                len = (len % 16 == 0) ? len : (len + (16 - (len % 16)));
+                byte[] buf = BitConverter.GetBytes(len);
+                s.Send(buf);
+                buf = Security.AESEncrypt(aesKey, Encoding.UTF8.GetBytes(remoteStatus.FolderPath));
+                s.Send(buf);
+                byte[] recvBuf = Networking.my_recv(4, s);
                 if (recvBuf == null)
-                    return null;
-                Int64 filesInfoToRecv = BitConverter.ToInt64(recvBuf, 0);
+                    return -1;
+                Int32 filesInfoToRecv = BitConverter.ToInt32(recvBuf, 0);
                 for (int i = 0; i < filesInfoToRecv; i++)
                 {
+                    DirectoryFile file = new DirectoryFile();
                     recvBuf = Networking.my_recv(8, s);
                     if (recvBuf == null)
-                        return null;
+                        return -1;
                     Int64 id = BitConverter.ToInt64(recvBuf, 0);
                     recvBuf = Networking.my_recv(4, s);
                     if (recvBuf == null)
-                        return null;
-                    Int32 pathLen = BitConverter.ToInt32(recvBuf, 0);
-                    byte[] encryptedData = Networking.my_recv(pathLen, s);
+                        return -1;
+                    len = BitConverter.ToInt32(recvBuf, 0);
+                    byte[] encryptedData = Networking.my_recv(len, s);
                     if (encryptedData == null)
-                        return null;
+                        return -1;
+                    String path = Encoding.UTF8.GetString(Security.AESDecrypt(aesKey, encryptedData));
+                    recvBuf = Networking.my_recv(4, s);
+                    if (recvBuf == null)
+                        return -1;
+                    len = BitConverter.ToInt32(recvBuf, 0);
+                    encryptedData = Networking.my_recv(len, s);
+                    if (encryptedData == null)
+                        return -1;
                     String filename = Encoding.UTF8.GetString(Security.AESDecrypt(aesKey, encryptedData));
-                    encryptedData = Networking.my_recv(32, s);
-                    if (encryptedData == null)
-                        return null;
-                    String checksum = Encoding.UTF8.GetString(Security.AESDecrypt(aesKey, encryptedData));
-                    DirectoryFile file = new DirectoryFile();
+                    recvBuf = Networking.my_recv(1, s);
+                    if (recvBuf == null)
+                        return -1;
+                    if (recvBuf[0] == 1)
+                    {
+                        file.Directory = true;
+                    }
+                    if (recvBuf[0] == 0)
+                    {
+                        encryptedData = Networking.my_recv(32, s);
+                        if (encryptedData == null)
+                            return -1;
+                        String checksum = Encoding.UTF8.GetString(Security.AESDecrypt(aesKey, encryptedData));
+                        file.Checksum = checksum;
+                    }
                     file.Id = id;
                     file.UserId = userId;
                     file.Filename = filename;
-                    file.Checksum = checksum;
-                    remoteStat.Files.Add(filename, file);
+                    file.Path = path;
+                    if (file.Directory)
+                        file.Fullname = file.Path;
+                    else 
+                        file.Fullname = Path.Combine(path, filename);
+                    remoteStatus.Files.Add(filename, file);
                 }
-                return remoteStat;
+                return filesInfoToRecv;
             }
             catch (SocketException) { }
-            return null;
+            return -1;
         }
 
         public void fillDirectoryStatus(DirectoryStatus local, String directory)
@@ -415,11 +445,20 @@ namespace ClientApp
                    file.LastModificationTime = info.LastWriteTime;
                    file.Filename = info.FullName;
                    file.Checksum = getChecksum(info);
-                   local.Files.Add(file.Filename, file);
+                   file.Path = info.DirectoryName;
+                   local.Files.Add(file.Fullname, file);
                }
                if (Directory.Exists(path))
                {
                    //entry is a directory
+                   DirectoryFile file = new DirectoryFile();
+                   DirectoryInfo info = new DirectoryInfo(path);
+                   file.UserId = userId;
+                   file.Directory = true;
+                   file.Filename = info.Name;
+                   file.Path = info.FullName;
+                   file.Fullname = info.FullName;
+                   local.Files.Add(file.Fullname, file);
                    fillDirectoryStatus(local, path);
                }
            }
@@ -493,6 +532,12 @@ namespace ClientApp
                 s.Send(buf);
                 byte[] encryptedData = Security.AESEncrypt(aesKey, file.Filename);
                 s.Send(encryptedData);
+                len = file.Path.Length;
+                len = (len % 16 == 0) ? len : (len + (16 - (len % 16)));
+                buf = BitConverter.GetBytes(len);
+                s.Send(buf);
+                encryptedData = Security.AESEncrypt(aesKey, file.Path);
+                s.Send(encryptedData);
                 buf = BitConverter.GetBytes(file.LastModificationTime.ToBinary());
                 s.Send(buf);
                 command = Networking.my_recv(4, tcpClient.Client);
@@ -533,6 +578,22 @@ namespace ClientApp
                 s.Send(buf);
                 byte[] encryptedData = Security.AESEncrypt(aesKey, file.Filename);
                 s.Send(encryptedData);
+                len = file.Path.Length;
+                len = (len % 16 == 0) ? len : (len + (16 - (len % 16)));
+                buf = BitConverter.GetBytes(len);
+                s.Send(buf);
+                encryptedData = Security.AESEncrypt(aesKey, file.Path);
+                s.Send(encryptedData);
+                if (file.Directory)
+                {
+                    buf = new byte[] { 0 };
+                    s.Send(buf);
+                }
+                else
+                {
+                    buf = new byte[] { 1 };
+                    s.Send(buf);
+                }
             }
             catch (SocketException) { }
         }
@@ -550,26 +611,42 @@ namespace ClientApp
                 s.Send(buf);
                 byte[] encryptedData = Security.AESEncrypt(aesKey, file.Filename);
                 s.Send(encryptedData);
-                buf = BitConverter.GetBytes(file.LastModificationTime.ToBinary());
+                len = file.Path.Length;
+                len = (len % 16 == 0) ? len : (len + (16 - (len % 16)));
+                buf = BitConverter.GetBytes(len);
                 s.Send(buf);
-                command = Networking.my_recv(4, tcpClient.Client);
-                if (command != null && (
-                        ((Networking.CONNECTION_CODES)BitConverter.ToUInt32(command, 0) == Networking.CONNECTION_CODES.OK)))
+                encryptedData = Security.AESEncrypt(aesKey, file.Path);
+                s.Send(encryptedData);
+                if (file.Directory)
                 {
-                    long fileLen = file.Length;
-                    fileLen = (fileLen % 16 == 0) ? fileLen : (fileLen + (16 - (fileLen % 16)));
-                    buf = BitConverter.GetBytes(fileLen);
+                    buf = new byte[1] { 0 };
                     s.Send(buf);
-                    using (FileStream reader = File.OpenRead(file.Filename))
+                }
+                else
+                {
+                    buf = new byte[1] { 1 };
+                    s.Send(buf);
+                    buf = BitConverter.GetBytes(file.LastModificationTime.ToBinary());
+                    s.Send(buf);
+                    command = Networking.my_recv(4, tcpClient.Client);
+                    if (command != null && (
+                            ((Networking.CONNECTION_CODES)BitConverter.ToUInt32(command, 0) == Networking.CONNECTION_CODES.OK)))
                     {
-                        long left = fileLen;
-                        while (left > 0)
+                        long fileLen = file.Length;
+                        fileLen = (fileLen % 16 == 0) ? fileLen : (fileLen + (16 - (fileLen % 16)));
+                        buf = BitConverter.GetBytes(fileLen);
+                        s.Send(buf);
+                        using (FileStream reader = File.OpenRead(file.Filename))
                         {
-                            int dim = (left > 8192) ? 8192 : (int)left;
-                            buf = new byte[dim];
-                            reader.Read(buf, 0, dim);
-                            s.Send(buf);
-                            left -= dim;
+                            long left = fileLen;
+                            while (left > 0)
+                            {
+                                int dim = (left > 8192) ? 8192 : (int)left;
+                                buf = new byte[dim];
+                                reader.Read(buf, 0, dim);
+                                s.Send(buf);
+                                left -= dim;
+                            }
                         }
                     }
                 }
