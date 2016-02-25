@@ -516,3 +516,27 @@ Nome parametro: value
    in System.IO.Directory.EnumerateFileSystemEntries(String path)
    in ClientApp.Client.fillDirectoryStatus(DirectoryStatus local, String directory) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\Client.cs:riga 404
    in ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 116
+24/02/2016 18:53:03 ***Fatal Error***  Il valore non può essere null.
+Nome parametro: key
+   in System.Collections.Generic.Dictionary`2.Insert(TKey key, TValue value, Boolean add)
+   in System.Collections.Generic.Dictionary`2.Add(TKey key, TValue value)
+   in ClientApp.Client.fillDirectoryStatus(DirectoryStatus local, String directory) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\Client.cs:riga 449
+   in ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 119
+24/02/2016 18:53:16 ***Fatal Error***  Il valore non può essere null.
+Nome parametro: key
+   in System.Collections.Generic.Dictionary`2.Insert(TKey key, TValue value, Boolean add)
+   in System.Collections.Generic.Dictionary`2.Add(TKey key, TValue value)
+   in ClientApp.Client.fillDirectoryStatus(DirectoryStatus local, String directory) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\Client.cs:riga 449
+   in ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 119
+24/02/2016 18:53:26 ***Fatal Error***  Il valore non può essere null.
+Nome parametro: key
+   in System.Collections.Generic.Dictionary`2.Insert(TKey key, TValue value, Boolean add)
+   in System.Collections.Generic.Dictionary`2.Add(TKey key, TValue value)
+   in ClientApp.Client.fillDirectoryStatus(DirectoryStatus local, String directory) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\Client.cs:riga 449
+   in ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 119
+25/02/2016 01:54:12 ***Fatal Error***  Impossibile stabilire la connessione. Rifiuto persistente del computer di destinazione 127.0.0.1:8001
+   in System.Net.Sockets.TcpClient.Connect(String hostname, Int32 port)
+   in ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 81
+25/02/2016 13:12:28 ***Fatal Error***  Impossibile stabilire la connessione. Rifiuto persistente del computer di destinazione 127.0.0.1:8001
+   in System.Net.Sockets.TcpClient.Connect(String hostname, Int32 port)
+   in ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 81

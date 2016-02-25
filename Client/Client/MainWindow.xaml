@@ -5,10 +5,9 @@
         Title="Client" Height="736.5" Width="938"
         xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro" Foreground="#FF020202" ResizeMode="CanMinimize">
 
-
     <Controls:WindowCommands >
         <Grid Height="697" Width="922">
-            <Grid x:Name="Grid_initial" HorizontalAlignment="Center" Height="376" Width="350" >
+            <Grid x:Name="Grid_initial" HorizontalAlignment="Center" Height="376" Width="350">
                 <Controls:MetroContentControl Margin="0,0,-15,0">
                     <TabControl Margin="-12,-15,0,-73">
                         <TabItem Header="Register" Margin="46,0,-57,0">
@@ -43,13 +42,33 @@
                     </TabControl>
                 </Controls:MetroContentControl>
             </Grid>
-            <Grid x:Name="Grid_logged" Height="697" Width="922" Visibility="Collapsed">
-                <Button HorizontalAlignment="Center" VerticalAlignment="Bottom" x:Name="Logout_button" Content="Logout" Style="{StaticResource AccentedSquareButtonStyle}" Height="35" Width="70" Click="Connect_button_Click" Margin="125,0"/>
-                <DataGrid x:Name="fileGrid" Margin="60,54,60,53"
-                  AutoGenerateColumns="False" ColumnHeaderHeight="50"
-                  Style="{StaticResource AzureDataGrid}">
-                    
+            <Grid x:Name="Grid_logged" Width="922" Visibility="Collapsed">
+                <Button VerticalAlignment="Bottom" x:Name="Logout_button" Content="Logout" Style="{StaticResource AccentedSquareButtonStyle}" Height="35" Width="70" Click="Connect_button_Click" Margin="823,0,29,0"/>
+                <DataGrid IsReadOnly="True"
+                          AutoGenerateColumns="False"
+                          CanUserAddRows="False"
+                          x:Name="file_grid" MouseDoubleClick="file_grid_MouseDoubleClick" Margin="0,103,0,40">
+                    <DataGrid.Columns>
+                        <DataGridTemplateColumn>
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Image Source="{Binding Icon}" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTextColumn Header="File Name" Binding="{Binding Filename}"></DataGridTextColumn>
+                        <DataGridTextColumn Header="Path" Binding="{Binding Path}"></DataGridTextColumn>
+                        <DataGridTextColumn Header="Last Modification Time" Binding="{Binding LastModificationTime}"></DataGridTextColumn>
+                        <DataGridTextColumn Header="Checksum" Binding="{Binding Checksum}"></DataGridTextColumn>
+                    </DataGrid.Columns>
                 </DataGrid>
+                <Button VerticalAlignment="Top" BorderBrush="Black"  x:Name="Back_button" Style="{DynamicResource MetroCircleButtonStyle}" Margin="10,51,860,0" Height="47" Width="50" Click="Back_button_Click">
+                    <Image Source="back_arrow.ico" Width="22" Height="20"></Image>
+                </Button>
+                <Button VerticalAlignment="Top" HorizontalAlignment="Center" BorderBrush="Black"  x:Name="Refresh_button" Style="{DynamicResource MetroCircleButtonStyle}" Margin="79,51,793,0" Height="47" Width="50" Click="Refresh_button_Click">
+                    <Image Source="refresh.ico" Width="22" Height="20"></Image>
+                </Button>
+
             </Grid>
         </Grid>
     </Controls:WindowCommands>

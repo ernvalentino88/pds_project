@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Threading;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
@@ -443,10 +444,14 @@ namespace ClientApp
                    file.Length = info.Length;
                    file.UserId = userId;
                    file.LastModificationTime = info.LastWriteTime;
-                   file.Filename = info.FullName;
-                   file.Checksum = getChecksum(info);
+                   file.Filename = info.Name;
                    file.Path = info.DirectoryName;
-                   local.Files.Add(file.Fullname, file);
+                   file.Fullname = info.FullName;
+                   file.Checksum = getChecksum(info);
+                   lock (local.Files)
+                   {
+                       local.Files.Add(file.Fullname, file);
+                   }
                }
                if (Directory.Exists(path))
                {
@@ -458,10 +463,61 @@ namespace ClientApp
                    file.Filename = info.Name;
                    file.Path = info.FullName;
                    file.Fullname = info.FullName;
-                   local.Files.Add(file.Fullname, file);
-                   fillDirectoryStatus(local, path);
+                   lock (local.Files)
+                   {
+                       local.Files.Add(file.Fullname, file);
+                   }
+                   //State s = new State();
+                   //s.Directory = info.FullName;
+                   //s.Status = local;
+                   //ThreadPool.QueueUserWorkItem(new WaitCallback(fillDirectoryStatus), s);
                }
            }
+        }
+
+        public void fillDirectoryStatus(Object state)
+        {
+            State s = (State)state;
+            DirectoryStatus local = s.Status;
+            var entries = Directory.EnumerateFileSystemEntries(s.Directory);
+            foreach (var path in entries)
+            {
+                if (File.Exists(path))
+                {
+                    //entry is a file
+                    FileInfo info = new FileInfo(path);
+                    DirectoryFile file = new DirectoryFile();
+                    file.Length = info.Length;
+                    file.UserId = userId;
+                    file.LastModificationTime = info.LastWriteTime;
+                    file.Filename = info.Name;
+                    file.Path = info.DirectoryName;
+                    file.Fullname = info.FullName;
+                    file.Checksum = getChecksum(info);
+                    lock (local.Files)
+                    {
+                        local.Files.Add(file.Fullname, file);
+                    }
+                }
+                if (Directory.Exists(path))
+                {
+                    //entry is a directory
+                    DirectoryFile file = new DirectoryFile();
+                    DirectoryInfo info = new DirectoryInfo(path);
+                    file.UserId = userId;
+                    file.Directory = true;
+                    file.Filename = info.Name;
+                    file.Path = info.FullName;
+                    file.Fullname = info.FullName;
+                    lock (local.Files)
+                    {
+                        local.Files.Add(file.Fullname, file);
+                    }
+                    s.Directory = info.FullName;
+                    ThreadPool.QueueUserWorkItem(new WaitCallback(fillDirectoryStatus), s);
+                }
+            }
+            //to do notify when finish
         }
 
         public String getChecksum(FileInfo info)
@@ -538,26 +594,35 @@ namespace ClientApp
                 s.Send(buf);
                 encryptedData = Security.AESEncrypt(aesKey, file.Path);
                 s.Send(encryptedData);
-                buf = BitConverter.GetBytes(file.LastModificationTime.ToBinary());
-                s.Send(buf);
-                command = Networking.my_recv(4, tcpClient.Client);
-                if (command != null && (
-                        ((Networking.CONNECTION_CODES)BitConverter.ToUInt32(command, 0) == Networking.CONNECTION_CODES.OK)))
+                if (file.Directory)
                 {
-                    long fileLen = file.Length;
-                    fileLen = (fileLen % 16 == 0) ? fileLen : (fileLen + (16 - (fileLen % 16)));
-                    buf = BitConverter.GetBytes(fileLen);
+                    buf = new byte[1] { 0 };
                     s.Send(buf);
-                    using (FileStream reader = File.OpenRead(file.Filename))
+                }
+                else
+                {
+                    buf = new byte[1] { 1 };
+                    s.Send(buf);
+                    buf = BitConverter.GetBytes(file.LastModificationTime.ToBinary());
+                    s.Send(buf);
+                    command = Networking.my_recv(4, tcpClient.Client);
+                    if (command != null && (
+                            ((Networking.CONNECTION_CODES)BitConverter.ToUInt32(command, 0) == Networking.CONNECTION_CODES.OK)))
                     {
-                        long left = fileLen;
-                        while (left > 0)
+                        buf = BitConverter.GetBytes(file.Length);
+                        s.Send(buf);
+                        using (FileStream reader = File.OpenRead(file.Filename))
                         {
-                            int dim = (left > 8192) ? 8192 : (int)left;
-                            buf = new byte[dim];
-                            reader.Read(buf, 0, dim);
-                            s.Send(buf);
-                            left -= dim;
+                            long left = file.Length;
+                            while (left > 0)
+                            {
+                                int dim = (left > 4096) ? 4096 : (int)left;
+                                buf = new byte[dim];
+                                reader.Read(buf, 0, dim);
+                                encryptedData = Security.AESEncrypt(aesKey, buf);
+                                s.Send(encryptedData);
+                                left -= dim;
+                            }
                         }
                     }
                 }
@@ -632,19 +697,18 @@ namespace ClientApp
                     if (command != null && (
                             ((Networking.CONNECTION_CODES)BitConverter.ToUInt32(command, 0) == Networking.CONNECTION_CODES.OK)))
                     {
-                        long fileLen = file.Length;
-                        fileLen = (fileLen % 16 == 0) ? fileLen : (fileLen + (16 - (fileLen % 16)));
-                        buf = BitConverter.GetBytes(fileLen);
+                        buf = BitConverter.GetBytes(file.Length);
                         s.Send(buf);
                         using (FileStream reader = File.OpenRead(file.Filename))
                         {
-                            long left = fileLen;
+                            long left = file.Length;
                             while (left > 0)
                             {
-                                int dim = (left > 8192) ? 8192 : (int)left;
+                                int dim = (left > 4096) ? 4096 : (int)left;
                                 buf = new byte[dim];
                                 reader.Read(buf, 0, dim);
-                                s.Send(buf);
+                                encryptedData = Security.AESEncrypt(aesKey, buf);
+                                s.Send(encryptedData);
                                 left -= dim;
                             }
                         }
@@ -653,5 +717,10 @@ namespace ClientApp
             }
             catch (SocketException) { }
         }
+    }
+    class State
+    {
+        public DirectoryStatus Status { get; set; }
+        public String Directory { get; set; }
     }
 }

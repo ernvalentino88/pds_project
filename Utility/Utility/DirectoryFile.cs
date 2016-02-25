@@ -18,7 +18,7 @@ namespace Utility
         private Boolean directory;
         private Int64 length;
         private String fullname;
-        private DateTime lastModTime;
+
 
         public DirectoryFile() 
         {
@@ -45,7 +45,8 @@ namespace Utility
             this.filename = filename;
             this.fullname = path;
             this.userId = userId;
-            this.Directory = isDirectory;
+            this.directory = isDirectory;
+            this.deleted = false;
         }
 
         public String Filename
@@ -169,15 +170,21 @@ namespace Utility
 
         public override int GetHashCode()
         {
-            return ( filename.GetHashCode() +
-                userId.GetHashCode() + checksum.GetHashCode() );
+            int checksumHash = (directory == true) ? 0 : checksum.GetHashCode();                
+            return ( fullname.GetHashCode() +
+                userId.GetHashCode() + checksumHash );
         }
 
         public override bool Equals(object obj)
         {
             DirectoryFile other = (DirectoryFile)obj;
-            return ( userId.Equals(other.userId) && 
-                filename.Equals(other.filename) && checksum.Equals(other.checksum) );
+            if (other.directory && this.directory)
+                return (userId.Equals(other.userId) &&
+                    fullname.Equals(other.fullname));
+            if (!other.directory && !this.directory)
+                return ( userId.Equals(other.userId) && 
+                    fullname.Equals(other.fullname) && checksum.Equals(other.checksum) );
+            return false;
         }
     }
 }

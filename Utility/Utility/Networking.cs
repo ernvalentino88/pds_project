@@ -77,7 +77,7 @@ namespace Utility
                 {
                     while (left > 0)
                     {
-                        Int64 dim = (left > 4096) ? 4096 : left;
+                        int dim = (left > 4096) ? 4096 : (int)left;
                         byte[] buffer = new byte[dim];
                         b = s.Receive(buffer);
                         if (b <= 0)
@@ -86,6 +86,37 @@ namespace Utility
                         }
                         ms.Write(buffer, 0, b);
                         left -= b;
+                    }
+                }
+            }
+            catch (SocketException)
+            {
+                return null;
+            }
+            return received;
+        }
+
+        public static byte[] recvEncryptedFile(Int64 size, Socket s,AesCryptoServiceProvider key)
+        {
+            Int64 left = size;
+            //adjust size for receive correct number of bytes after encrypt
+            left = (left % 16 == 0) ? left : (left + (16 - (left % 16)));
+            byte[] received = new byte[size];
+            try
+            {
+                using (MemoryStream ms = new MemoryStream(received))
+                {
+                    while (left > 0)
+                    {
+                        int dim = (left > 4096) ? 4096 : (int)left;
+                        byte[] buffer = my_recv(dim, s);
+                        if (buffer == null)
+                            return null;
+                        byte[] decryptedData = Security.AESDecrypt(key, buffer);
+                        if (decryptedData == null)
+                            return null;
+                        ms.Write(decryptedData, 0, decryptedData.Length);
+                        left -= buffer.Length;
                     }
                 }
             }

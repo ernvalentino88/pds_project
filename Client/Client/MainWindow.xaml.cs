@@ -38,18 +38,24 @@ namespace ClientApp
         private delegate String LoginDelegate();
         private delegate void FillGrid(DirectoryStatus status);
         private Boolean connected;
+        private Boolean root;
         private Client client;
+        private DirectoryInfo CurrentDirectory;
+        private ObservableCollection<FileListItem> FileList;
+        private String directory;
 
         public MainWindow()
         {
             InitializeComponent();
             connected = false;
+            root = false;
+            FileList = new ObservableCollection<FileListItem>();
         }
 
         private void Connect_button_Click(object sender, RoutedEventArgs e)
         {
             ConnectDelegate cd = new ConnectDelegate(connect);
-            cd.BeginInvoke(this.Text_ip.Text, this.Text_port.Text,this.Text_user.Text,this.Box_pwd.Password,null, null);
+            cd.BeginInvoke(this.Text_ip.Text, this.Text_port.Text, this.Text_user.Text, this.Box_pwd.Password, null, null);
         }
 
         private void connect(String address, String port, String username, String pwd)
@@ -89,7 +95,7 @@ namespace ClientApp
                         client.UserId = username;
                         DispatcherOperation result = this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new LoginDelegate(updateUI_logged));
                         result.Wait();
-                        String directory = (String)result.Result;
+                        directory = (String)result.Result;
 
                         if (!client.resumeSession())
                         {
@@ -114,9 +120,10 @@ namespace ClientApp
                         DirectoryStatus local = new DirectoryStatus();
                         local.FolderPath = directory;
                         local.Username = username;
+                        root = true;
                         client.fillDirectoryStatus(local, directory);
                         this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new FillGrid(fill_grid), local);
-                        DirectoryStatus remote = new DirectoryStatus();
+                        //DirectoryStatus remote = new DirectoryStatus();
                         //remote.Username = username;
                         //remote.FolderPath = directory;
                         //if (client.startSynch(remote) >= 0)
@@ -161,8 +168,23 @@ namespace ClientApp
 
         private void fill_grid(DirectoryStatus status)
         {
-            ObservableCollection<DirectoryFile> obs = new ObservableCollection<DirectoryFile>(status.Files.Values);
-            this.fileGrid.ItemsSource = obs;
+            if (root)
+            {
+                //see turn back botton
+                this.Back_button.IsEnabled = false;
+            }
+            else
+            {
+                //don't see botton
+                this.Back_button.IsEnabled = true;
+            }
+            FileList.Clear();
+            foreach (var item in status.Files)
+            {
+                FileListItem fl = new FileListItem(item.Value);
+                FileList.Add(fl);
+            }
+            this.file_grid.ItemsSource = FileList;        
         }
 
         private String updateUI_logged()
@@ -340,10 +362,46 @@ namespace ClientApp
         {
             if (connected)
             {
-                connected = false;
                 client.closeConnectionTcpClient();
+                connected = false;
             }
         }
+
+        private void file_grid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            if (this.file_grid.SelectedItem == null)
+                return;
+            var item = this.file_grid.SelectedItem as FileListItem;
+            if (item.Directory)
+            {
+                //entry is a directory
+                DirectoryStatus local = new DirectoryStatus();
+                client.fillDirectoryStatus(local, item.Path);
+                CurrentDirectory = new DirectoryInfo(item.Path);
+                root = directory.Equals(item.Path);
+                this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new FillGrid(fill_grid), local);
+            }
+        }
+
+        private void Back_button_Click(object sender, RoutedEventArgs e)
+        {
+            if (CurrentDirectory != null)
+            {
+                CurrentDirectory = CurrentDirectory.Parent;
+                DirectoryStatus local = new DirectoryStatus();
+                client.fillDirectoryStatus(local, CurrentDirectory.FullName);
+                CurrentDirectory = new DirectoryInfo(CurrentDirectory.FullName);
+                root = directory.Equals(CurrentDirectory.FullName);
+                this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new FillGrid(fill_grid), local);
+            }
+        }
+
+        private void Refresh_button_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        
 
     }
 }

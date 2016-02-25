@@ -426,10 +426,8 @@ namespace ServerApp
                     recvBuf = Networking.my_recv(8, s);
                     if (recvBuf == null)
                         return false;
-                    encryptedData = Networking.my_recv(BitConverter.ToInt64(recvBuf, 0), s);
-                    if (encryptedData != null)
-                        return false;
-                    byte[] file = Security.AESDecrypt(aes, encryptedData);
+                    Int64 fileLen = BitConverter.ToInt64(recvBuf, 0);
+                    byte[] file = Networking.recvEncryptedFile(fileLen, s, aes);
                     if (file == null)
                         return false;
                     return DBmanager.insertFile(conn, newStatus, filename, path, file, lastModTime);
@@ -469,10 +467,8 @@ namespace ServerApp
                 recvBuf = Networking.my_recv(8, s);
                 if (recvBuf == null)
                     return false;
-                encryptedData = Networking.my_recv(BitConverter.ToInt64(recvBuf, 0), s);
-                if (encryptedData != null)
-                    return false;
-                byte[] file = Security.AESDecrypt(aes, encryptedData);
+                Int64 fileLen = BitConverter.ToInt64(recvBuf, 0);
+                byte[] file = Networking.recvEncryptedFile(fileLen, s, aes);
                 if (file == null)
                     return false;
 
