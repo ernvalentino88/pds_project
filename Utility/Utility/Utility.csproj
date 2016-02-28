@@ -60,6 +60,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="WatcherTest.cs" />
     <Compile Include="DBmanager.cs" />
     <Compile Include="DirectoryFile.cs" />
     <Compile Include="DirectoryStatus.cs" />
