@@ -64,33 +64,37 @@ public class WatcherTest
             watcher.EnableRaisingEvents = false;
 
             //elaborate info about file
-            FileInfo fi = new FileInfo(e.FullPath);
+            //FileInfo fi = new FileInfo(e.FullPath);
+           
             //exclude files started from '~','$' and '.'(hidden files)
-            if (fi.Name[0].Equals('~') == false && fi.Name[0].Equals('$') == false && fi.Name[0].Equals('.') == false) 
-           {
+            //if (fi.Name[0].Equals('~') == false && fi.Name[0].Equals('$') == false && fi.Name[0].Equals('.') == false && fi.Extension.Equals(".tmp") == false && fi.Extension.Equals(".TMP") == false && fi.Extension.Equals("") == false) 
+           //{
                 // Determine if entry is directory or file
-                if ((fi.Attributes & FileAttributes.Directory) == FileAttributes.Directory)
+                if (Directory.Exists(e.FullPath))
                 {    //directory
-                    Console.WriteLine("Directory: " + e.FullPath + " " + e.ChangeType);
+                    DirectoryInfo di = new DirectoryInfo(e.FullPath);
+                        Console.WriteLine("Directory: " + e.FullPath + " " + e.ChangeType);
+                    
 
                 }
-                else
+                if (File.Exists(e.FullPath))
                 {
                     //file
                     /******Usefull but not working*****/
                     /*
                         //check if file is hidden or not
-                        if ((fi.Attributes & FileAttributes.Hidden) == FileAttributes.Hidden)
+
+                            if ((fi.Attributes & FileAttributes.Hidden) ==FileAttributes.Hidden)
                           {
                             //file is not hidden
-                     
-                        } 
+                              Console.WriteLine("File: " + e.FullPath + " " + e.ChangeType);
+                       } 
                      */
-
+                    //FileInfo fi = new FileInfo(e.FullPath);
                     // Specify what is done when a file is changed, created, or deleted.
                     Console.WriteLine("File: " + e.FullPath + " " + e.ChangeType);
                 }
-           }
+           //}
         }
         catch (System.UnauthorizedAccessException) { 
             //file protetto o non puo essere aperto perche' e' eseguibile
@@ -113,19 +117,23 @@ public class WatcherTest
             //if from ~->.doc changed
             FileInfo fi_old = new FileInfo(e.OldFullPath);
             FileInfo fi_new = new FileInfo(e.FullPath);
-            if (fi_old.Name[0].Equals('~'))
-            {
-                //file doc changed
-                Console.WriteLine("File with ~: " + e.FullPath + " Changed");
-            }
-            else
-            {
-                if (fi_new.Name[0].Equals('~') != true)
+        /*
+           // if (/*fi_old.Extension.Equals(".tmp") == false && fi_old.Extension.Equals(".TMP") == false &&/ fi_new.Extension.Equals(".tmp") == false && fi_new.Extension.Equals(".TMP") == false)
+           // {
+                if ((fi_old.Name[0].Equals('~') && fi_new.Name[0].Equals('~') != true) ||( fi_new.Extension.Equals(".tmp") == false && fi_new.Extension.Equals(".TMP") == false))
                 {
-                    // Specify what is done when a file is renamed.
-                    Console.WriteLine("File: {0} renamed to {1}", e.OldFullPath, e.FullPath);
+                    //file Microsoft changed
+                    Console.WriteLine("File with MICROSOFT: " + e.FullPath + " Changed");
                 }
+                else
+                {
+                    if (fi_new.Name[0].Equals('~') != true && (fi_new.Extension.Equals(".tmp") == false && fi_new.Extension.Equals(".TMP") == false))
+                    {  */
+                        // Specify what is done when a file is renamed.
+                        Console.WriteLine("File: {0} renamed to {1}", e.OldFullPath, e.FullPath);
+                //    }
 
-            }
+            //    }
+           // }
    }
 }
