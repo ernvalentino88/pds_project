@@ -4,3 +4,9 @@ C:\Users\John\Documents\GitHub\pds_project\WatcherTest\WatcherTest\bin\Debug\Wat
 C:\Users\John\Documents\GitHub\pds_project\WatcherTest\WatcherTest\obj\Debug\WatcherTest.exe
 C:\Users\John\Documents\GitHub\pds_project\WatcherTest\WatcherTest\obj\Debug\WatcherTest.pdb
 C:\Users\John\Documents\GitHub\pds_project\WatcherTest\WatcherTest\obj\Debug\WatcherTest.csprojResolveAssemblyReference.cache
+C:\Users\Ernesto\Documents\GitHub\pds_project\WatcherTest\WatcherTest\bin\Debug\WatcherTest.exe.config
+C:\Users\Ernesto\Documents\GitHub\pds_project\WatcherTest\WatcherTest\obj\Debug\WatcherTest.exe
+C:\Users\Ernesto\Documents\GitHub\pds_project\WatcherTest\WatcherTest\obj\Debug\WatcherTest.pdb
+C:\Users\Ernesto\Documents\GitHub\pds_project\WatcherTest\WatcherTest\bin\Debug\WatcherTest.exe
+C:\Users\Ernesto\Documents\GitHub\pds_project\WatcherTest\WatcherTest\bin\Debug\WatcherTest.pdb
+C:\Users\Ernesto\Documents\GitHub\pds_project\WatcherTest\WatcherTest\obj\Debug\WatcherTest.csprojResolveAssemblyReference.cache

@@ -558,3 +558,105 @@ Nome parametro: key
    at System.IO.Directory.EnumerateFileSystemEntries(String path)
    at ClientApp.Client.fillDirectoryStatus(DirectoryStatus local, String directory) in c:\Users\John\Documents\GitHub\pds_project\Client\Client\Client.cs:line 436
    at ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\John\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:line 124
+01/03/2016 12:37:17 ***Fatal Error***  Impossibile accedere a un oggetto eliminato.
+Nome oggetto: 'System.Net.Sockets.Socket'.
+   in System.Net.Sockets.Socket.Send(Byte[] buffer, Int32 offset, Int32 size, SocketFlags socketFlags, SocketError& errorCode)
+   in System.Net.Sockets.Socket.Send(Byte[] buffer, Int32 offset, Int32 size, SocketFlags socketFlags)
+   in System.Net.Sockets.Socket.Send(Byte[] buffer)
+   in ClientApp.Client.keyExchangeTcpClient() in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\Client.cs:riga 92
+   in ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 89
+01/03/2016 12:37:25 ***Fatal Error***  Questo tipo di CollectionView non supporta modifiche al SourceCollection corrispondente da un thread diverso dal thread del dispatcher.
+   in System.Windows.Data.CollectionView.OnCollectionChanged(Object sender, NotifyCollectionChangedEventArgs args)
+   in System.Collections.ObjectModel.ObservableCollection`1.OnCollectionChanged(NotifyCollectionChangedEventArgs e)
+   in System.Collections.ObjectModel.ObservableCollection`1.ClearItems()
+   in System.Collections.ObjectModel.Collection`1.Clear()
+   in ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 96
+01/03/2016 12:37:37 ***Fatal Error***  Questo tipo di CollectionView non supporta modifiche al SourceCollection corrispondente da un thread diverso dal thread del dispatcher.
+   in System.Windows.Data.CollectionView.OnCollectionChanged(Object sender, NotifyCollectionChangedEventArgs args)
+   in System.Collections.ObjectModel.ObservableCollection`1.OnCollectionChanged(NotifyCollectionChangedEventArgs e)
+   in System.Collections.ObjectModel.ObservableCollection`1.ClearItems()
+   in System.Collections.ObjectModel.Collection`1.Clear()
+   in ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 96
+02/03/2016 00:07:27 ***Fatal Error***  Impossibile accedere a un oggetto eliminato.
+Nome oggetto: 'System.Net.Sockets.Socket'.
+   in System.Net.Sockets.Socket.Send(Byte[] buffer, Int32 offset, Int32 size, SocketFlags socketFlags, SocketError& errorCode)
+   in System.Net.Sockets.Socket.Send(Byte[] buffer, Int32 offset, Int32 size, SocketFlags socketFlags)
+   in System.Net.Sockets.Socket.Send(Byte[] buffer)
+   in ClientApp.Client.getRemoteStatus(DirectoryStatus remoteStatus, String directory) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\Client.cs:riga 347
+   in ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 119
+02/03/2016 00:08:17 ***Fatal Error***  Impossibile accedere a un oggetto eliminato.
+Nome oggetto: 'System.Net.Sockets.Socket'.
+   in System.Net.Sockets.Socket.Send(Byte[] buffer, Int32 offset, Int32 size, SocketFlags socketFlags, SocketError& errorCode)
+   in System.Net.Sockets.Socket.Send(Byte[] buffer, Int32 offset, Int32 size, SocketFlags socketFlags)
+   in System.Net.Sockets.Socket.Send(Byte[] buffer)
+   in ClientApp.Client.getRemoteStatus(DirectoryStatus remoteStatus, String directory) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\Client.cs:riga 347
+   in ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 119
+02/03/2016 00:58:15 ***Fatal Error***  Impossibile stabilire la connessione. Rifiuto persistente del computer di destinazione 127.0.0.1:8001
+   in System.Net.Sockets.TcpClient.Connect(String hostname, Int32 port)
+   in ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 84
+02/03/2016 01:39:09 ***Fatal Error***  Generata eccezione di tipo 'System.OutOfMemoryException'.
+   in Utility.Networking.my_recv(Int32 size, Socket s) in c:\Users\Ernesto\Documents\GitHub\pds_project\Utility\Utility\Networking.cs:riga 45
+   in ClientApp.Client.getRemoteStatus(DirectoryStatus remoteStatus, String directory) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\Client.cs:riga 370
+   in ClientApp.Client.firstSynch(DirectoryStatus local, DirectoryStatus remote, String directory) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\Client.cs:riga 418
+   in ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 118
+02/03/2016 01:39:23 ***Fatal Error***  Impossibile accedere a un oggetto eliminato.
+Nome oggetto: 'System.Net.Sockets.Socket'.
+   in System.Net.Sockets.Socket.Send(Byte[] buffer, Int32 offset, Int32 size, SocketFlags socketFlags, SocketError& errorCode)
+   in System.Net.Sockets.Socket.Send(Byte[] buffer, Int32 offset, Int32 size, SocketFlags socketFlags)
+   in System.Net.Sockets.Socket.Send(Byte[] buffer)
+   in ClientApp.Client.keyExchangeTcpClient() in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\Client.cs:riga 92
+   in ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 89
+02/03/2016 01:49:17 ***Fatal Error***  I dati di input non sono un blocco completo.
+   in System.Security.Cryptography.CapiSymmetricAlgorithm.TransformFinalBlock(Byte[] inputBuffer, Int32 inputOffset, Int32 inputCount)
+   in System.Security.Cryptography.CryptoStream.FlushFinalBlock()
+   in System.Security.Cryptography.CryptoStream.Dispose(Boolean disposing)
+   in System.IO.Stream.Close()
+   in Utility.Security.AESDecrypt(Aes aes, Byte[] dataToDecrypt) in c:\Users\Ernesto\Documents\GitHub\pds_project\Utility\Utility\Security.cs:riga 128
+   in ClientApp.Client.getRemoteStatus(DirectoryStatus remoteStatus, String directory) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\Client.cs:riga 369
+   in ClientApp.Client.firstSynch(DirectoryStatus local, DirectoryStatus remote, String directory) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\Client.cs:riga 418
+   in ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 118
+02/03/2016 01:49:26 ***Fatal Error***  Formato del percorso non valido.
+   in System.IO.Path.NormalizePath(String path, Boolean fullCheck, Int32 maxPathLength, Boolean expandShortPaths)
+   in System.IO.Path.GetFullPathInternal(String path)
+   in System.IO.FileSystemEnumerableIterator`1..ctor(String path, String originalUserPath, String searchPattern, SearchOption searchOption, SearchResultHandler`1 resultHandler, Boolean checkHost)
+   in System.IO.Directory.EnumerateFileSystemEntries(String path)
+   in ClientApp.Client.fillDirectoryStatus(DirectoryStatus local, String directory) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\Client.cs:riga 428
+   in ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 114
+02/03/2016 01:49:37 ***Fatal Error***  I dati di input non sono un blocco completo.
+   in System.Security.Cryptography.CapiSymmetricAlgorithm.TransformFinalBlock(Byte[] inputBuffer, Int32 inputOffset, Int32 inputCount)
+   in System.Security.Cryptography.CryptoStream.FlushFinalBlock()
+   in System.Security.Cryptography.CryptoStream.Dispose(Boolean disposing)
+   in System.IO.Stream.Close()
+   in Utility.Security.AESDecrypt(Aes aes, Byte[] dataToDecrypt) in c:\Users\Ernesto\Documents\GitHub\pds_project\Utility\Utility\Security.cs:riga 128
+   in ClientApp.Client.getRemoteStatus(DirectoryStatus remoteStatus, String directory) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\Client.cs:riga 369
+   in ClientApp.Client.firstSynch(DirectoryStatus local, DirectoryStatus remote, String directory) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\Client.cs:riga 418
+   in ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 118
+02/03/2016 01:50:00 ***Fatal Error***  I dati di input non sono un blocco completo.
+   in System.Security.Cryptography.CapiSymmetricAlgorithm.TransformFinalBlock(Byte[] inputBuffer, Int32 inputOffset, Int32 inputCount)
+   in System.Security.Cryptography.CryptoStream.FlushFinalBlock()
+   in System.Security.Cryptography.CryptoStream.Dispose(Boolean disposing)
+   in System.IO.Stream.Close()
+   in Utility.Security.AESDecrypt(Aes aes, Byte[] dataToDecrypt) in c:\Users\Ernesto\Documents\GitHub\pds_project\Utility\Utility\Security.cs:riga 128
+   in ClientApp.Client.getRemoteStatus(DirectoryStatus remoteStatus, String directory) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\Client.cs:riga 369
+   in ClientApp.Client.firstSynch(DirectoryStatus local, DirectoryStatus remote, String directory) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\Client.cs:riga 418
+   in ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 118
+02/03/2016 01:50:05 ***Fatal Error***  Formato del percorso non valido.
+   in System.IO.Path.NormalizePath(String path, Boolean fullCheck, Int32 maxPathLength, Boolean expandShortPaths)
+   in System.IO.Path.GetFullPathInternal(String path)
+   in System.IO.FileSystemEnumerableIterator`1..ctor(String path, String originalUserPath, String searchPattern, SearchOption searchOption, SearchResultHandler`1 resultHandler, Boolean checkHost)
+   in System.IO.Directory.EnumerateFileSystemEntries(String path)
+   in ClientApp.Client.fillDirectoryStatus(DirectoryStatus local, String directory) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\Client.cs:riga 428
+   in ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 114
+02/03/2016 02:09:12 ***Fatal Error***  Il riempimento non è valido e non può essere rimosso.
+   in System.Security.Cryptography.CapiSymmetricAlgorithm.DepadBlock(Byte[] block, Int32 offset, Int32 count)
+   in System.Security.Cryptography.CapiSymmetricAlgorithm.TransformFinalBlock(Byte[] inputBuffer, Int32 inputOffset, Int32 inputCount)
+   in System.Security.Cryptography.CryptoStream.FlushFinalBlock()
+   in System.Security.Cryptography.CryptoStream.Dispose(Boolean disposing)
+   in System.IO.Stream.Close()
+   in Utility.Security.AESDecrypt(Aes aes, Byte[] dataToDecrypt) in c:\Users\Ernesto\Documents\GitHub\pds_project\Utility\Utility\Security.cs:riga 128
+   in ClientApp.Client.getRemoteStatus(DirectoryStatus remoteStatus, String directory) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\Client.cs:riga 394
+   in ClientApp.Client.firstSynch(DirectoryStatus local, DirectoryStatus remote, String directory) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\Client.cs:riga 418
+   in ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 118
+02/03/2016 02:12:50 ***Fatal Error***  Impossibile stabilire la connessione. Rifiuto persistente del computer di destinazione 127.0.0.1:8001
+   in System.Net.Sockets.TcpClient.Connect(String hostname, Int32 port)
+   in ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 84

@@ -34,7 +34,8 @@ namespace Utility
             UPD = 14,
             DEL = 15,
             INIT_SYNCH = 16,
-            DIR = 17
+            DIR = 17,
+            FILE = 18
         };
 
         public static byte[] my_recv(int size, Socket s)
@@ -99,8 +100,9 @@ namespace Utility
         public static byte[] recvEncryptedFile(Int64 size, Socket s,AesCryptoServiceProvider key)
         {
             Int64 left = size;
+            
             //adjust size for receive correct number of bytes after encrypt
-            left = (left % 16 == 0) ? left : (left + (16 - (left % 16)));
+            //left += 16 - (left % 16);
             byte[] received = new byte[size];
             try
             {
@@ -112,11 +114,12 @@ namespace Utility
                         byte[] buffer = my_recv(dim, s);
                         if (buffer == null)
                             return null;
-                        byte[] decryptedData = Security.AESDecrypt(key, buffer);
-                        if (decryptedData == null)
-                            return null;
-                        ms.Write(decryptedData, 0, decryptedData.Length);
-                        left -= buffer.Length;
+                        //byte[] decryptedData = Security.AESDecrypt(key, buffer);
+                        //if (decryptedData == null)
+                        //    return null;
+                        //ms.Write(decryptedData, 0, decryptedData.Length);
+                        ms.Write(buffer, 0, buffer.Length);
+                        left -= dim;
                     }
                 }
             }
@@ -126,6 +129,5 @@ namespace Utility
             }
             return received;
         }
-
     }
 }

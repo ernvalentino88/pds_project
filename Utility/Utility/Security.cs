@@ -208,6 +208,12 @@ namespace Utility
             return Encoding.UTF8.GetString(decryptedBytes);
         }
 
+        public static void EncryptFile(AesCryptoServiceProvider aes, String filename)
+        {
+            FileStream fs = new FileStream(filename, FileMode.Open, FileAccess.Read);
+            
+        }
+
         public static byte[] XOR(byte[] a, byte[] b)
         {
             byte[] xored = (a.Length >= b.Length) ? new byte[a.Length] : new byte[b.Length];

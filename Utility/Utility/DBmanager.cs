@@ -76,53 +76,66 @@ namespace Utility
 
         public static DirectoryStatus getLastSnapshot(String directory, String username)
         {
+            DirectoryStatus ds = new DirectoryStatus();
+            ds.FolderPath = directory;
+            ds.Username = username;
+            String date = null;
             try
             {
-                DirectoryStatus ds = null;
                 using (var con = new SQLiteConnection(connectionString))
                 {
                     con.Open();
                     using (var cmd = con.CreateCommand())
                     {
-                        cmd.CommandText = @"select * from snapshots where user_id = @id" 
-                                +" and substr(path,1,@len) = @dir and creation_time ="
-                                +" (select max(creation_time) from snapshots where"
-                                +" user_id = @id and substr(path,1,@len) = @dir;";
+                        int len = directory.Length;
+                        cmd.CommandText = @"select max(creation_time) from snapshots where"
+                                + " user_id = @id and substr(path,1," + len + ") = @dir;";
                         cmd.Parameters.AddWithValue("@id", username);
-                        cmd.Parameters.AddWithValue("@len", directory.Length);
                         cmd.Parameters.AddWithValue("@dir", directory);
-                        using (var reader = cmd.ExecuteReader())
+                        object val = cmd.ExecuteScalar();
+                        date = (val == System.DBNull.Value) ? null : (String)val;
+                    }
+                    if (date != null)
+                    {
+                        ds.CreationTime = DateTime.ParseExact(date, date_format, null);
+                        using (var cmd = con.CreateCommand())
                         {
-                            if (reader.HasRows)
+                            int len = directory.Length;
+                            cmd.CommandText = @"select * from snapshots where user_id = @id"
+                                    + " and substr(path,1," + len + ") = @dir and creation_time ="
+                                    + " @date;";
+                            cmd.Parameters.AddWithValue("@id", username);
+                            cmd.Parameters.AddWithValue("@dir", directory);
+                            cmd.Parameters.AddWithValue("@date", date);
+                            using (var reader = cmd.ExecuteReader())
                             {
-                                ds = new DirectoryStatus();
-                                ds.FolderPath = directory;
-                                ds.Username = username;
-                                ds.CreationTime = reader.GetDateTime(3);
-                            }
-                            while (reader.Read())
-                            {
-                                DirectoryFile file = new DirectoryFile();
-                                file.UserId = username;
-                                file.Path = (String)reader["path"];
-                                file.Id = (Int64)reader["file_id"];
-                                file.Filename = (String)reader["filename"];
-                                file.Checksum = (String)reader["checksum"];
-                                file.Deleted = (Boolean)reader["deleted"];
-                                file.Directory = (Boolean)reader["directory"];
-                                if (file.Directory)
-                                    file.Fullname = file.Path;
-                                else 
-                                    file.Fullname = Path.Combine(file.Path, file.Filename);
-                                ds.Files.Add(file.Fullname,file);
+                                while (reader.Read())
+                                {
+                                    DirectoryFile file = new DirectoryFile();
+                                    file.UserId = username;
+                                    file.Directory = (Boolean)reader["directory"];
+                                    file.Path = (String)reader["path"];
+                                    file.Filename = (String)reader["filename"];
+                                    file.Deleted = (Boolean)reader["deleted"];
+                                    if (file.Directory)
+                                    {
+                                        file.Fullname = file.Path;
+                                    }
+                                    else
+                                    {
+                                        file.Fullname = Path.Combine(file.Path, file.Filename);
+                                        file.Id = (Int64)reader["file_id"];
+                                        file.Checksum = (String)reader["checksum"];
+                                    }
+                                    ds.Files.Add(file.Fullname, file);
+                                }
                             }
                         }
                     }
                 }
-                return ds;
             }
             catch (SQLiteException) { }
-            return null;
+            return ds;
         }
 
         public static bool insertDirectory(SQLiteConnection conn, DirectoryStatus newStatus, String filename, String path)
@@ -132,9 +145,9 @@ namespace Utility
                 using (SQLiteCommand cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = @"insert into snapshots (user_id,creation_time,path,filename,directory) values"
-                        + " @user, @creationTime, @path, @filename, @directory";
+                        + " (@user, @creationTime, @path, @filename, @directory);";
                     cmd.Parameters.AddWithValue("@user", newStatus.Username);
-                    cmd.Parameters.AddWithValue("@creation_time", newStatus.CreationTime.ToString(date_format));
+                    cmd.Parameters.AddWithValue("@creationTime", newStatus.CreationTime.ToString(date_format));
                     cmd.Parameters.AddWithValue("@path", path);
                     cmd.Parameters.AddWithValue("@filename", filename);
                     cmd.Parameters.AddWithValue("@directory", true);
@@ -157,7 +170,7 @@ namespace Utility
                 using (SQLiteCommand cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = @"insert into files (user_id,path,filename,content,last_mod_time) values"
-                            + " @user, @path, @filename, @content, @lastModTime";
+                            + " (@user, @path, @filename, @content, @lastModTime);";
                     cmd.Parameters.AddWithValue("@user", newStatus.Username);
                     cmd.Parameters.AddWithValue("@path", path);
                     cmd.Parameters.AddWithValue("@filename", filename);
@@ -169,9 +182,9 @@ namespace Utility
                 using (SQLiteCommand cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = "select file_id from files where user_id = @user and path = @path and"
-                            + " filename = @filename and last_mod_time = @lastModTime";
+                            + " filename = @filename and last_mod_time = @lastModTime;";
                     cmd.Parameters.AddWithValue("@user", newStatus.Username);
-                    cmd.Parameters.AddWithValue("@path", filename);
+                    cmd.Parameters.AddWithValue("@path", path);
                     cmd.Parameters.AddWithValue("@filename", filename);
                     cmd.Parameters.AddWithValue("@lastModTime", lastModTime.ToString(date_format));
                     using (var reader = cmd.ExecuteReader())
@@ -188,10 +201,10 @@ namespace Utility
                 using (SQLiteCommand cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = @"insert into snapshots (user_id,file_id,creation_time,checksum,path,filename) values"
-                        + " @user, @fileId, @creationTime, @checksum, @path, @filename";
+                        + " (@user, @fileId, @creationTime, @checksum, @path, @filename);";
                     cmd.Parameters.AddWithValue("@user", newStatus.Username);
                     cmd.Parameters.AddWithValue("@fileId", fileId);
-                    cmd.Parameters.AddWithValue("@creation_time", newStatus.CreationTime.ToString(date_format));
+                    cmd.Parameters.AddWithValue("@creationTime", newStatus.CreationTime.ToString(date_format));
                     cmd.Parameters.AddWithValue("@checksum", checksum);
                     cmd.Parameters.AddWithValue("@path", path);
                     cmd.Parameters.AddWithValue("@filename", filename);
@@ -210,7 +223,7 @@ namespace Utility
             int maxId=-1;
             try
             {
-                string selectMaxId = "select max(fileId) from files";
+                string selectMaxId = "select max(fileId) from files;";
                 SQLiteCommand selectMaxCmd = new SQLiteCommand(selectMaxId, connection);
                 object val = selectMaxCmd.ExecuteScalar();
                 maxId = int.Parse(val.ToString());
@@ -229,9 +242,9 @@ namespace Utility
                 using (SQLiteCommand cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = @"insert into snapshots (user_id,creation_time,path,filename,directory,deleted) values"
-                        + " @user, @creationTime, @path, @filename, @directory, @deleted";
+                        + " (@user, @creationTime, @path, @filename, @directory, @deleted);";
                     cmd.Parameters.AddWithValue("@user", newStatus.Username);
-                    cmd.Parameters.AddWithValue("@creation_time", newStatus.CreationTime.ToString(date_format));
+                    cmd.Parameters.AddWithValue("@creationTime", newStatus.CreationTime.ToString(date_format));
                     cmd.Parameters.AddWithValue("@path", path);
                     cmd.Parameters.AddWithValue("@filename", filename);
                     cmd.Parameters.AddWithValue("@directory", true);
@@ -255,10 +268,10 @@ namespace Utility
                 using (SQLiteCommand cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = @"insert into snapshots (user_id,file_id,creation_time,checksum,path,filename,deleted) values"
-                        + " @user, @fileId, @creationTime, @checksum, @path, @filename, @deleted";
+                        + " (@user, @fileId, @creationTime, @checksum, @path, @filename, @deleted);";
                     cmd.Parameters.AddWithValue("@user", file.UserId);
                     cmd.Parameters.AddWithValue("@fileId", file.Id);
-                    cmd.Parameters.AddWithValue("@creation_time", newStatus.CreationTime.ToString(date_format));
+                    cmd.Parameters.AddWithValue("@creationTime", newStatus.CreationTime.ToString(date_format));
                     cmd.Parameters.AddWithValue("@checksum", file.Checksum);
                     cmd.Parameters.AddWithValue("@path", file.Path);
                     cmd.Parameters.AddWithValue("@filename", file.Filename);
@@ -289,9 +302,9 @@ namespace Utility
                         if (file.Directory)
                         {
                             cmd.CommandText = @"insert into snapshots (user_id,creation_time,path,filename,directory,deleted) values"
-                                + " @user, @creationTime, @path, @filename, @directory, @deleted";
+                                + " (@user, @creationTime, @path, @filename, @directory, @deleted);";
                             cmd.Parameters.AddWithValue("@user", newStatus.Username);
-                            cmd.Parameters.AddWithValue("@creation_time", newStatus.CreationTime.ToString(date_format));
+                            cmd.Parameters.AddWithValue("@creationTime", newStatus.CreationTime.ToString(date_format));
                             cmd.Parameters.AddWithValue("@path", file.Path);
                             cmd.Parameters.AddWithValue("@filename", file.Filename);
                             cmd.Parameters.AddWithValue("@directory", file.Directory);
@@ -302,10 +315,10 @@ namespace Utility
                         else
                         {
                             cmd.CommandText = @"insert into snapshots (user_id,file_id,creation_time,checksum,path,deleted) values"
-                                + " @user, @fileId, @creationTime, @checksum, @path, @deleted";
+                                + " (@user, @fileId, @creationTime, @checksum, @path, @deleted);";
                             cmd.Parameters.AddWithValue("@user", file.UserId);
                             cmd.Parameters.AddWithValue("@fileId", file.Id);
-                            cmd.Parameters.AddWithValue("@creation_time", newStatus.CreationTime.ToString(date_format));
+                            cmd.Parameters.AddWithValue("@creationTime", newStatus.CreationTime.ToString(date_format));
                             cmd.Parameters.AddWithValue("@checksum", file.Checksum);
                             cmd.Parameters.AddWithValue("@path", file.Path);
                             cmd.Parameters.AddWithValue("@filename", file.Filename);

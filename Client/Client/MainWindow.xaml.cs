@@ -106,32 +106,20 @@ namespace ClientApp
                             String bannerMsg = "Your session is expired, please login again";
                             this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegateAsync(updateUI_banner), msg, title, bannerMsg);
                         }
-                        msg = "resumed: " + sessionId;
-                        this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegate(updateUI), msg);
-                        //if (!client.sendDirectory(directory))
-                        //{
-                        //    connected = false;
-                        //    tcpClient.Close();
-                        //    msg = "Log in to the remote server";
-                        //    String title = "You were disconncted";
-                        //    String bannerMsg = "Your session is expired, please login again";
-                        //    this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegateAsync(updateUI_banner), msg, title, bannerMsg);
-                        //}
+                        
                         DirectoryStatus local = new DirectoryStatus();
                         local.FolderPath = directory;
                         local.Username = username;
                         root = true;
                         client.fillDirectoryStatus(local, directory);
-                        this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new FillGrid(fill_grid), local);
-                        //DirectoryStatus remote = new DirectoryStatus();
-                        //remote.Username = username;
-                        //remote.FolderPath = directory;
-                        //if (client.startSynch(remote) >= 0)
-                        //{
-
-                        //    client.synchronize(local, remote);
-                        //}
-
+                        DirectoryStatus remote = new DirectoryStatus();
+                        remote.Username = username;
+                        remote.FolderPath = directory;
+                        client.firstSynch(local, remote, directory);
+                        client.getRemoteStatus(remote, directory);
+                        this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new FillGrid(fill_grid), remote);
+                        
+                        
                     }
                 }
                 catch (SocketException se)
@@ -168,6 +156,7 @@ namespace ClientApp
 
         private void fill_grid(DirectoryStatus status)
         {
+            FileList.Clear();
             if (root)
             {
                 //see turn back botton
@@ -178,7 +167,6 @@ namespace ClientApp
                 //don't see botton
                 this.Back_button.IsEnabled = true;
             }
-            FileList.Clear();
             foreach (var item in status.Files)
             {
                 FileListItem fl = new FileListItem(item.Value);
