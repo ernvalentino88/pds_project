@@ -463,6 +463,7 @@ namespace ServerApp
                 if (recvBuf == null)
                     return false;
                 DateTime lastModTime = DateTime.FromBinary(BitConverter.ToInt64(recvBuf, 0));
+
                 byte[] command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.OK);
                 s.Send(command);
                 recvBuf = Networking.my_recv(8, s);
@@ -537,6 +538,16 @@ namespace ServerApp
                         encryptedData = Security.AESEncrypt(aes, buf);
                         s.Send(BitConverter.GetBytes(encryptedData.Length));
                         s.Send(encryptedData);
+                        if (file.Deleted)
+                        {
+                            command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.DEL);
+                            s.Send(command);
+                        }
+                        else
+                        {
+                            command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.OK);
+                            s.Send(command);
+                        }
                         if (file.Directory)
                         {
                             command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.DIR);

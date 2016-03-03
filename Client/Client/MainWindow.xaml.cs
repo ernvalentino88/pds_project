@@ -42,7 +42,7 @@ namespace ClientApp
         private Client client;
         private DirectoryInfo CurrentDirectory;
         private ObservableCollection<FileListItem> FileList;
-        private String directory;
+        private String RootDirectory;
 
         public MainWindow()
         {
@@ -89,37 +89,49 @@ namespace ClientApp
                     if (client.keyExchangeTcpClient())
                     {
                         Int64 sessionId = client.authenticationTcpClient(username, pwd);
-                        msg = "" + sessionId;
-                        this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegate(updateUI), msg);
+                        if (sessionId <= 0)
+                        {
+                            if (sessionId == -1)
+                            {
+                                //network or other error
+                            }
+                            if (sessionId == -2 || sessionId == -1)
+                            {
+                                //username or password not correct
+                            }
+                        }
                         client.Server = new IPEndPoint(IPAddress.Parse(address), portInt);
                         client.UserId = username;
                         DispatcherOperation result = this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new LoginDelegate(updateUI_logged));
                         result.Wait();
-                        directory = (String)result.Result;
-
-                        if (!client.resumeSession())
+                        RootDirectory = (String)result.Result;
+                        if (RootDirectory != null && RootDirectory != String.Empty)
                         {
-                            connected = false;
-                            tcpClient.Close();
-                            msg = "Log in to the remote server";
-                            String title = "You were disconncted";
-                            String bannerMsg = "Your session is expired, please login again";
-                            this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegateAsync(updateUI_banner), msg, title, bannerMsg);
+                            if (!client.resumeSession())
+                            {
+                                connected = false;
+                                tcpClient.Close();
+                                msg = "Log in to the remote server";
+                                String title = "You were disconncted";
+                                String bannerMsg = "Your session is expired, please login again";
+                                this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegateAsync(updateUI_banner), msg, title, bannerMsg);
+                            }
+
+                            DirectoryStatus local = new DirectoryStatus();
+                            local.FolderPath = RootDirectory;
+                            local.Username = username;
+                            root = true;
+                            client.fillDirectoryStatus(local, RootDirectory);
+                            DirectoryStatus remote = new DirectoryStatus();
+                            remote.Username = username;
+                            remote.FolderPath = RootDirectory;
+                            client.firstSynch(local, remote, RootDirectory);
+                            remote = new DirectoryStatus();
+                            remote.Username = username;
+                            remote.FolderPath = RootDirectory;
+                            client.getRemoteStatus(remote, RootDirectory);
+                            this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new FillGrid(fill_grid), remote);
                         }
-                        
-                        DirectoryStatus local = new DirectoryStatus();
-                        local.FolderPath = directory;
-                        local.Username = username;
-                        root = true;
-                        client.fillDirectoryStatus(local, directory);
-                        DirectoryStatus remote = new DirectoryStatus();
-                        remote.Username = username;
-                        remote.FolderPath = directory;
-                        client.firstSynch(local, remote, directory);
-                        client.getRemoteStatus(remote, directory);
-                        this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new FillGrid(fill_grid), remote);
-                        
-                        
                     }
                 }
                 catch (SocketException se)
@@ -366,7 +378,7 @@ namespace ClientApp
                 DirectoryStatus local = new DirectoryStatus();
                 client.fillDirectoryStatus(local, item.Path);
                 CurrentDirectory = new DirectoryInfo(item.Path);
-                root = directory.Equals(item.Path);
+                root = RootDirectory.Equals(item.Path);
                 this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new FillGrid(fill_grid), local);
             }
         }
@@ -379,7 +391,7 @@ namespace ClientApp
                 DirectoryStatus local = new DirectoryStatus();
                 client.fillDirectoryStatus(local, CurrentDirectory.FullName);
                 CurrentDirectory = new DirectoryInfo(CurrentDirectory.FullName);
-                root = directory.Equals(CurrentDirectory.FullName);
+                root = RootDirectory.Equals(CurrentDirectory.FullName);
                 this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new FillGrid(fill_grid), local);
             }
         }

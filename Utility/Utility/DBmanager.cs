@@ -156,7 +156,7 @@ namespace Utility
                 //add directory
                 DirectoryFile dirFile = new DirectoryFile(path, filename, newStatus.Username, true);
                 dirFile.Directory = true;
-                newStatus.Files[dirFile.Fullname] = dirFile;
+                newStatus.Files.Add(dirFile.Fullname, dirFile);
                 return true;
             }
             catch (SQLiteException) { }
@@ -212,7 +212,7 @@ namespace Utility
                 }
                 //add file
                 DirectoryFile dirFile = new DirectoryFile((Int64)fileId, path, filename, newStatus.Username, checksum, lastModTime);
-                newStatus.Files[dirFile.Fullname] = dirFile;
+                newStatus.Files.Add(dirFile.Fullname, dirFile);
                 return true;
             }
             catch (SQLiteException) { }
@@ -254,7 +254,7 @@ namespace Utility
                 //add directory
                 DirectoryFile dirFile = new DirectoryFile(path, filename, newStatus.Username, true);
                 dirFile.Deleted = true;
-                newStatus.Files[dirFile.Fullname] = dirFile;
+                newStatus.Files.Add(dirFile.Fullname, dirFile);
                 return true;
             }
             catch (SQLiteException) { }
@@ -280,7 +280,7 @@ namespace Utility
                 }
                 DirectoryFile dirFile = new DirectoryFile(file.Id, file.Path, file.Filename, file.UserId, file.Checksum, file.LastModificationTime);
                 file.Deleted = true;
-                newStatus.Files[dirFile.Fullname] = dirFile;
+                newStatus.Files.Add(dirFile.Fullname, dirFile);
                 return true;
             }
             catch (SQLiteException) { }
@@ -310,12 +310,12 @@ namespace Utility
                             cmd.Parameters.AddWithValue("@directory", file.Directory);
                             cmd.Parameters.AddWithValue("@deleted", file.Deleted);
                             cmd.ExecuteNonQuery();
-                            newStatus.Files[file.Fullname] = file;
+                            newStatus.Files.Add(file.Fullname, file);
                         }
                         else
                         {
-                            cmd.CommandText = @"insert into snapshots (user_id,file_id,creation_time,checksum,path,deleted) values"
-                                + " (@user, @fileId, @creationTime, @checksum, @path, @deleted);";
+                            cmd.CommandText = @"insert into snapshots (user_id,file_id,creation_time,checksum,path,filename,deleted) values"
+                                + " (@user, @fileId, @creationTime, @checksum, @path, @filename, @deleted);";
                             cmd.Parameters.AddWithValue("@user", file.UserId);
                             cmd.Parameters.AddWithValue("@fileId", file.Id);
                             cmd.Parameters.AddWithValue("@creationTime", newStatus.CreationTime.ToString(date_format));
@@ -324,7 +324,7 @@ namespace Utility
                             cmd.Parameters.AddWithValue("@filename", file.Filename);
                             cmd.Parameters.AddWithValue("@deleted", file.Deleted);
                             cmd.ExecuteNonQuery();
-                            newStatus.Files[file.Fullname] = file;
+                            newStatus.Files.Add(file.Fullname, file);
                         }
                     }
                 }

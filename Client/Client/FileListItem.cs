@@ -15,10 +15,10 @@ namespace ClientApp
     {
         private ImageSource icon;
         private String filename;
-        private String lastModTime;
         private String path;
         private String checksum;
         private Boolean directory;
+        private Boolean deleted;
         private static ImageSource dir_img = new BitmapImage(new Uri("dir.ico", UriKind.Relative));
         private static ImageSource file_img = new BitmapImage(new Uri("file.ico", UriKind.Relative));
 
@@ -43,18 +43,6 @@ namespace ClientApp
             set
             {
                 filename = value;
-            }
-        }
-
-        public String LastModificationTime
-        {
-            get
-            {
-                return lastModTime;
-            }
-            set
-            {
-                lastModTime = value;
             }
         }
 
@@ -94,13 +82,25 @@ namespace ClientApp
             }
         }
 
+        public Boolean Deleted
+        {
+            get
+            {
+                return deleted;
+            }
+            set
+            {
+                deleted = value;
+            }
+        }
+
         public FileListItem(DirectoryFile file)
         {
             directory = file.Directory;
             filename = file.Filename;
             path = file.Path;
             checksum = file.Checksum;
-            lastModTime = (file.LastModificationTime == DateTime.MinValue) ? "" : file.LastModificationTime.ToString("ddd dd MMM yyyy HH:mm");
+            deleted = file.Deleted;
             icon = (directory == true) ? dir_img : file_img;
         }
     }

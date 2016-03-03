@@ -378,6 +378,13 @@ namespace ClientApp
                         command = Networking.my_recv(4, s);
                         if (command == null)
                             return -1;
+                        if ((Networking.CONNECTION_CODES)BitConverter.ToUInt32(command, 0) == Networking.CONNECTION_CODES.DEL)
+                        {
+                            file.Deleted = true;
+                        }
+                        command = Networking.my_recv(4, s);
+                        if (command == null)
+                            return -1;
                         if ((Networking.CONNECTION_CODES)BitConverter.ToUInt32(command, 0) == Networking.CONNECTION_CODES.DIR)
                         {
                             file.Directory = true;
@@ -402,7 +409,7 @@ namespace ClientApp
                             file.Fullname = file.Path;
                         else
                             file.Fullname = Path.Combine(path, filename);
-                        remoteStatus.Files.Add(filename, file);
+                        remoteStatus.Files.Add(file.Fullname, file);
                     }
                     return filesInfoToRecv;
                 }
@@ -582,39 +589,31 @@ namespace ClientApp
                 buf = BitConverter.GetBytes(encryptedData.Length);
                 s.Send(buf);
                 s.Send(encryptedData);
-                if (file.Directory)
+                
+                buf = BitConverter.GetBytes(file.LastModificationTime.ToBinary());
+                s.Send(buf);
+                command = Networking.my_recv(4, tcpClient.Client);
+                if (command != null && (
+                        ((Networking.CONNECTION_CODES)BitConverter.ToUInt32(command, 0) == Networking.CONNECTION_CODES.OK)))
                 {
-                    command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.DIR);
-                    s.Send(command);
-                }
-                else
-                {
-                    command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.FILE);
-                    s.Send(command);
-                    buf = BitConverter.GetBytes(file.LastModificationTime.ToBinary());
+                    buf = BitConverter.GetBytes(file.Length);
                     s.Send(buf);
-                    command = Networking.my_recv(4, tcpClient.Client);
-                    if (command != null && (
-                            ((Networking.CONNECTION_CODES)BitConverter.ToUInt32(command, 0) == Networking.CONNECTION_CODES.OK)))
+                    using (FileStream reader = File.OpenRead(file.Fullname))
                     {
-                        buf = BitConverter.GetBytes(file.Length);
-                        s.Send(buf);
-                        using (FileStream reader = File.OpenRead(file.Fullname))
+                        long left = file.Length;
+                        while (left > 0)
                         {
-                            long left = file.Length;
-                            while (left > 0)
-                            {
-                                int dim = (left > 4096) ? 4096 : (int)left;
-                                buf = new byte[dim];
-                                reader.Read(buf, 0, dim);
-                                //encryptedData = Security.AESEncrypt(aesKey, buf);
-                                //s.Send(encryptedData);
-                                s.Send(buf);
-                                left -= dim;
-                            }
+                            int dim = (left > 4096) ? 4096 : (int)left;
+                            buf = new byte[dim];
+                            reader.Read(buf, 0, dim);
+                            encryptedData = Security.AESEncrypt(aesKey, buf);
+                            s.Send(encryptedData);
+                            //s.Send(buf);
+                            left -= dim;
                         }
                     }
                 }
+                
             }
             catch (SocketException) { }
         }
@@ -688,9 +687,9 @@ namespace ClientApp
                                 int dim = (left > 4096) ? 4096 : (int)left;
                                 buf = new byte[dim];
                                 reader.Read(buf, 0, dim);
-                                //encryptedData = Security.AESEncrypt(aesKey, buf);
-                                //s.Send(encryptedData);
-                                s.Send(buf);
+                                encryptedData = Security.AESEncrypt(aesKey, buf);
+                                s.Send(encryptedData);
+                                //s.Send(buf);
                                 left -= dim;
                             }
                         }

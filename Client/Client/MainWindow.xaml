@@ -58,7 +58,7 @@
                         </DataGridTemplateColumn>
                         <DataGridTextColumn Header="File Name" Binding="{Binding Filename}"></DataGridTextColumn>
                         <DataGridTextColumn Header="Path" Binding="{Binding Path}"></DataGridTextColumn>
-                        <DataGridTextColumn Header="Last Modification Time" Binding="{Binding LastModificationTime}"></DataGridTextColumn>
+                        <DataGridCheckBoxColumn Header="Deleted" Binding="{Binding Deleted}"></DataGridCheckBoxColumn>
                         <DataGridTextColumn Header="Checksum" Binding="{Binding Checksum}"></DataGridTextColumn>
                     </DataGrid.Columns>
                 </DataGrid>

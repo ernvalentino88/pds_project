@@ -660,3 +660,47 @@ Nome oggetto: 'System.Net.Sockets.Socket'.
 02/03/2016 02:12:50 ***Fatal Error***  Impossibile stabilire la connessione. Rifiuto persistente del computer di destinazione 127.0.0.1:8001
    in System.Net.Sockets.TcpClient.Connect(String hostname, Int32 port)
    in ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 84
+02/03/2016 18:02:00 ***Fatal Error***  Formato del percorso non valido.
+   in System.IO.Path.NormalizePath(String path, Boolean fullCheck, Int32 maxPathLength, Boolean expandShortPaths)
+   in System.IO.Path.GetFullPathInternal(String path)
+   in System.IO.FileSystemEnumerableIterator`1..ctor(String path, String originalUserPath, String searchPattern, SearchOption searchOption, SearchResultHandler`1 resultHandler, Boolean checkHost)
+   in System.IO.Directory.EnumerateFileSystemEntries(String path)
+   in ClientApp.Client.fillDirectoryStatus(DirectoryStatus local, String directory) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\Client.cs:riga 428
+   in ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 114
+02/03/2016 18:02:07 ***Fatal Error***  Formato del percorso non valido.
+   in System.IO.Path.NormalizePath(String path, Boolean fullCheck, Int32 maxPathLength, Boolean expandShortPaths)
+   in System.IO.Path.GetFullPathInternal(String path)
+   in System.IO.FileSystemEnumerableIterator`1..ctor(String path, String originalUserPath, String searchPattern, SearchOption searchOption, SearchResultHandler`1 resultHandler, Boolean checkHost)
+   in System.IO.Directory.EnumerateFileSystemEntries(String path)
+   in ClientApp.Client.fillDirectoryStatus(DirectoryStatus local, String directory) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\Client.cs:riga 428
+   in ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 114
+02/03/2016 18:02:11 ***Fatal Error***  Formato del percorso non valido.
+   in System.IO.Path.NormalizePath(String path, Boolean fullCheck, Int32 maxPathLength, Boolean expandShortPaths)
+   in System.IO.Path.GetFullPathInternal(String path)
+   in System.IO.FileSystemEnumerableIterator`1..ctor(String path, String originalUserPath, String searchPattern, SearchOption searchOption, SearchResultHandler`1 resultHandler, Boolean checkHost)
+   in System.IO.Directory.EnumerateFileSystemEntries(String path)
+   in ClientApp.Client.fillDirectoryStatus(DirectoryStatus local, String directory) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\Client.cs:riga 428
+   in ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 114
+02/03/2016 18:02:45 ***Fatal Error***  È già stato aggiunto un elemento con la stessa chiave.
+   in System.ThrowHelper.ThrowArgumentException(ExceptionResource resource)
+   in System.Collections.Generic.Dictionary`2.Insert(TKey key, TValue value, Boolean add)
+   in System.Collections.Generic.Dictionary`2.Add(TKey key, TValue value)
+   in ClientApp.Client.getRemoteStatus(DirectoryStatus remoteStatus, String directory) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\Client.cs:riga 405
+   in ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 119
+02/03/2016 18:02:55 ***Fatal Error***  Formato del percorso non valido.
+   in System.IO.Path.NormalizePath(String path, Boolean fullCheck, Int32 maxPathLength, Boolean expandShortPaths)
+   in System.IO.Path.GetFullPathInternal(String path)
+   in System.IO.FileSystemEnumerableIterator`1..ctor(String path, String originalUserPath, String searchPattern, SearchOption searchOption, SearchResultHandler`1 resultHandler, Boolean checkHost)
+   in System.IO.Directory.EnumerateFileSystemEntries(String path)
+   in ClientApp.Client.fillDirectoryStatus(DirectoryStatus local, String directory) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\Client.cs:riga 428
+   in ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 114
+02/03/2016 19:09:31 ***Fatal Error***  Impossibile stabilire la connessione. Rifiuto persistente del computer di destinazione 127.0.0.1:8001
+   in System.Net.Sockets.TcpClient.Connect(String hostname, Int32 port)
+   in ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 84
+02/03/2016 22:48:19 ***Fatal Error***  Formato del percorso non valido.
+   in System.IO.Path.NormalizePath(String path, Boolean fullCheck, Int32 maxPathLength, Boolean expandShortPaths)
+   in System.IO.Path.GetFullPathInternal(String path)
+   in System.IO.FileSystemEnumerableIterator`1..ctor(String path, String originalUserPath, String searchPattern, SearchOption searchOption, SearchResultHandler`1 resultHandler, Boolean checkHost)
+   in System.IO.Directory.EnumerateFileSystemEntries(String path)
+   in ClientApp.Client.fillDirectoryStatus(DirectoryStatus local, String directory) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\Client.cs:riga 435
+   in ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 115

@@ -100,10 +100,10 @@ namespace Utility
         public static byte[] recvEncryptedFile(Int64 size, Socket s,AesCryptoServiceProvider key)
         {
             Int64 left = size;
-            
-            //adjust size for receive correct number of bytes after encrypt
-            //left += 16 - (left % 16);
             byte[] received = new byte[size];
+            //adjust size for receive correct number of bytes after encrypt
+            //left = (left % 16 == 0) ? left + 16 : left + (16 - (left % 16));
+            
             try
             {
                 using (MemoryStream ms = new MemoryStream(received))
@@ -111,15 +111,16 @@ namespace Utility
                     while (left > 0)
                     {
                         int dim = (left > 4096) ? 4096 : (int)left;
+                        dim = (dim % 16 == 0) ? dim + 16 : dim + (16 - (dim % 16));
                         byte[] buffer = my_recv(dim, s);
                         if (buffer == null)
                             return null;
-                        //byte[] decryptedData = Security.AESDecrypt(key, buffer);
-                        //if (decryptedData == null)
-                        //    return null;
-                        //ms.Write(decryptedData, 0, decryptedData.Length);
-                        ms.Write(buffer, 0, buffer.Length);
-                        left -= dim;
+                        byte[] decryptedData = Security.AESDecrypt(key, buffer);
+                        if (decryptedData == null)
+                            return null;
+                        ms.Write(decryptedData, 0, decryptedData.Length);
+                        //ms.Write(buffer, 0, buffer.Length);
+                        left -= decryptedData.Length;
                     }
                 }
             }
