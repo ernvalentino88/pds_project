@@ -26,10 +26,10 @@ public class WatcherTestFinal
 
         try
         {
-           // Console.WriteLine("Directory: ");
-           // String name;
-           // name = Console.ReadLine();
-            String name = @"C:\Users\John\Documents\TEST";
+            Console.WriteLine("Directory: ");
+            String name;
+            name = Console.ReadLine();
+            //String name = @"C:\Users\John\Documents\TEST";
             watcher.Path = name;
 
             /* Watch for changes in LastAccess and LastWrite times, and
@@ -58,44 +58,44 @@ public class WatcherTestFinal
     
     // Define the event handlers.
 
-    private static void OnDeleted(object source, FileSystemEventArgs e) {
-       //Console.WriteLine("! "+e.FullPath + " Deleted");
-        FileInfo fi = new FileInfo(e.FullPath);
-        if (fi.Name[0].Equals('~') == false && fi.Name[0].Equals('$') == false && fi.Name[0].Equals('.') == false && fi.Extension.Equals(".tmp") == false && fi.Extension.Equals(".TMP") == false && fi.Extension.Equals("") == false)
+    private static void OnDeleted(object source, FileSystemEventArgs e) 
+    {
+        if (!Path.HasExtension(e.FullPath))
         {
-            Console.WriteLine(e.FullPath + " Deleted");
+            //directory: a file with no extension is treated like a directory
+            Console.WriteLine("Directory: " + e.FullPath + " Deleted");
         }
-        else { 
-            //directory.exsists() doesnt work as it is deleted already
-            DirectoryInfo di = new DirectoryInfo(e.FullPath);
-            if ((di.Attributes & FileAttributes.Directory) == FileAttributes.Directory)
+        else
+        {
+            //file
+            if ( !Path.GetFileName(e.FullPath)[0].Equals('~') && !Path.GetFileName(e.FullPath)[0].Equals('$') &&
+                    !Path.GetFileName(e.FullPath)[0].Equals('~') && !Path.GetExtension(e.FullPath).Equals(".tmp") &&
+                    !Path.GetExtension(e.FullPath).Equals(".TMP") )
             {
-                
-                    Console.WriteLine(e.FullPath + " Deleted");
-                
-            } 
+                Console.WriteLine("File: " + e.FullPath + " Deleted");
+            }
         }
     }
 
     private static void OnCreated(object source, FileSystemEventArgs e)
     {   
         if (Directory.Exists(e.FullPath))
-            {    //directory
-                DirectoryInfo di = new DirectoryInfo(e.FullPath);
-                Console.WriteLine("Directory: " + e.FullPath + " Created");
-
-
-            }
+        {    
+            //directory
+            //DirectoryInfo di = new DirectoryInfo(e.FullPath);
+            Console.WriteLine("Directory: " + e.FullPath + " Created");
+        }
         if (File.Exists(e.FullPath))
-        {    //exclude files started from '~','$' and '.'(hidden files) and without extensions
+        {
+            //exclude files started from '~','$' and '.'(hidden files) and without extensions
             FileInfo fi = new FileInfo(e.FullPath);
-            if (fi.Name[0].Equals('~') == false && fi.Name[0].Equals('$') == false && fi.Name[0].Equals('.') == false && fi.Extension.Equals(".tmp") == false && fi.Extension.Equals(".TMP") == false && fi.Extension.Equals("") == false) 
+            if ( !fi.Name[0].Equals('~') && !fi.Name[0].Equals('$') && !fi.Name[0].Equals('.') &&
+                    !fi.Extension.Equals(".tmp") && !fi.Extension.Equals(".TMP") && !fi.Extension.Equals("") )
             {
-                    //file
+                //file
                 Console.WriteLine("File: " + e.FullPath + " Created");
             }   
-        }
-    
+        } 
     }
 
  
@@ -105,19 +105,16 @@ public class WatcherTestFinal
         {
             //to avoid double changes
             watcher.EnableRaisingEvents = false;
-
-            //elaborate info about file
-            FileInfo fi = new FileInfo(e.FullPath);
-
-            //exclude files started from '~','$' and '.'(hidden files) and without extensions
-            if (fi.Name[0].Equals('~') == false && fi.Name[0].Equals('$') == false && fi.Name[0].Equals('.') == false && fi.Extension.Equals(".tmp") == false && fi.Extension.Equals(".TMP") == false && fi.Extension.Equals("") == false) 
+            if (File.Exists(e.FullPath))
             {
-                //Do only for file   
-                if (File.Exists(e.FullPath))
+                //exclude files started from '~','$' and '.'(hidden files) and without extensions
+                FileInfo fi = new FileInfo(e.FullPath);
+                if (!fi.Name[0].Equals('~') && !fi.Name[0].Equals('$') && !fi.Name[0].Equals('.') &&
+                        !fi.Extension.Equals(".tmp") && !fi.Extension.Equals(".TMP") && !fi.Extension.Equals(""))
                 {
-                   //file
+                    //file
                     Console.WriteLine("File: " + e.FullPath + " Changed");
-                }
+                } 
             }
         }
         catch (System.UnauthorizedAccessException)
@@ -136,41 +133,38 @@ public class WatcherTestFinal
     {
         //if from .doc -> ~ ignore
         //if from ~->.doc changed
-        FileInfo fi_old = new FileInfo(e.OldFullPath);
-        FileInfo fi_new = new FileInfo(e.FullPath);
-       // Console.WriteLine("!File: {0} renamed to {1}", e.OldFullPath, e.FullPath);
-        
-           // if (fi_old.Extension.Equals(".tmp") == false && fi_old.Extension.Equals(".TMP") == false && fi_new.Extension.Equals(".tmp") == false && fi_new.Extension.Equals(".TMP") == false)
-          //  {
-        if (!Directory.Exists(e.FullPath))
+        if (Directory.Exists(e.FullPath))
         {
-            if ((fi_old.Name[0].Equals('~') == true && fi_new.Name[0].Equals('~') == false) || (fi_old.Extension.Equals("") == true) || ((fi_old.Extension.Equals(".tmp") == true || fi_old.Extension.Equals(".TMP") == true) && (fi_new.Extension.Equals(".tmp") == false || fi_new.Extension.Equals(".TMP") == false)))
+            // a directory is renamed
+            Console.WriteLine("Directory: {0} renamed to {1}", e.OldFullPath, e.FullPath);
+        }
+        if (File.Exists(e.FullPath))
+        {
+            // a file is renamed
+            FileInfo fi_old = new FileInfo(e.OldFullPath);
+            FileInfo fi_new = new FileInfo(e.FullPath);
+
+            if ( (fi_old.Name[0].Equals('~') && !fi_new.Name[0].Equals('~')) ||
+                  (fi_old.Extension.Equals(".tmp") && !fi_new.Name[0].Equals('~')) ||
+                  (fi_old.Extension.Equals("") && !fi_new.Name[0].Equals('~')) ||
+                  (fi_old.Name[0].Equals('~') && !fi_new.Extension.Equals("tmp")) ||
+                  (fi_old.Extension.Equals(".tmp") && !fi_new.Extension.Equals("tmp")) ||
+                  (fi_old.Extension.Equals("") && !fi_new.Extension.Equals("tmp")) ||
+                  (fi_old.Name[0].Equals('~') && !fi_new.Extension.Equals("")) ||
+                  (fi_old.Extension.Equals(".tmp") && !fi_new.Extension.Equals("")) ||
+                  (fi_old.Extension.Equals("") && !fi_new.Extension.Equals("")) )
             {
                 //file Microsoft changed
                 Console.WriteLine("File MICROSOFT: " + e.FullPath + " Changed");
             }
             else
             {
-                if (fi_new.Name[0].Equals('~') != true && (fi_new.Extension.Equals(".tmp") == false && fi_new.Extension.Equals(".TMP") == false))
+                if (!fi_new.Name[0].Equals('~') && !fi_new.Name[0].Equals('$') && !fi_new.Name[0].Equals('.') &&
+                            !fi_new.Extension.Equals(".tmp") && !fi_new.Extension.Equals(".TMP") && !fi_new.Extension.Equals(""))
                 {
-                    // Specify what is done when a file is renamed.
-                    //Console.WriteLine("File/Directory: {0} renamed to {1}", e.OldFullPath, e.FullPath);
-                    /*if (Directory.Exists(e.FullPath))
-                    {    //directory
-                        Console.WriteLine("Directory: {0} renamed to {1}", e.OldFullPath, e.FullPath);
-                    }*/
-                    if (File.Exists(e.FullPath))
-                    {
-                        Console.WriteLine("File: {0} renamed to {1}", e.OldFullPath, e.FullPath);
-                    }
+                    Console.WriteLine("File: {0} renamed to {1}", e.OldFullPath, e.FullPath);
                 }
-
             }
         }
-        else { 
-            //directory changed
-            Console.WriteLine("Directory: {0} renamed to {1}", e.OldFullPath, e.FullPath);
-        }
-        // }
     }
 }
