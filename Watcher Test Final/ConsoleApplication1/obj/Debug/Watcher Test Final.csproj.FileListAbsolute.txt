@@ -1,0 +1,6 @@
+C:\Users\John\Documents\GitHub\pds_project\Watcher Test Final\ConsoleApplication1\bin\Debug\ConsoleApplication1.exe.config
+C:\Users\John\Documents\GitHub\pds_project\Watcher Test Final\ConsoleApplication1\bin\Debug\ConsoleApplication1.exe
+C:\Users\John\Documents\GitHub\pds_project\Watcher Test Final\ConsoleApplication1\bin\Debug\ConsoleApplication1.pdb
+C:\Users\John\Documents\GitHub\pds_project\Watcher Test Final\ConsoleApplication1\obj\Debug\Watcher Test Final.csprojResolveAssemblyReference.cache
+C:\Users\John\Documents\GitHub\pds_project\Watcher Test Final\ConsoleApplication1\obj\Debug\ConsoleApplication1.exe
+C:\Users\John\Documents\GitHub\pds_project\Watcher Test Final\ConsoleApplication1\obj\Debug\ConsoleApplication1.pdb
