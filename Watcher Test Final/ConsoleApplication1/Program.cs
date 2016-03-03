@@ -59,12 +59,22 @@ public class WatcherTestFinal
     // Define the event handlers.
 
     private static void OnDeleted(object source, FileSystemEventArgs e) {
-       // Console.WriteLine("! "+e.FullPath + " Deleted");
+       //Console.WriteLine("! "+e.FullPath + " Deleted");
         FileInfo fi = new FileInfo(e.FullPath);
-            if (fi.Name[0].Equals('~') == false && fi.Name[0].Equals('$') == false && fi.Name[0].Equals('.') == false && fi.Extension.Equals(".tmp") == false && fi.Extension.Equals(".TMP") == false && fi.Extension.Equals("") == false)
+        if (fi.Name[0].Equals('~') == false && fi.Name[0].Equals('$') == false && fi.Name[0].Equals('.') == false && fi.Extension.Equals(".tmp") == false && fi.Extension.Equals(".TMP") == false && fi.Extension.Equals("") == false)
+        {
+            Console.WriteLine(e.FullPath + " Deleted");
+        }
+        else { 
+            //directory.exsists() doesnt work as it is deleted already
+            DirectoryInfo di = new DirectoryInfo(e.FullPath);
+            if ((di.Attributes & FileAttributes.Directory) == FileAttributes.Directory)
             {
-                Console.WriteLine(e.FullPath + " Deleted");
-            }
+                
+                    Console.WriteLine(e.FullPath + " Deleted");
+                
+            } 
+        }
     }
 
     private static void OnCreated(object source, FileSystemEventArgs e)
