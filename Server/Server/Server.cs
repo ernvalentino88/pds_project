@@ -317,6 +317,13 @@ namespace ServerApp
                             if (!this.deleteFile(con, clientSession, newStatus))
                                 exit = true;
                             break;
+                        case Networking.CONNECTION_CODES.HELLO:
+                            this.Hello(clientSession.Socket);
+                            break;
+                        case Networking.CONNECTION_CODES.SESSION:
+                            if (!this.resumeSession(ref clientSession, clientSession.Socket))
+                                exit = true;
+                            break;
                         case Networking.CONNECTION_CODES.END_SYNCH:
                             if (!DBmanager.insertUnchanged(con, clientSession.CurrentStatus, newStatus))
                                 exit = true;

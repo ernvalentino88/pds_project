@@ -131,12 +131,12 @@ namespace ServerApp
             bool exit = false;
             while (!exit)
             {
-                s.ReceiveTimeout = Networking.TIME_OUT_SHORT;
+                s.ReceiveTimeout = Networking.TIME_OUT_LONG;
                 s.SendTimeout = Networking.TIME_OUT_SHORT;
                 byte[] buffer_command = Utility.Networking.my_recv(4, s);
                 if (buffer_command != null)
                 {
-                    //s.ReceiveTimeout = Networking.TIME_OUT_SHORT;
+                    s.ReceiveTimeout = Networking.TIME_OUT_SHORT;
                     Networking.CONNECTION_CODES code = (Networking.CONNECTION_CODES)BitConverter.ToUInt32(buffer_command, 0);
                     switch (code)
                     {
