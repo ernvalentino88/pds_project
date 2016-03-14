@@ -702,6 +702,7 @@ namespace ClientApp
         {
             try
             {
+                this.resumeSession();
                 Socket s = tcpClient.Client;
                 byte[] command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.UPD);
                 s.Send(command);
@@ -746,6 +747,7 @@ namespace ClientApp
         {
             try
             {
+                this.resumeSession();
                 Socket s = tcpClient.Client;
                 byte[] command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.DEL);
                 s.Send(command);
@@ -775,6 +777,7 @@ namespace ClientApp
         {
             try
             {
+                this.resumeSession();
                 Socket s = tcpClient.Client;
                 byte[] command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.ADD);
                 s.Send(command);
