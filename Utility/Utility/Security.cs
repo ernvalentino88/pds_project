@@ -101,17 +101,20 @@ namespace Utility
         public static byte[] AESEncrypt(Aes aes, byte[] dataToEncrypt)
         {
             byte[] encryptedBytes = null;
-            using (MemoryStream ms = new MemoryStream())
+            try
             {
-                
-                using (var cs = new CryptoStream(ms, getEncryptor(aes), CryptoStreamMode.Write))
+                using (MemoryStream ms = new MemoryStream())
                 {
-                    cs.Write(dataToEncrypt, 0, dataToEncrypt.Length);
-                    cs.Close();
+
+                    using (var cs = new CryptoStream(ms, getEncryptor(aes), CryptoStreamMode.Write))
+                    {
+                        cs.Write(dataToEncrypt, 0, dataToEncrypt.Length);
+                        cs.Close();
+                    }
+                    encryptedBytes = ms.ToArray();
                 }
-                encryptedBytes = ms.ToArray();
-                
             }
+            catch (Exception) { return null; }
 
             return encryptedBytes;
         }
@@ -119,17 +122,20 @@ namespace Utility
         public static byte[] AESDecrypt(Aes aes, byte[] dataToDecrypt)
         {
             byte[] decryptedBytes = null;
-            using (MemoryStream ms = new MemoryStream())
+            try
             {
-
-                using (var cs = new CryptoStream(ms, getDecryptor(aes), CryptoStreamMode.Write))
+                using (MemoryStream ms = new MemoryStream())
                 {
-                    cs.Write(dataToDecrypt, 0, dataToDecrypt.Length);
-                    cs.Close();
-                }
-                decryptedBytes = ms.ToArray();
 
+                    using (var cs = new CryptoStream(ms, getDecryptor(aes), CryptoStreamMode.Write))
+                    {
+                        cs.Write(dataToDecrypt, 0, dataToDecrypt.Length);
+                        cs.Close();
+                    }
+                    decryptedBytes = ms.ToArray();
+                }
             }
+            catch (Exception) { return null; }
 
             return decryptedBytes;
         }

@@ -169,7 +169,7 @@ namespace ServerApp
                                 exit = true;
                             break;
                         case Networking.CONNECTION_CODES.DIR:
-                            if (!server.getDirectoryName(cs))
+                            if (!server.getDirectoryInfo(cs))
                                 exit = true;
                             break;
                         case Networking.CONNECTION_CODES.INIT_SYNCH:
@@ -238,44 +238,6 @@ namespace ServerApp
                 all_sockets.Remove(s);
             }
         }
-
-      /*  private bool get_cmd(Socket s) {
-            byte[] buffer_command = new byte[4];
-            int b = s.Receive(buffer_command);
-            if (b != 4) { throw new System.Exception("Wrong command bytes"); }
-            Networking.CONNECTION_CODES code = (Networking.CONNECTION_CODES)BitConverter.ToUInt32(buffer_command, 0);
-            switch (code) {
-                case Networking.CONNECTION_CODES.EXIT: return false;
-                case Networking.CONNECTION_CODES.NEW_REG:  break;
-                case Networking.CONNECTION_CODES.AUTH: 
-                    long sid = Networking.authenticationTcpServer(aes, s); 
-                    this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new update_ui_delegate(updateUI_msg), "SESSION ID:"+sid);
-                    break;
-                
-
-            }
-
-            return true;
-        }*/
-
-     /*   private void register(Socket s) {
-            byte[] buffer_name = new byte[256];
-            byte[] buffer_pwd = new byte[256];
-            int b=s.Receive(buffer_name);
-            if (b != 256) { throw new System.Exception("Wrong size"); }
-            b = s.Receive(buffer_pwd);
-            if (b != 256) { throw new System.Exception("Wrong size"); }
-            byte[] name = aes.AES_Decrypt(buffer_name);
-            byte[] pwd = aes.AES_Decrypt(buffer_pwd);
-            string id = System.Text.Encoding.Default.GetString(name);
-            string pass = System.Text.Encoding.Default.GetString(pwd);
-
-            if (!DBmanager.register(id, pass)) {
-                s.Send(BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.ERR));
-                throw new Exception("Error during register");   
-            }
-        }
-        */
   
 
         

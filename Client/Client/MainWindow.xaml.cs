@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -37,19 +38,107 @@ namespace ClientApp
         private delegate Task UpdateDelegateAsync(String msg, String bannerTitle, String bannerMsg);
         private delegate String LoginDelegate();
         private delegate void FillGrid(DirectoryStatus status);
+        private delegate void UpdateBar(int n);
+        private delegate void InitBar();
         private Boolean connected;
-        private Boolean root;
         private Client client;
-        private DirectoryInfo CurrentDirectory;
-        private ObservableCollection<FileListItem> FileList;
+        private String CurrentDirectory;
         private String RootDirectory;
+        private ObservableCollection<FileListItem> FileList;
+        private BackgroundWorker bw = new BackgroundWorker();
+        private ManualResetEvent mre;
+
+        public BackgroundWorker BackgroundWorker
+        {
+            get
+            {
+                return bw;
+            }
+            private set
+            {
+                bw = value;
+            }
+        }
 
         public MainWindow()
         {
             InitializeComponent();
             connected = false;
-            root = false;
             FileList = new ObservableCollection<FileListItem>();
+            bw.WorkerReportsProgress = true;
+            bw.WorkerSupportsCancellation = true;
+            bw.DoWork += new DoWorkEventHandler(bw_DoWork);
+            bw.ProgressChanged += new ProgressChangedEventHandler(bw_ProgressChanged);
+            bw.RunWorkerCompleted += new RunWorkerCompletedEventHandler(bw_RunWorkerCompleted);
+        }
+
+        private void bw_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            if (!connected)
+                return;
+            if (!client.resumeSession())
+            {
+                connected = false;
+                client.TcpClient.Close();
+                String msg = "Log in to the remote server";
+                String title = "You were disconncted";
+                String bannerMsg = "Your session is expired, please login again";
+                this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegateAsync(updateUI_banner), msg, title, bannerMsg);
+            }
+            this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, (Action)(() =>
+            {
+                this.progressBar_file.Visibility = Visibility.Hidden;
+                this.file_grid.Visibility = Visibility.Visible;
+                this.Back_button.Visibility = Visibility.Visible;
+                this.Refresh_button.Visibility = Visibility.Visible;
+                this.Label_log.Visibility = Visibility.Hidden;
+            }));
+            DirectoryStatus remote = new DirectoryStatus();
+            remote.Username = client.UserId;
+            remote.FolderPath = RootDirectory;
+            if (client.getDirectoryInfo(remote, RootDirectory) < 0)
+            {
+                connected = false;
+                client.TcpClient.Close();
+                String msg = "Log in to the remote server";
+                String title = "You were disconncted";
+                String bannerMsg = "A Network Error occurred, please try later";
+                this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegateAsync(updateUI_banner), msg, title, bannerMsg);
+            }
+            else
+                this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new FillGrid(fill_grid), remote);
+        }
+
+        private void bw_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        {
+            this.Dispatcher.BeginInvoke(DispatcherPriority.Background, new UpdateBar(update_bar2), e.ProgressPercentage);
+        }
+
+        private void bw_DoWork(object sender, DoWorkEventArgs e)
+        {
+            BackgroundWorker worker = sender as BackgroundWorker;
+            PbUpdater up = (PbUpdater)e.Argument;
+            if (worker.CancellationPending)
+            {
+                e.Cancel = true;
+            }
+            else
+            {
+                if (!client.resumeSession())
+                {
+                    connected = false;
+                    client.TcpClient.Close();
+                    String msg = "Log in to the remote server";
+                    String title = "You were disconncted";
+                    String bannerMsg = "Your session is expired, please login again";
+                    this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegateAsync(updateUI_banner), msg, title, bannerMsg);
+                }
+                else
+                {
+                    this.Dispatcher.BeginInvoke(DispatcherPriority.Background, new InitBar(update_bar1));
+                    client.firstSynch(up.local, up.remote, RootDirectory, this);
+                }
+            }
         }
 
         private void Connect_button_Click(object sender, RoutedEventArgs e)
@@ -68,6 +157,8 @@ namespace ClientApp
             {
                 connected = false;
                 client.closeConnectionTcpClient();
+                if (bw.IsBusy)
+                    bw.CancelAsync(); 
                 String msg = "Log in to the remote server";
                 this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegate(updateUI), msg);
             }
@@ -80,11 +171,13 @@ namespace ClientApp
                     connected = true;
                     String msg = "Trying to connect to the server . . .";
                     this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegate(updateUI_progressBar), msg);
-                    TcpClient tcpClient = new TcpClient();
+                     
+                    client.TcpClient = new TcpClient();
+                    TcpClient tcpClient = client.TcpClient;
                     tcpClient.Connect(address, portInt);
                     tcpClient.ReceiveTimeout = Networking.TIME_OUT_SHORT;
                     tcpClient.SendTimeout = Networking.TIME_OUT_SHORT;
-                    client.TcpClient = tcpClient;
+                    
 
                     if (client.keyExchangeTcpClient())
                     {
@@ -107,30 +200,48 @@ namespace ClientApp
                         RootDirectory = (String)result.Result;
                         if (RootDirectory != null && RootDirectory != String.Empty)
                         {
-                            if (!client.resumeSession())
-                            {
-                                connected = false;
-                                tcpClient.Close();
-                                msg = "Log in to the remote server";
-                                String title = "You were disconncted";
-                                String bannerMsg = "Your session is expired, please login again";
-                                this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegateAsync(updateUI_banner), msg, title, bannerMsg);
-                            }
 
                             DirectoryStatus local = new DirectoryStatus();
                             local.FolderPath = RootDirectory;
                             local.Username = username;
-                            root = true;
+                            CurrentDirectory = String.Copy(RootDirectory);
                             client.fillDirectoryStatus(local, RootDirectory);
                             DirectoryStatus remote = new DirectoryStatus();
                             remote.Username = username;
                             remote.FolderPath = RootDirectory;
-                            client.firstSynch(local, remote, RootDirectory);
-                            remote = new DirectoryStatus();
-                            remote.Username = username;
-                            remote.FolderPath = RootDirectory;
-                            client.getRemoteStatus(remote, RootDirectory);
-                            this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new FillGrid(fill_grid), remote);
+                            //client.firstSynch(local, remote, RootDirectory, this);
+                            
+                            PbUpdater up = new PbUpdater();
+                            up.rootDir = RootDirectory;
+                            up.remote = remote;
+                            up.local = local;
+                            bw.RunWorkerAsync(up);
+                            //this.getRemoteStatus(remote, RootDirectory);
+                            //client.synchronize(local, remote);
+                            local = null;
+                            remote = null;
+                            //this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, (Action)( () => {
+                            //    this.progressBar_file.Visibility = Visibility.Hidden;
+                            //    this.file_grid.Visibility = Visibility.Visible;
+                            //    this.Back_button.Visibility = Visibility.Visible;
+                            //    this.Refresh_button.Visibility = Visibility.Visible;
+                            //    this.Label_log.Visibility = Visibility.Hidden;
+                            //}) );
+                            GC.Collect();
+                            //remote = new DirectoryStatus();
+                            //remote.Username = username;
+                            //remote.FolderPath = RootDirectory;
+                            //if (client.getDirectoryInfo(remote, RootDirectory) < 0)
+                            //{
+                            //    connected = false;
+                            //    tcpClient.Close();
+                            //    msg = "Log in to the remote server";
+                            //    String title = "You were disconncted";
+                            //    String bannerMsg = "A Network Error occurred, please try later";
+                            //    this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegateAsync(updateUI_banner), msg, title, bannerMsg);
+                            //}
+                            //else
+                            //    this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new FillGrid(fill_grid), remote);
                         }
                     }
                 }
@@ -166,10 +277,103 @@ namespace ClientApp
             }
         }
 
+        public Int64 getRemoteStatus(DirectoryStatus remoteStatus, String rootDirectory)
+        {
+            try
+            {
+                Socket s = client.TcpClient.Client;
+                AesCryptoServiceProvider aes = client.AESKey;
+                byte[] command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.INIT_SYNCH);
+                s.Send(command);
+                byte[] buf = Security.AESEncrypt(aes, Encoding.UTF8.GetBytes(rootDirectory));
+                s.Send(BitConverter.GetBytes(buf.Length));
+                s.Send(buf);
+                command = Networking.my_recv(4, s);
+                if (command != null && (
+                        ((Networking.CONNECTION_CODES)BitConverter.ToUInt32(command, 0) == Networking.CONNECTION_CODES.OK)))
+                {
+                    byte[] recvBuf = Networking.my_recv(4, s);
+                    if (recvBuf == null)
+                        return -1;
+                    Int32 filesInfoToRecv = BitConverter.ToInt32(recvBuf, 0);
+                    PbUpdater up = new PbUpdater();
+                    up.max = filesInfoToRecv;
+                    for (int i = 0; i < filesInfoToRecv; i++)
+                    {
+                        DirectoryFile file = new DirectoryFile();
+                        recvBuf = Networking.my_recv(4, s);
+                        if (recvBuf == null)
+                            return -1;
+                        int len = BitConverter.ToInt32(recvBuf, 0);
+                        byte[] encryptedData = Networking.my_recv(len, s);
+                        if (encryptedData == null)
+                            return -1;
+                        String path = Encoding.UTF8.GetString(Security.AESDecrypt(aes, encryptedData));
+                        recvBuf = Networking.my_recv(4, s);
+                        if (recvBuf == null)
+                            return -1;
+                        len = BitConverter.ToInt32(recvBuf, 0);
+                        encryptedData = Networking.my_recv(len, s);
+                        if (encryptedData == null)
+                            return -1;
+                        String filename = Encoding.UTF8.GetString(Security.AESDecrypt(aes, encryptedData));
+                        command = Networking.my_recv(4, s);
+                        if (command == null)
+                            return -1;
+                        if ((Networking.CONNECTION_CODES)BitConverter.ToUInt32(command, 0) == Networking.CONNECTION_CODES.DEL)
+                        {
+                            file.Deleted = true;
+                        }
+                        command = Networking.my_recv(4, s);
+                        if (command == null)
+                            return -1;
+                        if ((Networking.CONNECTION_CODES)BitConverter.ToUInt32(command, 0) == Networking.CONNECTION_CODES.DIR)
+                        {
+                            file.Directory = true;
+                        }
+                        if ((Networking.CONNECTION_CODES)BitConverter.ToUInt32(command, 0) == Networking.CONNECTION_CODES.FILE)
+                        {
+                            recvBuf = Networking.my_recv(8, s);
+                            if (recvBuf == null)
+                                return -1;
+                            Int64 id = BitConverter.ToInt64(recvBuf, 0);
+                            encryptedData = Networking.my_recv(48, s);
+                            if (encryptedData == null)
+                                return -1;
+                            String checksum = Encoding.UTF8.GetString(Security.AESDecrypt(aes, encryptedData));
+                            file.Checksum = checksum;
+                            file.Id = id;
+                        }
+                        file.UserId = client.UserId;
+                        file.Filename = filename;
+                        file.Path = path;
+                        file.Fullname = System.IO.Path.Combine(path, filename);
+                        remoteStatus.Files.Add(file.Fullname, file);
+                        up.value = i;
+                        this.progressBar_file.Dispatcher.BeginInvoke(DispatcherPriority.Background, new InitBar(update_bar1));
+                    }
+                    return filesInfoToRecv;
+                }
+            }
+            catch (SocketException) { }
+            return -1;
+        }
+
+        private void update_bar1()
+        {
+            this.progressBar_file.IsIndeterminate = false;
+        }
+
+        private void update_bar2(int n)
+        {
+            this.Label_log.Content = "Synchronization progress: " + n + "%";
+            this.progressBar_file.Value = n;
+        }
+
         private void fill_grid(DirectoryStatus status)
         {
             FileList.Clear();
-            if (root)
+            if (CurrentDirectory.Equals(RootDirectory))
             {
                 //see turn back botton
                 this.Back_button.IsEnabled = false;
@@ -181,8 +385,8 @@ namespace ClientApp
             }
             foreach (var item in status.Files)
             {
-                FileListItem fl = new FileListItem(item.Value);
-                FileList.Add(fl);
+                FileListItem file = new FileListItem(item.Value);
+                FileList.Add(file);
             }
             this.file_grid.ItemsSource = FileList;        
         }
@@ -191,9 +395,16 @@ namespace ClientApp
         {
             this.Grid_initial.Visibility = Visibility.Collapsed;
             this.Grid_logged.Visibility = Visibility.Visible;
+            this.file_grid.Visibility = Visibility.Hidden;
+            this.Back_button.Visibility = Visibility.Hidden;
+            this.Refresh_button.Visibility = Visibility.Hidden;
             FolderBrowserDialog dlg = new FolderBrowserDialog();
             dlg.Description = "Choose the folder you want to start synchronize";
             dlg.ShowDialog();
+            this.progressBar_file.Visibility = Visibility.Visible;
+            this.progressBar_file.IsIndeterminate = true;
+            this.Label_log.Content = "Retrieving directory infromation . . .";
+            this.Label_log.Visibility = Visibility.Visible;
             return dlg.SelectedPath;
         }
 
@@ -313,6 +524,8 @@ namespace ClientApp
         public async Task updateUI_banner(String msg, String bannerTitle, String bannerMsg)
         {
             await this.ShowMessageAsync(bannerTitle, bannerMsg);
+            this.Grid_initial.Visibility = Visibility.Visible;
+            this.Grid_logged.Visibility = Visibility.Collapsed;
             this.Text_ip.Visibility = Visibility.Visible;
             this.Text_port.Visibility = Visibility.Visible;
             this.Text_user.Visibility = Visibility.Visible;
@@ -375,11 +588,22 @@ namespace ClientApp
             if (item.Directory)
             {
                 //entry is a directory
-                DirectoryStatus local = new DirectoryStatus();
-                client.fillDirectoryStatus(local, item.Path);
-                CurrentDirectory = new DirectoryInfo(item.Path);
-                root = RootDirectory.Equals(item.Path);
-                this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new FillGrid(fill_grid), local);
+                DirectoryStatus dir = new DirectoryStatus();
+                CurrentDirectory = System.IO.Path.Combine(item.Path, item.Filename);
+                if (client.getDirectoryInfo(dir, CurrentDirectory) < 0)
+                {
+                    connected = false;
+                    client.TcpClient.Close();
+                    String msg = "Log in to the remote server";
+                    String title = "You were disconnected";
+                    String bannerMsg = "A Network Error occurred, please try later";
+                    this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegateAsync(updateUI_banner), msg, title, bannerMsg);
+                }
+                this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new FillGrid(fill_grid), dir);
+            }
+            else
+            {
+                //entry is a file
             }
         }
 
@@ -387,21 +611,50 @@ namespace ClientApp
         {
             if (CurrentDirectory != null)
             {
-                CurrentDirectory = CurrentDirectory.Parent;
-                DirectoryStatus local = new DirectoryStatus();
-                client.fillDirectoryStatus(local, CurrentDirectory.FullName);
-                CurrentDirectory = new DirectoryInfo(CurrentDirectory.FullName);
-                root = RootDirectory.Equals(CurrentDirectory.FullName);
-                this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new FillGrid(fill_grid), local);
+                CurrentDirectory = System.IO.Path.GetDirectoryName(CurrentDirectory);
+                DirectoryStatus dir = new DirectoryStatus();
+                if (client.getDirectoryInfo(dir, CurrentDirectory) < 0)
+                {
+                    connected = false;
+                    client.TcpClient.Close();
+                    String msg = "Log in to the remote server";
+                    String title = "You were disconnected";
+                    String bannerMsg = "A Network Error occurred, please try later";
+                    this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegateAsync(updateUI_banner), msg, title, bannerMsg);
+                }
+                else 
+                    this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new FillGrid(fill_grid), dir);
             }
         }
 
         private void Refresh_button_Click(object sender, RoutedEventArgs e)
         {
-
+            if (CurrentDirectory != null)
+            {
+                DirectoryStatus dir = new DirectoryStatus();
+                if (client.getDirectoryInfo(dir, CurrentDirectory) < 0)
+                {
+                    connected = false;
+                    client.TcpClient.Close();
+                    String msg = "Log in to the remote server";
+                    String title = "You were disconnected";
+                    String bannerMsg = "A Network Error occurred, please try later";
+                    this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegateAsync(updateUI_banner), msg, title, bannerMsg);
+                }
+                else 
+                    this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new FillGrid(fill_grid), dir);
+            }
         }
 
         
 
+    }
+    class PbUpdater
+    {
+        public int value { get; set; }
+        public int max { get; set; }
+        public DirectoryStatus remote { get; set; }
+        public DirectoryStatus local { get; set; }
+        public String rootDir { get; set; }
     }
 }

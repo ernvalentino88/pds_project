@@ -14,6 +14,7 @@ namespace ClientApp
     class FileListItem
     {
         private ImageSource icon;
+        private Int64 id;
         private String filename;
         private String path;
         private String checksum;
@@ -26,11 +27,24 @@ namespace ClientApp
         {
             get
             {
+                icon = (directory == true) ? dir_img : file_img;
                 return icon;
+            }
+            private set
+            {
+                icon = value;
+            }
+        }
+
+        public Int64 Id
+        {
+            get
+            {
+                return id;
             }
             set
             {
-                icon = value;
+                id = value;
             }
         }
 
@@ -94,6 +108,12 @@ namespace ClientApp
             }
         }
 
+        public FileListItem()
+        {
+            this.deleted = false;
+            this.directory = false;
+        }
+
         public FileListItem(DirectoryFile file)
         {
             directory = file.Directory;
@@ -101,7 +121,7 @@ namespace ClientApp
             path = file.Path;
             checksum = file.Checksum;
             deleted = file.Deleted;
-            icon = (directory == true) ? dir_img : file_img;
+            id = file.Id;
         }
     }
 

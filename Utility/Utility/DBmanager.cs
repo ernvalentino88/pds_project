@@ -117,16 +117,12 @@ namespace Utility
                                     file.Path = (String)reader["path"];
                                     file.Filename = (String)reader["filename"];
                                     file.Deleted = (Boolean)reader["deleted"];
-                                    if (file.Directory)
+                                    if (!file.Directory)
                                     {
-                                        file.Fullname = file.Path;
-                                    }
-                                    else
-                                    {
-                                        file.Fullname = Path.Combine(file.Path, file.Filename);
                                         file.Id = (Int64)reader["file_id"];
                                         file.Checksum = (String)reader["checksum"];
                                     }
+                                    file.Fullname = Path.Combine(file.Path, file.Filename);
                                     ds.Files.Add(file.Fullname, file);
                                 }
                             }
@@ -334,5 +330,64 @@ namespace Utility
             return false;
         }
 
+
+        public static DirectoryStatus getRequestedDirectory(String directory, String username)
+        {
+            DirectoryStatus ds = new DirectoryStatus();
+            ds.FolderPath = directory;
+            ds.Username = username;
+            String date = null;
+            try
+            {
+                using (var con = new SQLiteConnection(connectionString))
+                {
+                    con.Open();
+                    using (var cmd = con.CreateCommand())
+                    {
+                        int len = directory.Length;
+                        cmd.CommandText = @"select max(creation_time) from snapshots where"
+                                + " user_id = @id and path = @dir;";
+                        cmd.Parameters.AddWithValue("@id", username);
+                        cmd.Parameters.AddWithValue("@dir", directory);
+                        object val = cmd.ExecuteScalar();
+                        date = (val == System.DBNull.Value) ? null : (String)val;
+                    }
+                    if (date != null)
+                    {
+                        ds.CreationTime = DateTime.ParseExact(date, date_format, null);
+                        using (var cmd = con.CreateCommand())
+                        {
+                            int len = directory.Length;
+                            cmd.CommandText = @"select * from snapshots where user_id = @id"
+                                    + " and path = @dir and creation_time = @date;";
+                            cmd.Parameters.AddWithValue("@id", username);
+                            cmd.Parameters.AddWithValue("@dir", directory);
+                            cmd.Parameters.AddWithValue("@date", date);
+                            using (var reader = cmd.ExecuteReader())
+                            {
+                                while (reader.Read())
+                                {
+                                    DirectoryFile file = new DirectoryFile();
+                                    file.UserId = username;
+                                    file.Directory = (Boolean)reader["directory"];
+                                    file.Path = (String)reader["path"];
+                                    file.Filename = (String)reader["filename"];
+                                    file.Deleted = (Boolean)reader["deleted"];
+                                    if (!file.Directory)
+                                    {
+                                        file.Id = (Int64)reader["file_id"];
+                                        file.Checksum = (String)reader["checksum"];
+                                    }
+                                    file.Fullname = Path.Combine(file.Path, file.Filename);
+                                    ds.Files.Add(file.Fullname, file);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            catch (SQLiteException) { }
+            return ds;
+        }
     }
 }

@@ -503,6 +503,73 @@ namespace ServerApp
             return false;
         }
 
+        public bool getDirectoryInfo(ClientSession clientSession)
+        {
+            try
+            {
+                Socket s = clientSession.Socket;
+                AesCryptoServiceProvider aes = clientSession.AESKey;
+                byte[] recvBuf = Networking.my_recv(4, s);
+                if (recvBuf == null)
+                    return false;
+                int pathLen = BitConverter.ToInt32(recvBuf, 0);
+                recvBuf = Networking.my_recv(pathLen, s);
+                if (recvBuf == null)
+                    return false;
+                byte[] command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.OK);
+                s.Send(command);
+
+                String dir = Encoding.UTF8.GetString(Security.AESDecrypt(aes, recvBuf));
+                DirectoryStatus requestedDirectory = DBmanager.getRequestedDirectory(dir, clientSession.User.UserId);
+                int count = (requestedDirectory == null) ? 0 : requestedDirectory.Files.Count;
+                byte[] buf = BitConverter.GetBytes(count);
+                s.Send(buf);
+                if (requestedDirectory != null)
+                {
+                    foreach (var item in requestedDirectory.Files)
+                    {
+                        DirectoryFile file = item.Value;
+                        buf = Encoding.UTF8.GetBytes(file.Path);
+                        byte[] encryptedData = Security.AESEncrypt(aes, buf);
+                        s.Send(BitConverter.GetBytes(encryptedData.Length));
+                        s.Send(encryptedData);
+                        buf = Encoding.UTF8.GetBytes(file.Filename);
+                        encryptedData = Security.AESEncrypt(aes, buf);
+                        s.Send(BitConverter.GetBytes(encryptedData.Length));
+                        s.Send(encryptedData);
+                        if (file.Deleted)
+                        {
+                            command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.DEL);
+                            s.Send(command);
+                        }
+                        else
+                        {
+                            command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.OK);
+                            s.Send(command);
+                        }
+                        if (file.Directory)
+                        {
+                            command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.DIR);
+                            s.Send(command);
+                        }
+                        else
+                        {
+                            command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.FILE);
+                            s.Send(command);
+                            buf = BitConverter.GetBytes(file.Id);
+                            s.Send(buf);
+                            buf = Encoding.UTF8.GetBytes(file.Checksum);
+                            encryptedData = Security.AESEncrypt(aes, buf);
+                            s.Send(encryptedData);
+                        }
+                    }
+                }
+                return true;
+            }
+            catch (SocketException) { }
+            return false;
+        }
+
         public bool beginSynchronization(ClientSession clientSession)
         {
             try

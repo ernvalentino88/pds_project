@@ -18,7 +18,7 @@
                                 <TextBox HorizontalAlignment="Center" x:Name="Text_regIp" Controls:TextBoxHelper.Watermark="IP address" Height="22" Controls:TextBoxHelper.ClearTextButton="True" Width="252" Margin="52,210,51,95"  />
                                 <TextBox HorizontalAlignment="Center" x:Name="Text_regPort" Controls:TextBoxHelper.Watermark="Port" Controls:TextBoxHelper.ClearTextButton="True" Width="252" Height="22" Margin="52,250,51,55"  />
                                 <Grid HorizontalAlignment="Center" Margin="52,0,48,0" Width="282">
-                                    <Label HorizontalAlignment="Center" x:Name="label_regMsg" Content="Create account" FontSize="14" FontWeight="ExtraBold"  FontFamily="Calibri" Foreground="SteelBlue" Height="43" VerticalAlignment="Top" Margin="70,10,68,0" />
+                                    <Label HorizontalContentAlignment="Center" x:Name="label_regMsg" Content="Create account" FontSize="14" FontWeight="ExtraBold"  FontFamily="Calibri" Foreground="SteelBlue" Height="43" VerticalAlignment="Top" Margin="70,10,68,0" />
                                 </Grid>
                                 <Controls:MetroProgressBar x:Name="progressBar_reg" IsIndeterminate="True" Visibility="Hidden" Height="27" HorizontalAlignment="Center" Width="313" Margin="7,152,0,152"/>
                                 <Button HorizontalAlignment="Center" VerticalAlignment="Bottom" x:Name="Register_button" Content="register" Style="{StaticResource AccentedSquareButtonStyle}" Height="35" Width="70" Margin="125,0" Click="Register_button_Click"/>
@@ -32,7 +32,7 @@
                                 <TextBox HorizontalAlignment="Center" x:Name="Text_ip" Controls:TextBoxHelper.Watermark="IP address" Height="22" Controls:TextBoxHelper.ClearTextButton="True" Width="252" Margin="35,170,33,135" />
                                 <TextBox HorizontalAlignment="Center" x:Name="Text_port" Controls:TextBoxHelper.Watermark="Port" Controls:TextBoxHelper.ClearTextButton="True" Width="252" Height="22" Margin="35,217,33,88"  />
                                 <Grid HorizontalAlignment="Center">
-                                    <Label HorizontalAlignment="Center" x:Name="Message_label" Content="Log in to the remote server" FontSize="14" FontWeight="ExtraBold"  FontFamily="Calibri" Foreground="SteelBlue" Height="43" VerticalAlignment="Top" Margin="70,10,68,0" />
+                                    <Label HorizontalContentAlignment="Center" x:Name="Message_label" Content="Log in to the remote server" FontSize="14" FontWeight="ExtraBold"  FontFamily="Calibri" Foreground="SteelBlue" Height="43" VerticalAlignment="Top" Margin="70,10,68,0" />
                                 </Grid>
                                 <Controls:MetroProgressBar x:Name="progress_bar" IsIndeterminate="True" Visibility="Hidden" Height="27" HorizontalAlignment="Center" Width="313" Margin="7,152,0,152"/>
                                 <Button HorizontalAlignment="Center" VerticalAlignment="Bottom" x:Name="Connect_button" Content="Connect" Style="{StaticResource AccentedSquareButtonStyle}" Height="35" Width="70" Click="Connect_button_Click" Margin="125,0"/>
@@ -62,13 +62,16 @@
                         <DataGridTextColumn Header="Checksum" Binding="{Binding Checksum}"></DataGridTextColumn>
                     </DataGrid.Columns>
                 </DataGrid>
+                <ProgressBar BorderBrush="RoyalBlue"  x:Name="progressBar_file" Visibility="Hidden" HorizontalAlignment="Center" Height="26" Margin="178,346,160,325" Width="584"/>
                 <Button VerticalAlignment="Top" BorderBrush="Black"  x:Name="Back_button" Style="{DynamicResource MetroCircleButtonStyle}" Margin="10,51,860,0" Height="47" Width="50" Click="Back_button_Click">
                     <Image Source="back_arrow.ico" Width="22" Height="20"></Image>
                 </Button>
                 <Button VerticalAlignment="Top" HorizontalAlignment="Center" BorderBrush="Black"  x:Name="Refresh_button" Style="{DynamicResource MetroCircleButtonStyle}" Margin="79,51,793,0" Height="47" Width="50" Click="Refresh_button_Click">
                     <Image Source="refresh.ico" Width="22" Height="20"></Image>
                 </Button>
-
+                <Grid HorizontalAlignment="Center">
+                    <Label HorizontalContentAlignment="Center" x:Name="Label_log" FontSize="16" FontWeight="ExtraBold" FontFamily="Calibri" Foreground="SteelBlue" Height="43" Margin="219,199,219,455" />
+                </Grid>
             </Grid>
         </Grid>
     </Controls:WindowCommands>

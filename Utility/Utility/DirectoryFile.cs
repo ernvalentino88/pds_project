@@ -43,7 +43,7 @@ namespace Utility
         {
             this.path = path;
             this.filename = filename;
-            this.fullname = path;
+            this.fullname = System.IO.Path.Combine(path, filename);
             this.userId = userId;
             this.directory = isDirectory;
             this.deleted = false;

@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Windows.Threading;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,6 +11,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Security.Cryptography;
 using Utility;
+using System.Windows;
 
 namespace ClientApp
 {
@@ -405,16 +408,90 @@ namespace ClientApp
                         file.UserId = userId;
                         file.Filename = filename;
                         file.Path = path;
-                        if (file.Directory)
-                            file.Fullname = file.Path;
-                        else
-                            file.Fullname = Path.Combine(path, filename);
+                        file.Fullname = Path.Combine(path, filename);
                         remoteStatus.Files.Add(file.Fullname, file);
                     }
                     return filesInfoToRecv;
                 }
             }
             catch (SocketException se) { Console.WriteLine(se.Message); }
+            return -1;
+        }
+
+        public Int64 getDirectoryInfo(DirectoryStatus current, String directory)
+        {
+            try
+            {
+                Socket s = tcpClient.Client;
+                byte[] command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.DIR);
+                s.Send(command);
+                byte[] buf = Security.AESEncrypt(aesKey, Encoding.UTF8.GetBytes(directory));
+                s.Send(BitConverter.GetBytes(buf.Length));
+                s.Send(buf);
+                command = Networking.my_recv(4, tcpClient.Client);
+                if (command != null && (
+                        ((Networking.CONNECTION_CODES)BitConverter.ToUInt32(command, 0) == Networking.CONNECTION_CODES.OK)))
+                {
+                    byte[] recvBuf = Networking.my_recv(4, s);
+                    if (recvBuf == null)
+                        return -1;
+                    Int32 filesInfoToRecv = BitConverter.ToInt32(recvBuf, 0);
+                    for (int i = 0; i < filesInfoToRecv; i++)
+                    {
+                        DirectoryFile file = new DirectoryFile();
+                        recvBuf = Networking.my_recv(4, s);
+                        if (recvBuf == null)
+                            return -1;
+                        int len = BitConverter.ToInt32(recvBuf, 0);
+                        byte[] encryptedData = Networking.my_recv(len, s);
+                        if (encryptedData == null)
+                            return -1;
+                        String path = Encoding.UTF8.GetString(Security.AESDecrypt(aesKey, encryptedData));
+                        recvBuf = Networking.my_recv(4, s);
+                        if (recvBuf == null)
+                            return -1;
+                        len = BitConverter.ToInt32(recvBuf, 0);
+                        encryptedData = Networking.my_recv(len, s);
+                        if (encryptedData == null)
+                            return -1;
+                        String filename = Encoding.UTF8.GetString(Security.AESDecrypt(aesKey, encryptedData));
+                        command = Networking.my_recv(4, s);
+                        if (command == null)
+                            return -1;
+                        if ((Networking.CONNECTION_CODES)BitConverter.ToUInt32(command, 0) == Networking.CONNECTION_CODES.DEL)
+                        {
+                            file.Deleted = true;
+                        }
+                        command = Networking.my_recv(4, s);
+                        if (command == null)
+                            return -1;
+                        if ((Networking.CONNECTION_CODES)BitConverter.ToUInt32(command, 0) == Networking.CONNECTION_CODES.DIR)
+                        {
+                            file.Directory = true;
+                        }
+                        if ((Networking.CONNECTION_CODES)BitConverter.ToUInt32(command, 0) == Networking.CONNECTION_CODES.FILE)
+                        {
+                            recvBuf = Networking.my_recv(8, s);
+                            if (recvBuf == null)
+                                return -1;
+                            Int64 id = BitConverter.ToInt64(recvBuf, 0);
+                            encryptedData = Networking.my_recv(48, s);
+                            if (encryptedData == null)
+                                return -1;
+                            String checksum = Encoding.UTF8.GetString(Security.AESDecrypt(aesKey, encryptedData));
+                            file.Checksum = checksum;
+                            file.Id = id;
+                        }
+                        file.UserId = userId;
+                        file.Filename = filename;
+                        file.Path = path;
+                        file.Fullname = Path.Combine(path, filename);
+                        current.Files.Add(file.Fullname, file);
+                    }
+                    return filesInfoToRecv;
+                }
+            }
+            catch (SocketException) {  }
             return -1;
         }
 
@@ -432,7 +509,7 @@ namespace ClientApp
 
         public void fillDirectoryStatus(DirectoryStatus local, String directory)
         {
-           var entries = Directory.EnumerateFileSystemEntries(directory);
+            var entries = Directory.EnumerateFileSystemEntries(directory);
            foreach (var path in entries)
            {
                if (File.Exists(path))
@@ -460,16 +537,17 @@ namespace ClientApp
                    file.UserId = userId;
                    file.Directory = true;
                    file.Filename = info.Name;
-                   file.Path = info.FullName;
+                   file.Path = info.Parent.FullName;
                    file.Fullname = info.FullName;
                    lock (local.Files)
                    {
                        local.Files.Add(file.Fullname, file);
                    }
-                   State s = new State();
-                   s.Directory = info.FullName;
-                   s.Status = local;
-                   ThreadPool.QueueUserWorkItem(new WaitCallback(fillDirectoryStatus), s);
+                   //State s = new State();
+                   //s.Directory = info.FullName;
+                   //s.Status = local;
+                   //ThreadPool.QueueUserWorkItem(new WaitCallback(fillDirectoryStatus), s);
+                   fillDirectoryStatus(local, info.FullName);
                }
            }
         }
@@ -493,7 +571,7 @@ namespace ClientApp
                     file.Path = info.DirectoryName;
                     file.Fullname = info.FullName;
                     file.Checksum = getChecksum(info);
-                    lock (local.Files)
+                    lock (local)
                     {
                         local.Files.Add(file.Fullname, file);
                     }
@@ -506,17 +584,16 @@ namespace ClientApp
                     file.UserId = userId;
                     file.Directory = true;
                     file.Filename = info.Name;
-                    file.Path = info.FullName;
+                    file.Path = info.Parent.FullName;
                     file.Fullname = info.FullName;
-                    lock (local.Files)
+                    lock (local)
                     {
                         local.Files.Add(file.Fullname, file);
                     }
-                    s.Directory = info.FullName;
-                    ThreadPool.QueueUserWorkItem(new WaitCallback(fillDirectoryStatus), s);
+                    //s.Directory = info.FullName;
+                    //ThreadPool.QueueUserWorkItem(new WaitCallback(fillDirectoryStatus), s);
                 }
             }
-            //to do notify when finish
         }
 
         public String getChecksum(FileInfo info)
@@ -567,6 +644,53 @@ namespace ClientApp
                     DirectoryFile localFile = local.Files[item.Key];
                     if (!localFile.Equals(remoteFile))
                         updateFile(localFile);
+                }
+                command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.END_SYNCH);
+                tcpClient.Client.Send(command);
+            }
+            catch (Exception) { }
+        }
+
+        public void synchronize(DirectoryStatus local, DirectoryStatus remote, MainWindow mainWindow)
+        {
+            try
+            {
+                if (local.Equals(remote))
+                    return;
+                byte[] command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.START_SYNCH);
+                tcpClient.Client.Send(command);
+                var fileAdded = local.getDifference(remote);
+                var fileDeleted = remote.getDifference(local);
+                var fileUpdated = remote.getIntersect(local);
+                long tot = fileAdded.Count + fileDeleted.Count + fileUpdated.Count;
+                long i = 0;
+                foreach (var item in fileAdded)
+                {
+                    addFile(item.Value);
+                    double percentage = (double)i / tot;
+                    mainWindow.BackgroundWorker.ReportProgress((int)(percentage * 100));
+                    i++;
+                }
+                
+                foreach (var item in fileDeleted)
+                {
+                    deleteFile(item.Value);
+                    double percentage = (double)i / tot;
+                    mainWindow.BackgroundWorker.ReportProgress((int)(percentage * 100));
+                    i++;
+                }
+                
+                foreach (var item in fileUpdated)
+                {
+                    DirectoryFile remoteFile = item.Value;
+                    DirectoryFile localFile = local.Files[item.Key];
+                    if (!localFile.Equals(remoteFile))
+                    {
+                        updateFile(localFile);
+                        double percentage = (double)i / tot;
+                        mainWindow.BackgroundWorker.ReportProgress((int)(percentage * 100));
+                        i++;
+                    }
                 }
                 command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.END_SYNCH);
                 tcpClient.Client.Send(command);
@@ -694,6 +818,95 @@ namespace ClientApp
                             }
                         }
                     }
+                }
+            }
+            catch (SocketException) { }
+        }
+
+        public Int64 getRemoteStatus(DirectoryStatus remoteStatus, String rootDirectory, MainWindow mainWindow)
+        {
+            try
+            {
+                Socket s = tcpClient.Client;
+                byte[] command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.INIT_SYNCH);
+                s.Send(command);
+                byte[] buf = Security.AESEncrypt(aesKey, Encoding.UTF8.GetBytes(rootDirectory));
+                s.Send(BitConverter.GetBytes(buf.Length));
+                s.Send(buf);
+                command = Networking.my_recv(4, tcpClient.Client);
+                if (command != null && (
+                        ((Networking.CONNECTION_CODES)BitConverter.ToUInt32(command, 0) == Networking.CONNECTION_CODES.OK)))
+                {
+                    byte[] recvBuf = Networking.my_recv(4, s);
+                    if (recvBuf == null)
+                        return -1;
+                    Int32 filesInfoToRecv = BitConverter.ToInt32(recvBuf, 0);
+                    for (int i = 0; i < filesInfoToRecv; i++)
+                    {
+                        DirectoryFile file = new DirectoryFile();
+                        recvBuf = Networking.my_recv(4, s);
+                        if (recvBuf == null)
+                            return -1;
+                        int len = BitConverter.ToInt32(recvBuf, 0);
+                        byte[] encryptedData = Networking.my_recv(len, s);
+                        if (encryptedData == null)
+                            return -1;
+                        String path = Encoding.UTF8.GetString(Security.AESDecrypt(aesKey, encryptedData));
+                        recvBuf = Networking.my_recv(4, s);
+                        if (recvBuf == null)
+                            return -1;
+                        len = BitConverter.ToInt32(recvBuf, 0);
+                        encryptedData = Networking.my_recv(len, s);
+                        if (encryptedData == null)
+                            return -1;
+                        String filename = Encoding.UTF8.GetString(Security.AESDecrypt(aesKey, encryptedData));
+                        command = Networking.my_recv(4, s);
+                        if (command == null)
+                            return -1;
+                        if ((Networking.CONNECTION_CODES)BitConverter.ToUInt32(command, 0) == Networking.CONNECTION_CODES.DEL)
+                        {
+                            file.Deleted = true;
+                        }
+                        command = Networking.my_recv(4, s);
+                        if (command == null)
+                            return -1;
+                        if ((Networking.CONNECTION_CODES)BitConverter.ToUInt32(command, 0) == Networking.CONNECTION_CODES.DIR)
+                        {
+                            file.Directory = true;
+                        }
+                        if ((Networking.CONNECTION_CODES)BitConverter.ToUInt32(command, 0) == Networking.CONNECTION_CODES.FILE)
+                        {
+                            recvBuf = Networking.my_recv(8, s);
+                            if (recvBuf == null)
+                                return -1;
+                            Int64 id = BitConverter.ToInt64(recvBuf, 0);
+                            encryptedData = Networking.my_recv(48, s);
+                            if (encryptedData == null)
+                                return -1;
+                            String checksum = Encoding.UTF8.GetString(Security.AESDecrypt(aesKey, encryptedData));
+                            file.Checksum = checksum;
+                            file.Id = id;
+                        }
+                        file.UserId = userId;
+                        file.Filename = filename;
+                        file.Path = path;
+                        file.Fullname = Path.Combine(path, filename);
+                        remoteStatus.Files.Add(file.Fullname, file);
+                    }
+                    return filesInfoToRecv;
+                }
+            }
+            catch (SocketException) { }
+            return -1;
+        }
+
+        internal void firstSynch(DirectoryStatus local, DirectoryStatus remote, String RootDirectory, MainWindow mainWindow)
+        {
+            try
+            {
+                if (getRemoteStatus(remote, RootDirectory, mainWindow) >= 0)
+                {
+                    synchronize(local, remote, mainWindow);
                 }
             }
             catch (SocketException) { }

@@ -704,3 +704,155 @@ Nome oggetto: 'System.Net.Sockets.Socket'.
    in System.IO.Directory.EnumerateFileSystemEntries(String path)
    in ClientApp.Client.fillDirectoryStatus(DirectoryStatus local, String directory) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\Client.cs:riga 435
    in ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 115
+04/03/2016 20:47:58 ***Fatal Error***  Impossibile accedere a un oggetto eliminato.
+Nome oggetto: 'System.Net.Sockets.Socket'.
+   in System.Net.Sockets.Socket.Send(Byte[] buffer, Int32 offset, Int32 size, SocketFlags socketFlags, SocketError& errorCode)
+   in System.Net.Sockets.Socket.Send(Byte[] buffer, Int32 offset, Int32 size, SocketFlags socketFlags)
+   in System.Net.Sockets.Socket.Send(Byte[] buffer)
+   in ClientApp.Client.getDirectoryInfo(DirectoryStatus current, String directory) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\Client.cs:riga 427
+   in ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 150
+04/03/2016 21:49:19 ***Fatal Error***  Impossibile stabilire la connessione. Rifiuto persistente del computer di destinazione 127.0.0.1:8001
+   in System.Net.Sockets.TcpClient.Connect(String hostname, Int32 port)
+   in ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 93
+04/03/2016 21:50:50 ***Fatal Error***  Impossibile accedere a un oggetto eliminato.
+Nome oggetto: 'System.Net.Sockets.Socket'.
+   in System.Net.Sockets.Socket.Send(Byte[] buffer, Int32 offset, Int32 size, SocketFlags socketFlags, SocketError& errorCode)
+   in System.Net.Sockets.Socket.Send(Byte[] buffer, Int32 offset, Int32 size, SocketFlags socketFlags)
+   in System.Net.Sockets.Socket.Send(Byte[] buffer)
+   in ClientApp.Client.getDirectoryInfo(DirectoryStatus current, String directory) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\Client.cs:riga 427
+   in ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 150
+04/03/2016 22:04:34 ***Fatal Error***  Impossibile accedere a un oggetto eliminato.
+Nome oggetto: 'System.Net.Sockets.Socket'.
+   in System.Net.Sockets.Socket.Send(Byte[] buffer, Int32 offset, Int32 size, SocketFlags socketFlags, SocketError& errorCode)
+   in System.Net.Sockets.Socket.Send(Byte[] buffer, Int32 offset, Int32 size, SocketFlags socketFlags)
+   in System.Net.Sockets.Socket.Send(Byte[] buffer)
+   in ClientApp.Client.getDirectoryInfo(DirectoryStatus current, String directory) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\Client.cs:riga 427
+   in ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 150
+04/03/2016 22:08:37 ***Fatal Error***  Impossibile accedere a un oggetto eliminato.
+Nome oggetto: 'System.Net.Sockets.Socket'.
+   in System.Net.Sockets.Socket.Send(Byte[] buffer, Int32 offset, Int32 size, SocketFlags socketFlags, SocketError& errorCode)
+   in System.Net.Sockets.Socket.Send(Byte[] buffer, Int32 offset, Int32 size, SocketFlags socketFlags)
+   in System.Net.Sockets.Socket.Send(Byte[] buffer)
+   in ClientApp.Client.getDirectoryInfo(DirectoryStatus current, String directory) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\Client.cs:riga 427
+   in ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 150
+05/03/2016 00:57:47 ***Fatal Error***  Impossibile accedere a un oggetto eliminato.
+Nome oggetto: 'System.Net.Sockets.Socket'.
+   in System.Net.Sockets.Socket.Send(Byte[] buffer, Int32 offset, Int32 size, SocketFlags socketFlags, SocketError& errorCode)
+   in System.Net.Sockets.Socket.Send(Byte[] buffer, Int32 offset, Int32 size, SocketFlags socketFlags)
+   in System.Net.Sockets.Socket.Send(Byte[] buffer)
+   in ClientApp.Client.getDirectoryInfo(DirectoryStatus current, String directory) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\Client.cs:riga 427
+   in ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 150
+05/03/2016 01:08:08 ***Fatal Error***  Impossibile accedere a un oggetto eliminato.
+Nome oggetto: 'System.Net.Sockets.Socket'.
+   in System.Net.Sockets.Socket.Send(Byte[] buffer, Int32 offset, Int32 size, SocketFlags socketFlags, SocketError& errorCode)
+   in System.Net.Sockets.Socket.Send(Byte[] buffer, Int32 offset, Int32 size, SocketFlags socketFlags)
+   in System.Net.Sockets.Socket.Send(Byte[] buffer)
+   in ClientApp.Client.getDirectoryInfo(DirectoryStatus current, String directory) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\Client.cs:riga 428
+   in ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 150
+05/03/2016 01:25:44 ***Fatal Error***  Impossibile accedere a un oggetto eliminato.
+Nome oggetto: 'System.Net.Sockets.Socket'.
+   in System.Net.Sockets.Socket.Send(Byte[] buffer, Int32 offset, Int32 size, SocketFlags socketFlags, SocketError& errorCode)
+   in System.Net.Sockets.Socket.Send(Byte[] buffer, Int32 offset, Int32 size, SocketFlags socketFlags)
+   in System.Net.Sockets.Socket.Send(Byte[] buffer)
+   in ClientApp.Client.getDirectoryInfo(DirectoryStatus current, String directory) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\Client.cs:riga 427
+   in ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 164
+05/03/2016 02:31:29 ***Fatal Error***  Impossibile accedere a un oggetto eliminato.
+Nome oggetto: 'System.Net.Sockets.Socket'.
+   in System.Net.Sockets.Socket.Send(Byte[] buffer, Int32 offset, Int32 size, SocketFlags socketFlags, SocketError& errorCode)
+   in System.Net.Sockets.Socket.Send(Byte[] buffer, Int32 offset, Int32 size, SocketFlags socketFlags)
+   in System.Net.Sockets.Socket.Send(Byte[] buffer)
+   in ClientApp.Client.getDirectoryInfo(DirectoryStatus current, String directory) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\Client.cs:riga 427
+   in ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 164
+05/03/2016 02:47:04 ***Fatal Error***  Impossibile accedere a un oggetto eliminato.
+Nome oggetto: 'System.Net.Sockets.Socket'.
+   in System.Net.Sockets.Socket.Send(Byte[] buffer, Int32 offset, Int32 size, SocketFlags socketFlags, SocketError& errorCode)
+   in System.Net.Sockets.Socket.Send(Byte[] buffer, Int32 offset, Int32 size, SocketFlags socketFlags)
+   in System.Net.Sockets.Socket.Send(Byte[] buffer)
+   in ClientApp.Client.getDirectoryInfo(DirectoryStatus current, String directory) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\Client.cs:riga 429
+   in ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 164
+05/03/2016 02:56:53 ***Fatal Error***  Impossibile accedere a un oggetto eliminato.
+Nome oggetto: 'System.Net.Sockets.Socket'.
+   in System.Net.Sockets.Socket.Send(Byte[] buffer, Int32 offset, Int32 size, SocketFlags socketFlags, SocketError& errorCode)
+   in System.Net.Sockets.Socket.Send(Byte[] buffer, Int32 offset, Int32 size, SocketFlags socketFlags)
+   in System.Net.Sockets.Socket.Send(Byte[] buffer)
+   in ClientApp.Client.getDirectoryInfo(DirectoryStatus current, String directory) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\Client.cs:riga 427
+   in ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 166
+05/03/2016 03:01:54 ***Fatal Error***  Impossibile accedere a un oggetto eliminato.
+Nome oggetto: 'System.Net.Sockets.Socket'.
+   in System.Net.Sockets.Socket.Send(Byte[] buffer, Int32 offset, Int32 size, SocketFlags socketFlags, SocketError& errorCode)
+   in System.Net.Sockets.Socket.Send(Byte[] buffer, Int32 offset, Int32 size, SocketFlags socketFlags)
+   in System.Net.Sockets.Socket.Send(Byte[] buffer)
+   in ClientApp.Client.getDirectoryInfo(DirectoryStatus current, String directory) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\Client.cs:riga 427
+   in ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 166
+05/03/2016 03:04:39 ***Fatal Error***  Impossibile accedere a un oggetto eliminato.
+Nome oggetto: 'System.Net.Sockets.Socket'.
+   in System.Net.Sockets.Socket.Send(Byte[] buffer, Int32 offset, Int32 size, SocketFlags socketFlags, SocketError& errorCode)
+   in System.Net.Sockets.Socket.Send(Byte[] buffer, Int32 offset, Int32 size, SocketFlags socketFlags)
+   in System.Net.Sockets.Socket.Send(Byte[] buffer)
+   in ClientApp.Client.getDirectoryInfo(DirectoryStatus current, String directory) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\Client.cs:riga 427
+   in ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 166
+05/03/2016 03:08:07 ***Fatal Error***  Impossibile accedere a un oggetto eliminato.
+Nome oggetto: 'System.Net.Sockets.Socket'.
+   in System.Net.Sockets.Socket.Send(Byte[] buffer, Int32 offset, Int32 size, SocketFlags socketFlags, SocketError& errorCode)
+   in System.Net.Sockets.Socket.Send(Byte[] buffer, Int32 offset, Int32 size, SocketFlags socketFlags)
+   in System.Net.Sockets.Socket.Send(Byte[] buffer)
+   in ClientApp.Client.getDirectoryInfo(DirectoryStatus current, String directory) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\Client.cs:riga 427
+   in ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 166
+05/03/2016 03:12:14 ***Fatal Error***  Impossibile accedere a un oggetto eliminato.
+Nome oggetto: 'System.Net.Sockets.Socket'.
+   in System.Net.Sockets.Socket.Send(Byte[] buffer, Int32 offset, Int32 size, SocketFlags socketFlags, SocketError& errorCode)
+   in System.Net.Sockets.Socket.Send(Byte[] buffer, Int32 offset, Int32 size, SocketFlags socketFlags)
+   in System.Net.Sockets.Socket.Send(Byte[] buffer)
+   in ClientApp.Client.getDirectoryInfo(DirectoryStatus current, String directory) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\Client.cs:riga 427
+   in ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 166
+05/03/2016 12:05:35 ***Fatal Error***  Impossibile accedere a un oggetto eliminato.
+Nome oggetto: 'System.Net.Sockets.Socket'.
+   in System.Net.Sockets.Socket.Send(Byte[] buffer, Int32 offset, Int32 size, SocketFlags socketFlags, SocketError& errorCode)
+   in System.Net.Sockets.Socket.Send(Byte[] buffer, Int32 offset, Int32 size, SocketFlags socketFlags)
+   in System.Net.Sockets.Socket.Send(Byte[] buffer)
+   in ClientApp.Client.getDirectoryInfo(DirectoryStatus current, String directory) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\Client.cs:riga 427
+   in ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 165
+05/03/2016 14:32:27 ***Fatal Error***  Impossibile accedere a un oggetto eliminato.
+Nome oggetto: 'System.Net.Sockets.Socket'.
+   in System.Net.Sockets.Socket.Send(Byte[] buffer, Int32 offset, Int32 size, SocketFlags socketFlags, SocketError& errorCode)
+   in System.Net.Sockets.Socket.Send(Byte[] buffer, Int32 offset, Int32 size, SocketFlags socketFlags)
+   in System.Net.Sockets.Socket.Send(Byte[] buffer)
+   in ClientApp.Client.getDirectoryInfo(DirectoryStatus current, String directory) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\Client.cs:riga 427
+   in ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 202
+05/03/2016 14:38:00 ***Fatal Error***  Impossibile accedere a un oggetto eliminato.
+Nome oggetto: 'System.Net.Sockets.Socket'.
+   in System.Net.Sockets.Socket.Send(Byte[] buffer, Int32 offset, Int32 size, SocketFlags socketFlags, SocketError& errorCode)
+   in System.Net.Sockets.Socket.Send(Byte[] buffer, Int32 offset, Int32 size, SocketFlags socketFlags)
+   in System.Net.Sockets.Socket.Send(Byte[] buffer)
+   in ClientApp.Client.getDirectoryInfo(DirectoryStatus current, String directory) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\Client.cs:riga 427
+   in ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 202
+06/03/2016 12:09:51 ***Fatal Error***  Impossibile accedere a un oggetto eliminato.
+Nome oggetto: 'System.Net.Sockets.Socket'.
+   in System.Net.Sockets.Socket.Send(Byte[] buffer, Int32 offset, Int32 size, SocketFlags socketFlags, SocketError& errorCode)
+   in System.Net.Sockets.Socket.Send(Byte[] buffer, Int32 offset, Int32 size, SocketFlags socketFlags)
+   in System.Net.Sockets.Socket.Send(Byte[] buffer)
+   in ClientApp.Client.getDirectoryInfo(DirectoryStatus current, String directory) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\Client.cs:riga 427
+   in ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 202
+06/03/2016 12:11:09 ***Fatal Error***  Impossibile accedere a un oggetto eliminato.
+Nome oggetto: 'System.Net.Sockets.Socket'.
+   in System.Net.Sockets.Socket.Send(Byte[] buffer, Int32 offset, Int32 size, SocketFlags socketFlags, SocketError& errorCode)
+   in System.Net.Sockets.Socket.Send(Byte[] buffer, Int32 offset, Int32 size, SocketFlags socketFlags)
+   in System.Net.Sockets.Socket.Send(Byte[] buffer)
+   in ClientApp.Client.getDirectoryInfo(DirectoryStatus current, String directory) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\Client.cs:riga 427
+   in ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 202
+06/03/2016 12:20:17 ***Fatal Error***  Impossibile accedere a un oggetto eliminato.
+Nome oggetto: 'System.Net.Sockets.Socket'.
+   in System.Net.Sockets.Socket.Send(Byte[] buffer, Int32 offset, Int32 size, SocketFlags socketFlags, SocketError& errorCode)
+   in System.Net.Sockets.Socket.Send(Byte[] buffer, Int32 offset, Int32 size, SocketFlags socketFlags)
+   in System.Net.Sockets.Socket.Send(Byte[] buffer)
+   in ClientApp.Client.getDirectoryInfo(DirectoryStatus current, String directory) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\Client.cs:riga 427
+   in ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 203
+06/03/2016 12:23:41 ***Fatal Error***  Impossibile accedere a un oggetto eliminato.
+Nome oggetto: 'System.Net.Sockets.Socket'.
+   in System.Net.Sockets.Socket.Send(Byte[] buffer, Int32 offset, Int32 size, SocketFlags socketFlags, SocketError& errorCode)
+   in System.Net.Sockets.Socket.Send(Byte[] buffer, Int32 offset, Int32 size, SocketFlags socketFlags)
+   in System.Net.Sockets.Socket.Send(Byte[] buffer)
+   in ClientApp.Client.getDirectoryInfo(DirectoryStatus current, String directory) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\Client.cs:riga 427
+   in ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 203
+06/03/2016 21:29:44 ***Fatal Error***  Riferimento a un oggetto non impostato su un'istanza di oggetto.
+   in ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 230
