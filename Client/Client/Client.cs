@@ -743,6 +743,51 @@ namespace ClientApp
             catch (SocketException) { }
         }
 
+        public void updateFile(String path)
+        {
+            try
+            {
+                this.resumeSession();
+                Socket s = tcpClient.Client;
+                byte[] command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.UPD);
+                s.Send(command);
+                byte[] encryptedData = Security.AESEncrypt(aesKey, file.Filename);
+                byte[] buf = BitConverter.GetBytes(encryptedData.Length);
+                s.Send(buf);
+                s.Send(encryptedData);
+                encryptedData = Security.AESEncrypt(aesKey, file.Path);
+                buf = BitConverter.GetBytes(encryptedData.Length);
+                s.Send(buf);
+                s.Send(encryptedData);
+
+                buf = BitConverter.GetBytes(file.LastModificationTime.ToBinary());
+                s.Send(buf);
+                command = Networking.my_recv(4, tcpClient.Client);
+                if (command != null && (
+                        ((Networking.CONNECTION_CODES)BitConverter.ToUInt32(command, 0) == Networking.CONNECTION_CODES.OK)))
+                {
+                    buf = BitConverter.GetBytes(file.Length);
+                    s.Send(buf);
+                    using (FileStream reader = File.OpenRead(file.Fullname))
+                    {
+                        long left = file.Length;
+                        while (left > 0)
+                        {
+                            int dim = (left > 4096) ? 4096 : (int)left;
+                            buf = new byte[dim];
+                            reader.Read(buf, 0, dim);
+                            encryptedData = Security.AESEncrypt(aesKey, buf);
+                            s.Send(encryptedData);
+                            //s.Send(buf);
+                            left -= dim;
+                        }
+                    }
+                }
+
+            }
+            catch (SocketException) { }
+        }
+
         private void deleteFile(DirectoryFile file)
         {
             try
@@ -773,7 +818,90 @@ namespace ClientApp
             catch (SocketException) { }
         }
 
+        public void deleteFile(String path)
+        {
+            try
+            {
+                this.resumeSession();
+                Socket s = tcpClient.Client;
+                byte[] command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.DEL);
+                s.Send(command);
+                byte[] encryptedData = Security.AESEncrypt(aesKey, file.Filename);
+                byte[] buf = BitConverter.GetBytes(encryptedData.Length);
+                s.Send(buf);
+                s.Send(encryptedData);
+                encryptedData = Security.AESEncrypt(aesKey, file.Path);
+                buf = BitConverter.GetBytes(encryptedData.Length);
+                s.Send(buf);
+                s.Send(encryptedData);
+                if (file.Directory)
+                {
+                    command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.DIR);
+                    s.Send(command);
+                }
+                else
+                {
+                    command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.FILE);
+                    s.Send(command);
+                }
+            }
+            catch (SocketException) { }
+        }
+
         private void addFile(DirectoryFile file)
+        {
+            try
+            {
+                this.resumeSession();
+                Socket s = tcpClient.Client;
+                byte[] command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.ADD);
+                s.Send(command);
+                byte[] encryptedData = Security.AESEncrypt(aesKey, file.Filename);
+                byte[] buf = BitConverter.GetBytes(encryptedData.Length);
+                s.Send(buf);
+                s.Send(encryptedData);
+                encryptedData = Security.AESEncrypt(aesKey, file.Path);
+                buf = BitConverter.GetBytes(encryptedData.Length);
+                s.Send(buf);
+                s.Send(encryptedData);
+                if (file.Directory)
+                {
+                    command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.DIR);
+                    s.Send(command);
+                }
+                else
+                {
+                    command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.FILE);
+                    s.Send(command);
+                    buf = BitConverter.GetBytes(file.LastModificationTime.ToBinary());
+                    s.Send(buf);
+                    command = Networking.my_recv(4, tcpClient.Client);
+                    if (command != null && (
+                            ((Networking.CONNECTION_CODES)BitConverter.ToUInt32(command, 0) == Networking.CONNECTION_CODES.OK)))
+                    {
+                        buf = BitConverter.GetBytes(file.Length);
+                        s.Send(buf);
+                        using (FileStream reader = File.OpenRead(file.Fullname))
+                        {
+                            long left = file.Length;
+                            while (left > 0)
+                            {
+                                int dim = (left > 4096) ? 4096 : (int)left;
+                                buf = new byte[dim];
+                                reader.Read(buf, 0, dim);
+                                encryptedData = Security.AESEncrypt(aesKey, buf);
+                                s.Send(encryptedData);
+                                //s.Send(buf);
+                                left -= dim;
+                            }
+                        }
+                    }
+                }
+            }
+            catch (SocketException) { }
+        }
+
+        public void addFile(String path)
         {
             try
             {
@@ -914,6 +1042,8 @@ namespace ClientApp
             }
             catch (SocketException) { }
         }
+
+
     }
     class State
     {
