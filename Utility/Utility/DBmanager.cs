@@ -193,7 +193,7 @@ namespace Utility
                 }
                 if (fileId == null || fileId <= 0)
                     return false;
-                String checksum = Security.CalculateMD5Hash(file);
+                String checksum = (file.Length > 0) ? Security.CalculateMD5Hash(file) : String.Empty;
                 using (SQLiteCommand cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = @"insert into snapshots (user_id,file_id,creation_time,checksum,path,filename) values"
@@ -231,26 +231,62 @@ namespace Utility
         }
 
 
-        public static bool deleteDirectory(SQLiteConnection conn, DirectoryStatus newStatus, string filename, string path)
+        public static bool deleteDirectory(SQLiteConnection conn, DirectoryStatus newStatus, DirectoryStatus oldStatus, String path)
         {
             try
             {
-                using (SQLiteCommand cmd = conn.CreateCommand())
+                Dictionary<String, DirectoryFile> del = new Dictionary<String,DirectoryFile>();
+                foreach (var item in oldStatus.Files)
                 {
-                    cmd.CommandText = @"insert into snapshots (user_id,creation_time,path,filename,directory,deleted) values"
-                        + " (@user, @creationTime, @path, @filename, @directory, @deleted);";
-                    cmd.Parameters.AddWithValue("@user", newStatus.Username);
-                    cmd.Parameters.AddWithValue("@creationTime", newStatus.CreationTime.ToString(date_format));
-                    cmd.Parameters.AddWithValue("@path", path);
-                    cmd.Parameters.AddWithValue("@filename", filename);
-                    cmd.Parameters.AddWithValue("@directory", true);
-                    cmd.Parameters.AddWithValue("@deleted", true);
-                    cmd.ExecuteNonQuery();
+                    if (item.Key.Length >= path.Length)
+                    {
+                        if (item.Key.Substring(0, path.Length).Equals(path))
+                        {
+                            // file or directory contained in the directory to delete
+                            del.Add(item.Key, item.Value);
+                        }
+                    }
                 }
-                //add directory
-                DirectoryFile dirFile = new DirectoryFile(path, filename, newStatus.Username, true);
-                dirFile.Deleted = true;
-                newStatus.Files.Add(dirFile.Fullname, dirFile);
+
+                foreach (var item in del)
+                {
+
+                    using (SQLiteCommand cmd = conn.CreateCommand())
+                    {
+                        DirectoryFile file = item.Value;
+                        if (file.Directory)
+                        {
+                            cmd.CommandText = @"insert into snapshots (user_id,creation_time,path,filename,directory,deleted) values"
+                                + " (@user, @creationTime, @path, @filename, @directory, @deleted);";
+                            cmd.Parameters.AddWithValue("@user", newStatus.Username);
+                            cmd.Parameters.AddWithValue("@creationTime", newStatus.CreationTime.ToString(date_format));
+                            cmd.Parameters.AddWithValue("@path", file.Path);
+                            cmd.Parameters.AddWithValue("@filename", file.Filename);
+                            cmd.Parameters.AddWithValue("@directory", file.Directory);
+                            cmd.Parameters.AddWithValue("@deleted", true);
+                            cmd.ExecuteNonQuery();
+                            file.Deleted = true;
+                            DirectoryFile newFile = file.clone();
+                            newStatus.Files.Add(newFile.Fullname, newFile);
+                        }
+                        else
+                        {
+                            cmd.CommandText = @"insert into snapshots (user_id,file_id,creation_time,checksum,path,filename,deleted) values"
+                                + " (@user, @fileId, @creationTime, @checksum, @path, @filename, @deleted);";
+                            cmd.Parameters.AddWithValue("@user", file.UserId);
+                            cmd.Parameters.AddWithValue("@fileId", file.Id);
+                            cmd.Parameters.AddWithValue("@creationTime", newStatus.CreationTime.ToString(date_format));
+                            cmd.Parameters.AddWithValue("@checksum", file.Checksum);
+                            cmd.Parameters.AddWithValue("@path", file.Path);
+                            cmd.Parameters.AddWithValue("@filename", file.Filename);
+                            cmd.Parameters.AddWithValue("@deleted", true);
+                            cmd.ExecuteNonQuery();
+                            file.Deleted = true;
+                            DirectoryFile newFile = file.clone();
+                            newStatus.Files.Add(newFile.Fullname, newFile);
+                        }
+                    }
+                }
                 return true;
             }
             catch (SQLiteException) { }
@@ -306,7 +342,8 @@ namespace Utility
                             cmd.Parameters.AddWithValue("@directory", file.Directory);
                             cmd.Parameters.AddWithValue("@deleted", file.Deleted);
                             cmd.ExecuteNonQuery();
-                            newStatus.Files.Add(file.Fullname, file);
+                            DirectoryFile newFile = file.clone();
+                            newStatus.Files.Add(newFile.Fullname, newFile);
                         }
                         else
                         {
@@ -320,7 +357,8 @@ namespace Utility
                             cmd.Parameters.AddWithValue("@filename", file.Filename);
                             cmd.Parameters.AddWithValue("@deleted", file.Deleted);
                             cmd.ExecuteNonQuery();
-                            newStatus.Files.Add(file.Fullname, file);
+                            DirectoryFile newFile = file.clone();
+                            newStatus.Files.Add(newFile.Fullname, newFile);
                         }
                     }
                 }

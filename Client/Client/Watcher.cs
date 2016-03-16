@@ -3,12 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
-//for watcher
+using System.Net;
+using System.Net.Sockets;
 using System.Security;
 using System.Security.Permissions;
 using System.IO;
-
 using Utility;
 
 
@@ -80,25 +79,24 @@ namespace ClientApp
             DirectoryFile file = new DirectoryFile();
             file.Fullname = e.FullPath;
             file.Filename = e.Name;
-            file.Path = Path.GetPathRoot(e.FullPath);
+            file.Path = Path.GetDirectoryName(e.FullPath);
             file.UserId = client.UserId;
-
-           
+       
             if (!Path.HasExtension(e.FullPath))
             {
                 file.Directory = true;
                 //directory: a file with no extension is treated like a directory
-                Console.WriteLine("Directory: " + e.FullPath + " Deleted");
+                client.deleteFile(file, true);
             }
             else
             {
                 //file
                 file.Directory = false;
                 if ( !Path.GetFileName(e.FullPath)[0].Equals('~') && !Path.GetFileName(e.FullPath)[0].Equals('$') &&
-                        !Path.GetFileName(e.FullPath)[0].Equals('~') && !Path.GetExtension(e.FullPath).Equals(".tmp") &&
+                        !Path.GetFileName(e.FullPath)[0].Equals('.') && !Path.GetExtension(e.FullPath).Equals(".tmp") &&
                         !Path.GetExtension(e.FullPath).Equals(".TMP") )
-                {   
-                    Console.WriteLine("File: " + e.FullPath + " Deleted");
+                {
+                    client.deleteFile(file, true);
                 }
             }
         }
@@ -114,21 +112,34 @@ namespace ClientApp
                     Console.WriteLine("Directory: " + e.FullPath + " Created");
                     lock (this)
                     {
-                        //TODO
+                        DirectoryFile file = new DirectoryFile();
+                        file.Directory = true;
+                        file.Filename = e.Name;
+                        file.Fullname = e.FullPath;
+                        file.Path = Path.GetDirectoryName(e.FullPath);
+                        file.UserId = client.UserId;
+                        client.addFile(file, true);
                     }
                 }
                 if (File.Exists(e.FullPath))
                 {
                     //exclude files started from '~','$' and '.'(hidden files) and without extensions
-                    FileInfo fi = new FileInfo(e.FullPath);
-                    if (!fi.Name[0].Equals('~') && !fi.Name[0].Equals('$') && !fi.Name[0].Equals('.') &&
-                            !fi.Extension.Equals(".tmp") && !fi.Extension.Equals(".TMP") && !fi.Extension.Equals(""))
+                    if (!Path.GetFileName(e.FullPath)[0].Equals('~') && !Path.GetFileName(e.FullPath)[0].Equals('$') &&
+                        !Path.GetFileName(e.FullPath)[0].Equals('.') && !Path.GetExtension(e.FullPath).Equals(".tmp") &&
+                        !Path.GetExtension(e.FullPath).Equals(".TMP") && !Path.HasExtension(e.FullPath))
                     {
                         //file
                         Console.WriteLine("File: " + e.FullPath + " Created");
                         lock (this)
                         {
-                            //TODO
+                            DirectoryFile file = new DirectoryFile();
+                            file.Filename = e.Name;
+                            file.Fullname = e.FullPath;
+                            file.Path = Path.GetDirectoryName(e.FullPath);
+                            file.UserId = client.UserId;
+                            file.LastModificationTime = File.GetCreationTime(e.FullPath);
+                            file.Length = 0;
+                            client.addFile(file, true);
                         }
                     }
                 }
@@ -148,12 +159,20 @@ namespace ClientApp
                 if (File.Exists(e.FullPath))
                 {
                     //exclude files started from '~','$' and '.'(hidden files) and without extensions
-                    FileInfo fi = new FileInfo(e.FullPath);
-                    if (!fi.Name[0].Equals('~') && !fi.Name[0].Equals('$') && !fi.Name[0].Equals('.') &&
-                            !fi.Extension.Equals(".tmp") && !fi.Extension.Equals(".TMP") && !fi.Extension.Equals(""))
+                    FileInfo info = new FileInfo(e.FullPath);
+                    if ( !info.Name[0].Equals('~') && !info.Name[0].Equals('$') &&
+                         !info.Name[0].Equals('.') && !info.Extension.Equals(".tmp") &&
+                         !info.Extension.Equals(".TMP") && !info.Extension.Equals("") )
                     {
                         //file
-                        Console.WriteLine("File: " + e.FullPath + " Changed");
+                        DirectoryFile file = new DirectoryFile();
+                        file.Filename = e.Name;
+                        file.Fullname = e.FullPath;
+                        file.Path = info.DirectoryName;
+                        file.UserId = client.UserId;
+                        file.LastModificationTime = info.LastWriteTime;
+                        file.Length = info.Length;
+                        client.updateFile(file, true);
                     } 
                 }
             }
@@ -176,7 +195,20 @@ namespace ClientApp
                     Console.WriteLine("Directory: {0} renamed to {1}", e.OldFullPath, e.FullPath);
                     lock (this)
                     {
-                        //TODO
+                        DirectoryFile file = new DirectoryFile();
+                        file.Fullname = e.OldFullPath;
+                        file.Filename = e.OldName;
+                        file.Path = Path.GetDirectoryName(e.OldFullPath);
+                        file.UserId = client.UserId;
+                        file.Directory = true;
+                        client.deleteFile(file, true);
+                        file = new DirectoryFile();
+                        file.Fullname = e.FullPath;
+                        file.Filename = e.Name;
+                        file.Path = Path.GetDirectoryName(e.FullPath);
+                        file.UserId = client.UserId;
+                        file.Directory = true;
+                        client.addFile(file, true);
                     }
                 }
                 if (File.Exists(e.FullPath))
@@ -199,7 +231,14 @@ namespace ClientApp
                         Console.WriteLine("File MICROSOFT: " + e.FullPath + " Changed");
                         lock (this)
                         {
-                            //TODO
+                            DirectoryFile file = new DirectoryFile();
+                            file.Filename = e.Name;
+                            file.Fullname = e.FullPath;
+                            file.Path = fi_new.DirectoryName;
+                            file.UserId = client.UserId;
+                            file.LastModificationTime = fi_new.LastWriteTime;
+                            file.Length = fi_new.Length;
+                            client.updateFile(file, true);
                         }
                     }
                     else
@@ -210,7 +249,20 @@ namespace ClientApp
                             Console.WriteLine("File: {0} renamed to {1}", e.OldFullPath, e.FullPath);
                             lock (this)
                             {
-                                //TODO
+                                DirectoryFile file = new DirectoryFile();
+                                file.Fullname = e.OldFullPath;
+                                file.Filename = e.OldName;
+                                file.Path = fi_old.DirectoryName;
+                                file.UserId = client.UserId;
+                                client.deleteFile(file, true);
+                                file = new DirectoryFile();
+                                file.Fullname = e.FullPath;
+                                file.Filename = e.Name;
+                                file.Path = fi_new.DirectoryName;
+                                file.UserId = client.UserId;
+                                file.LastModificationTime = fi_new.LastWriteTime;
+                                file.Length = fi_new.Length;
+                                client.addFile(file, true);
                             }
                         }
                     }

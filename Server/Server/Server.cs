@@ -378,7 +378,8 @@ namespace ServerApp
                 if ((Networking.CONNECTION_CODES)BitConverter.ToUInt32(recvBuf, 0) == Networking.CONNECTION_CODES.DIR)
                 {
                     //directory
-                    return DBmanager.deleteDirectory(conn, newStatus, filename, path);
+                    String fullname = Path.Combine(path, filename);
+                   return DBmanager.deleteDirectory(conn, newStatus, clientSession.CurrentStatus, fullname);
                 }
                 if ((Networking.CONNECTION_CODES)BitConverter.ToUInt32(recvBuf, 0) == Networking.CONNECTION_CODES.FILE)
                 {

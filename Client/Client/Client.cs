@@ -674,7 +674,8 @@ namespace ClientApp
                 
                 foreach (var item in fileDeleted)
                 {
-                    deleteFile(item.Value);
+                    if (!fileDeleted.ContainsKey(item.Value.Path))
+                        deleteFile(item.Value);
                     double percentage = (double)i / tot;
                     mainWindow.BackgroundWorker.ReportProgress((int)(percentage * 100));
                     i++;
@@ -743,47 +744,67 @@ namespace ClientApp
             catch (SocketException) { }
         }
 
-        public void updateFile(String path)
+        public void updateFile(DirectoryFile file, bool openSocket)
         {
             try
             {
-                this.resumeSession();
-                Socket s = tcpClient.Client;
-                byte[] command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.UPD);
+                TcpClient client = new TcpClient();
+                client.Connect(this.server);
+                Socket s = client.Client;
+                s.ReceiveTimeout = Networking.TIME_OUT_SHORT;
+                s.SendTimeout = Networking.TIME_OUT_SHORT;
+                //using client credential with a new socket
+                byte[] command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.SESSION);
                 s.Send(command);
-                byte[] encryptedData = Security.AESEncrypt(aesKey, file.Filename);
-                byte[] buf = BitConverter.GetBytes(encryptedData.Length);
-                s.Send(buf);
-                s.Send(encryptedData);
-                encryptedData = Security.AESEncrypt(aesKey, file.Path);
-                buf = BitConverter.GetBytes(encryptedData.Length);
-                s.Send(buf);
-                s.Send(encryptedData);
-
-                buf = BitConverter.GetBytes(file.LastModificationTime.ToBinary());
-                s.Send(buf);
+                byte[] session = BitConverter.GetBytes(this.sessionId);
+                byte[] rand = Networking.my_recv(8, tcpClient.Client);
+                SHA1CryptoServiceProvider sha = new SHA1CryptoServiceProvider();
+                byte[] hash = sha.ComputeHash(Security.XOR(rand, session));
+                s.Send(hash);
                 command = Networking.my_recv(4, tcpClient.Client);
                 if (command != null && (
                         ((Networking.CONNECTION_CODES)BitConverter.ToUInt32(command, 0) == Networking.CONNECTION_CODES.OK)))
                 {
-                    buf = BitConverter.GetBytes(file.Length);
+                    //session is not expired: ok
+                    command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.START_SYNCH);
+                    s.Send(command);
+                    command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.UPD);
+                    s.Send(command);
+                    byte[] encryptedData = Security.AESEncrypt(aesKey, file.Filename);
+                    byte[] buf = BitConverter.GetBytes(encryptedData.Length);
                     s.Send(buf);
-                    using (FileStream reader = File.OpenRead(file.Fullname))
+                    s.Send(encryptedData);
+                    encryptedData = Security.AESEncrypt(aesKey, file.Path);
+                    buf = BitConverter.GetBytes(encryptedData.Length);
+                    s.Send(buf);
+                    s.Send(encryptedData);
+
+                    buf = BitConverter.GetBytes(file.LastModificationTime.ToBinary());
+                    s.Send(buf);
+                    command = Networking.my_recv(4, tcpClient.Client);
+                    if (command != null && (
+                            ((Networking.CONNECTION_CODES)BitConverter.ToUInt32(command, 0) == Networking.CONNECTION_CODES.OK)))
                     {
-                        long left = file.Length;
-                        while (left > 0)
+                        buf = BitConverter.GetBytes(file.Length);
+                        s.Send(buf);
+                        using (FileStream reader = File.OpenRead(file.Fullname))
                         {
-                            int dim = (left > 4096) ? 4096 : (int)left;
-                            buf = new byte[dim];
-                            reader.Read(buf, 0, dim);
-                            encryptedData = Security.AESEncrypt(aesKey, buf);
-                            s.Send(encryptedData);
-                            //s.Send(buf);
-                            left -= dim;
+                            long left = file.Length;
+                            while (left > 0)
+                            {
+                                int dim = (left > 4096) ? 4096 : (int)left;
+                                buf = new byte[dim];
+                                reader.Read(buf, 0, dim);
+                                encryptedData = Security.AESEncrypt(aesKey, buf);
+                                s.Send(encryptedData);
+                                //s.Send(buf);
+                                left -= dim;
+                            }
                         }
+                        command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.END_SYNCH);
+                        s.Send(command);
                     }
                 }
-
             }
             catch (SocketException) { }
         }
@@ -818,82 +839,126 @@ namespace ClientApp
             catch (SocketException) { }
         }
 
-        public void deleteFile(String path)
+        public void deleteFile(DirectoryFile file, bool openSocket)
         {
             try
             {
-                this.resumeSession();
-                Socket s = tcpClient.Client;
-                byte[] command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.DEL);
+                TcpClient client = new TcpClient();
+                client.Connect(this.server);
+                Socket s = client.Client;
+                s.ReceiveTimeout = Networking.TIME_OUT_SHORT;
+                s.SendTimeout = Networking.TIME_OUT_SHORT;
+                //using client credential with a new socket
+                byte[] command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.SESSION);
                 s.Send(command);
-                byte[] encryptedData = Security.AESEncrypt(aesKey, file.Filename);
-                byte[] buf = BitConverter.GetBytes(encryptedData.Length);
-                s.Send(buf);
-                s.Send(encryptedData);
-                encryptedData = Security.AESEncrypt(aesKey, file.Path);
-                buf = BitConverter.GetBytes(encryptedData.Length);
-                s.Send(buf);
-                s.Send(encryptedData);
-                if (file.Directory)
+                byte[] session = BitConverter.GetBytes(this.sessionId);
+                byte[] rand = Networking.my_recv(8, tcpClient.Client);
+                SHA1CryptoServiceProvider sha = new SHA1CryptoServiceProvider();
+                byte[] hash = sha.ComputeHash(Security.XOR(rand, session));
+                s.Send(hash);
+                command = Networking.my_recv(4, tcpClient.Client);
+                if (command != null && (
+                        ((Networking.CONNECTION_CODES)BitConverter.ToUInt32(command, 0) == Networking.CONNECTION_CODES.OK)))
                 {
-                    command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.DIR);
+                    //session is not expired: ok
+                    command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.START_SYNCH);
                     s.Send(command);
-                }
-                else
-                {
-                    command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.FILE);
+                    command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.DEL);
+                    s.Send(command);
+                    byte[] encryptedData = Security.AESEncrypt(aesKey, file.Filename);
+                    byte[] buf = BitConverter.GetBytes(encryptedData.Length);
+                    s.Send(buf);
+                    s.Send(encryptedData);
+                    encryptedData = Security.AESEncrypt(aesKey, file.Path);
+                    buf = BitConverter.GetBytes(encryptedData.Length);
+                    s.Send(buf);
+                    s.Send(encryptedData);
+                    if (file.Directory)
+                    {
+                        command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.DIR);
+                        s.Send(command);
+                    }
+                    else
+                    {
+                        command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.FILE);
+                        s.Send(command);
+                    }
+                    command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.END_SYNCH);
                     s.Send(command);
                 }
             }
             catch (SocketException) { }
         }
 
-        private void addFile(DirectoryFile file)
+        public void addFile(DirectoryFile file, bool openSocket)
         {
             try
             {
-                this.resumeSession();
-                Socket s = tcpClient.Client;
-                byte[] command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.ADD);
+                TcpClient client = new TcpClient();
+                client.Connect(this.server);
+                Socket s = client.Client;
+                s.ReceiveTimeout = Networking.TIME_OUT_SHORT;
+                s.SendTimeout = Networking.TIME_OUT_SHORT;
+                //using client credential with a new socket
+                byte[] command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.SESSION);
                 s.Send(command);
-                byte[] encryptedData = Security.AESEncrypt(aesKey, file.Filename);
-                byte[] buf = BitConverter.GetBytes(encryptedData.Length);
-                s.Send(buf);
-                s.Send(encryptedData);
-                encryptedData = Security.AESEncrypt(aesKey, file.Path);
-                buf = BitConverter.GetBytes(encryptedData.Length);
-                s.Send(buf);
-                s.Send(encryptedData);
-                if (file.Directory)
+                byte[] session = BitConverter.GetBytes(this.sessionId);
+                byte[] rand = Networking.my_recv(8, tcpClient.Client);
+                SHA1CryptoServiceProvider sha = new SHA1CryptoServiceProvider();
+                byte[] hash = sha.ComputeHash(Security.XOR(rand, session));
+                s.Send(hash);
+                command = Networking.my_recv(4, tcpClient.Client);
+                if (command != null && (
+                        ((Networking.CONNECTION_CODES)BitConverter.ToUInt32(command, 0) == Networking.CONNECTION_CODES.OK)))
                 {
-                    command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.DIR);
+                    //session is not expired: ok
+                    command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.START_SYNCH);
                     s.Send(command);
-                }
-                else
-                {
-                    command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.FILE);
+                    command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.ADD);
                     s.Send(command);
-                    buf = BitConverter.GetBytes(file.LastModificationTime.ToBinary());
+                    byte[] encryptedData = Security.AESEncrypt(aesKey, file.Filename);
+                    byte[] buf = BitConverter.GetBytes(encryptedData.Length);
                     s.Send(buf);
-                    command = Networking.my_recv(4, tcpClient.Client);
-                    if (command != null && (
-                            ((Networking.CONNECTION_CODES)BitConverter.ToUInt32(command, 0) == Networking.CONNECTION_CODES.OK)))
+                    s.Send(encryptedData);
+                    encryptedData = Security.AESEncrypt(aesKey, file.Path);
+                    buf = BitConverter.GetBytes(encryptedData.Length);
+                    s.Send(buf);
+                    s.Send(encryptedData);
+                    if (file.Directory)
                     {
-                        buf = BitConverter.GetBytes(file.Length);
+                        command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.DIR);
+                        s.Send(command);
+                        command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.END_SYNCH);
+                        s.Send(command);
+                    }
+                    else
+                    {
+                        command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.FILE);
+                        s.Send(command);
+                        buf = BitConverter.GetBytes(file.LastModificationTime.ToBinary());
                         s.Send(buf);
-                        using (FileStream reader = File.OpenRead(file.Fullname))
+                        command = Networking.my_recv(4, tcpClient.Client);
+                        if (command != null && (
+                                ((Networking.CONNECTION_CODES)BitConverter.ToUInt32(command, 0) == Networking.CONNECTION_CODES.OK)))
                         {
-                            long left = file.Length;
-                            while (left > 0)
+                            buf = BitConverter.GetBytes(file.Length);
+                            s.Send(buf);
+                            using (FileStream reader = File.OpenRead(file.Fullname))
                             {
-                                int dim = (left > 4096) ? 4096 : (int)left;
-                                buf = new byte[dim];
-                                reader.Read(buf, 0, dim);
-                                encryptedData = Security.AESEncrypt(aesKey, buf);
-                                s.Send(encryptedData);
-                                //s.Send(buf);
-                                left -= dim;
+                                long left = file.Length;
+                                while (left > 0)
+                                {
+                                    int dim = (left > 4096) ? 4096 : (int)left;
+                                    buf = new byte[dim];
+                                    reader.Read(buf, 0, dim);
+                                    encryptedData = Security.AESEncrypt(aesKey, buf);
+                                    s.Send(encryptedData);
+                                    //s.Send(buf);
+                                    left -= dim;
+                                }
                             }
+                            command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.END_SYNCH);
+                            s.Send(command);
                         }
                     }
                 }
@@ -901,7 +966,7 @@ namespace ClientApp
             catch (SocketException) { }
         }
 
-        public void addFile(String path)
+        private void addFile(DirectoryFile file)
         {
             try
             {

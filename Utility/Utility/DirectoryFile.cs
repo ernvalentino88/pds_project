@@ -168,6 +168,21 @@ namespace Utility
             }
         }
 
+        public DirectoryFile clone()
+        {
+            DirectoryFile file = new DirectoryFile();
+            file.Deleted = (deleted) ? true : false;
+            file.Directory = (directory) ? true : false;
+            file.Filename = (filename == null) ? null : String.Copy(filename);
+            file.Fullname = (fullname == null) ? null : String.Copy(fullname);
+            file.Id = id;
+            file.LastModificationTime = new DateTime(lastModificationTime.ToBinary());
+            file.Length = length;
+            file.Path = (path == null) ? null : String.Copy(path);
+            file.UserId = (userId == null) ? null : String.Copy(userId);
+            return file;
+        }
+
         public override int GetHashCode()
         {
             int checksumHash = (directory == true) ? 0 : checksum.GetHashCode();                
