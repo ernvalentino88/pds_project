@@ -12,9 +12,9 @@ namespace Utility
     public class DBmanager
     {
         //pc alex
-        //public static String connectionString = @"Data Source=C:\Users\John\Desktop\SQLiteStudio\PDS.db;Version=3;";
+        public static String connectionString = @"Data Source=C:\Users\John\Desktop\SQLiteStudio\PDS.db;Version=3;";
         //pc ernesto
-        public static String connectionString = @"Data Source=C:\Users\Ernesto\Documents\SQLiteStudio\pds.db;Version=3;";
+       // public static String connectionString = @"Data Source=C:\Users\Ernesto\Documents\SQLiteStudio\pds.db;Version=3;";
         public static String date_format = "dd/MM/yyyy-HH:mm:ss";
 
         public static String find_user(String id)
@@ -193,7 +193,8 @@ namespace Utility
                 }
                 if (fileId == null || fileId <= 0)
                     return false;
-                String checksum = (file.Length > 0) ? Security.CalculateMD5Hash(file) : String.Empty;
+               // String checksum = (file.Length > 0) ? Security.CalculateMD5Hash(file) : String.Empty;
+                String checksum = Security.CalculateMD5Hash(file);
                 using (SQLiteCommand cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = @"insert into snapshots (user_id,file_id,creation_time,checksum,path,filename) values"
