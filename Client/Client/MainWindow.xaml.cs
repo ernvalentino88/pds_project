@@ -46,6 +46,7 @@ namespace ClientApp
         private String RootDirectory;
         private ObservableCollection<FileListItem> FileList;
         private BackgroundWorker bw = new BackgroundWorker();
+        private Watcher watcher;
 
         public BackgroundWorker BackgroundWorker
         {
@@ -105,7 +106,10 @@ namespace ClientApp
                 this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegateAsync(updateUI_banner), msg, title, bannerMsg);
             }
             else
+            {
                 this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new FillGrid(fill_grid), remote);
+                watcher = new Watcher(RootDirectory, client);
+            }
         }
 
         private void bw_ProgressChanged(object sender, ProgressChangedEventArgs e)
@@ -306,7 +310,6 @@ namespace ClientApp
                 FileList.Add(file);
             }
             this.Label_log.Visibility = Visibility.Hidden;
-            this.Refresh_button.IsEnabled = true;
             this.file_grid.ItemsSource = FileList;        
         }
 
@@ -528,6 +531,11 @@ namespace ClientApp
             {
                 CurrentDirectory = System.IO.Path.GetDirectoryName(CurrentDirectory);
                 DirectoryStatus dir = new DirectoryStatus();
+                this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, (Action)(() =>
+                {
+                    this.Back_button.IsEnabled = true;
+                    this.Refresh_button.IsEnabled = true;
+                }));
                 if (client.getDirectoryInfo(dir, CurrentDirectory) < 0)
                 {
                     connected = false;

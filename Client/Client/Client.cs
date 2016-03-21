@@ -1098,7 +1098,8 @@ namespace ClientApp
                         file.Path = Path.GetDirectoryName(path);
                         file.Fullname = path;
                         file.LastModificationTime = lastModTime;
-                        dir.Files.Add(file.Fullname, file);
+                        String fname = file.Fullname + "_" + lastModTime;
+                        dir.Files.Add(fname, file);
                     }
                     return filesInfoToRecv;
                 }

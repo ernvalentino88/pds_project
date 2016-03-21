@@ -869,3 +869,9 @@ Parameter name: hostNameOrAddress
    in System.Net.Sockets.Socket.Connect(EndPoint remoteEP)
    in System.Net.Sockets.TcpClient.Connect(IPEndPoint remoteEP)
    in ClientApp.Client.keepAlive() in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\Client.cs:riga 290
+21/03/2016 09:22:46 ***Fatal Error***  Impossibile stabilire la connessione. Rifiuto persistente del computer di destinazione 127.0.0.1:8001
+   in System.Net.Sockets.TcpClient.Connect(String hostname, Int32 port)
+   in ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 176
+21/03/2016 09:29:34 ***Fatal Error***  Impossibile stabilire la connessione. Rifiuto persistente del computer di destinazione 127.0.0.1:8001
+   in System.Net.Sockets.TcpClient.Connect(String hostname, Int32 port)
+   in ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 180
