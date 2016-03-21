@@ -20,6 +20,8 @@ namespace ClientApp
         private String checksum;
         private Boolean directory;
         private Boolean deleted;
+        private String btnContent;
+        private Boolean enabled;
         private static ImageSource dir_img = new BitmapImage(new Uri("dir.ico", UriKind.Relative));
         private static ImageSource file_img = new BitmapImage(new Uri("file.ico", UriKind.Relative));
 
@@ -108,6 +110,32 @@ namespace ClientApp
             }
         }
 
+        public String ButtonContent
+        {
+            get
+            {
+                return btnContent;
+            }
+            set
+            {
+                btnContent = value;
+            }
+        }
+
+        public Boolean EnableButton
+        {
+            get
+            {
+                if (directory && !deleted)
+                    return false;
+                return true;
+            }
+            set
+            {
+                deleted = value;
+            }
+        }
+
         public FileListItem()
         {
             this.deleted = false;
@@ -122,6 +150,7 @@ namespace ClientApp
             checksum = file.Checksum;
             deleted = file.Deleted;
             id = file.Id;
+            btnContent = (directory || deleted) ? "Restore" : "See older versions";
         }
     }
 

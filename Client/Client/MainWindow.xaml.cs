@@ -46,7 +46,6 @@ namespace ClientApp
         private String RootDirectory;
         private ObservableCollection<FileListItem> FileList;
         private BackgroundWorker bw = new BackgroundWorker();
-        private ManualResetEvent mre;
 
         public BackgroundWorker BackgroundWorker
         {
@@ -277,88 +276,6 @@ namespace ClientApp
             }
         }
 
-        public Int64 getRemoteStatus(DirectoryStatus remoteStatus, String rootDirectory)
-        {
-            try
-            {
-                Socket s = client.TcpClient.Client;
-                AesCryptoServiceProvider aes = client.AESKey;
-                byte[] command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.INIT_SYNCH);
-                s.Send(command);
-                byte[] buf = Security.AESEncrypt(aes, Encoding.UTF8.GetBytes(rootDirectory));
-                s.Send(BitConverter.GetBytes(buf.Length));
-                s.Send(buf);
-                command = Networking.my_recv(4, s);
-                if (command != null && (
-                        ((Networking.CONNECTION_CODES)BitConverter.ToUInt32(command, 0) == Networking.CONNECTION_CODES.OK)))
-                {
-                    byte[] recvBuf = Networking.my_recv(4, s);
-                    if (recvBuf == null)
-                        return -1;
-                    Int32 filesInfoToRecv = BitConverter.ToInt32(recvBuf, 0);
-                    PbUpdater up = new PbUpdater();
-                    up.max = filesInfoToRecv;
-                    for (int i = 0; i < filesInfoToRecv; i++)
-                    {
-                        DirectoryFile file = new DirectoryFile();
-                        recvBuf = Networking.my_recv(4, s);
-                        if (recvBuf == null)
-                            return -1;
-                        int len = BitConverter.ToInt32(recvBuf, 0);
-                        byte[] encryptedData = Networking.my_recv(len, s);
-                        if (encryptedData == null)
-                            return -1;
-                        String path = Encoding.UTF8.GetString(Security.AESDecrypt(aes, encryptedData));
-                        recvBuf = Networking.my_recv(4, s);
-                        if (recvBuf == null)
-                            return -1;
-                        len = BitConverter.ToInt32(recvBuf, 0);
-                        encryptedData = Networking.my_recv(len, s);
-                        if (encryptedData == null)
-                            return -1;
-                        String filename = Encoding.UTF8.GetString(Security.AESDecrypt(aes, encryptedData));
-                        command = Networking.my_recv(4, s);
-                        if (command == null)
-                            return -1;
-                        if ((Networking.CONNECTION_CODES)BitConverter.ToUInt32(command, 0) == Networking.CONNECTION_CODES.DEL)
-                        {
-                            file.Deleted = true;
-                        }
-                        command = Networking.my_recv(4, s);
-                        if (command == null)
-                            return -1;
-                        if ((Networking.CONNECTION_CODES)BitConverter.ToUInt32(command, 0) == Networking.CONNECTION_CODES.DIR)
-                        {
-                            file.Directory = true;
-                        }
-                        if ((Networking.CONNECTION_CODES)BitConverter.ToUInt32(command, 0) == Networking.CONNECTION_CODES.FILE)
-                        {
-                            recvBuf = Networking.my_recv(8, s);
-                            if (recvBuf == null)
-                                return -1;
-                            Int64 id = BitConverter.ToInt64(recvBuf, 0);
-                            encryptedData = Networking.my_recv(48, s);
-                            if (encryptedData == null)
-                                return -1;
-                            String checksum = Encoding.UTF8.GetString(Security.AESDecrypt(aes, encryptedData));
-                            file.Checksum = checksum;
-                            file.Id = id;
-                        }
-                        file.UserId = client.UserId;
-                        file.Filename = filename;
-                        file.Path = path;
-                        file.Fullname = System.IO.Path.Combine(path, filename);
-                        remoteStatus.Files.Add(file.Fullname, file);
-                        up.value = i;
-                        this.progressBar_file.Dispatcher.BeginInvoke(DispatcherPriority.Background, new InitBar(update_bar1));
-                    }
-                    return filesInfoToRecv;
-                }
-            }
-            catch (SocketException) { }
-            return -1;
-        }
-
         private void update_bar1()
         {
             this.progressBar_file.IsIndeterminate = false;
@@ -388,6 +305,8 @@ namespace ClientApp
                 FileListItem file = new FileListItem(item.Value);
                 FileList.Add(file);
             }
+            this.Label_log.Visibility = Visibility.Hidden;
+            this.Refresh_button.IsEnabled = true;
             this.file_grid.ItemsSource = FileList;        
         }
 
@@ -601,10 +520,6 @@ namespace ClientApp
                 }
                 this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new FillGrid(fill_grid), dir);
             }
-            else
-            {
-                //entry is a file
-            }
         }
 
         private void Back_button_Click(object sender, RoutedEventArgs e)
@@ -643,6 +558,56 @@ namespace ClientApp
                 }
                 else 
                     this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new FillGrid(fill_grid), dir);
+            }
+        }
+
+        private void Restore_Button_Click(object sender, RoutedEventArgs e)
+        {
+            FileListItem item = ((FrameworkElement)sender).DataContext as FileListItem;
+            CurrentDirectory = System.IO.Path.Combine(item.Path, item.Filename);
+            if (item.Directory)
+            {
+                //restore directory
+            }
+            else
+            {
+                if (item.Deleted)
+                {
+                    //restore file
+                }
+                else
+                {
+                    //see older versions of a file
+                    DirectoryStatus dir = new DirectoryStatus();
+                    this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, (Action)(() =>
+                    {
+                        this.Back_button.IsEnabled = false;
+                        this.Refresh_button.IsEnabled = false;
+                    }));
+                    int n = client.getPreviousVersions(dir, CurrentDirectory);
+                    if (n < 0)
+                    {
+                        connected = false;
+                        client.TcpClient.Close();
+                        String msg = "Log in to the remote server";
+                        String title = "You were disconnected";
+                        String bannerMsg = "A Network Error occurred, please try later";
+                        this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegateAsync(updateUI_banner), msg, title, bannerMsg);
+                    }
+                    if (n == 0)
+                    {
+                        this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, (Action)(() =>
+                        {
+                            FileList.Clear();
+                            this.file_grid.ItemsSource = FileList;
+                            this.Back_button.IsEnabled = true;
+                            this.Label_log.Content = "No previous version for the file selected";
+                            this.Label_log.Visibility = Visibility.Visible;
+                        }));
+                    }
+                    else
+                        this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new FillGrid(fill_grid), dir);
+                }
             }
         }
 

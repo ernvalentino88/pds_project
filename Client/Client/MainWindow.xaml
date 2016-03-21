@@ -56,10 +56,37 @@
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
-                        <DataGridTextColumn Header="File Name" Binding="{Binding Filename}"></DataGridTextColumn>
-                        <DataGridTextColumn Header="Path" Binding="{Binding Path}"></DataGridTextColumn>
-                        <DataGridCheckBoxColumn Header="Deleted" Binding="{Binding Deleted}"></DataGridCheckBoxColumn>
-                        <DataGridTextColumn Header="Checksum" Binding="{Binding Checksum}"></DataGridTextColumn>
+                        <DataGridTextColumn Header="File Name" Binding="{Binding Filename}">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="{x:Type TextBlock}">
+                                    <Setter Property="Margin" Value="5" />
+                                    <Setter Property="Padding" Value="5" />
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Header="Path" Binding="{Binding Path}">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="{x:Type TextBlock}">
+                                    <Setter Property="Margin" Value="5" />
+                                    <Setter Property="Padding" Value="5" />
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Header="Checksum" Binding="{Binding Checksum}">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="{x:Type TextBlock}">
+                                    <Setter Property="Margin" Value="5" />
+                                    <Setter Property="Padding" Value="5" />
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+                        <DataGridTemplateColumn>
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Button Content="{Binding ButtonContent}" IsEnabled="{Binding EnableButton}" Style="{StaticResource AccentedSquareButtonStyle}" Margin="10" Padding="5" Click="Restore_Button_Click"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
                     </DataGrid.Columns>
                 </DataGrid>
                 <ProgressBar BorderBrush="RoyalBlue"  x:Name="progressBar_file" Visibility="Hidden" HorizontalAlignment="Center" Height="26" Margin="178,346,160,325" Width="584"/>

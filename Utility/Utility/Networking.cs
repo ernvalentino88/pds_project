@@ -35,7 +35,8 @@ namespace Utility
             DEL = 15,
             INIT_SYNCH = 16,
             DIR = 17,
-            FILE = 18
+            FILE = 18,
+            PREV = 19
         };
 
         public static byte[] my_recv(int size, Socket s)

@@ -172,6 +172,10 @@ namespace ServerApp
                             if (!server.getDirectoryInfo(cs))
                                 exit = true;
                             break;
+                        case Networking.CONNECTION_CODES.PREV:
+                            if (!server.getPreviousVersions(cs))
+                                exit = true;
+                            break;
                         case Networking.CONNECTION_CODES.INIT_SYNCH:
                             if (!server.beginSynchronization(cs))
                                 exit = true;

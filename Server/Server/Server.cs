@@ -289,67 +289,93 @@ namespace ServerApp
 
         public bool synchronizationSession(ClientSession clientSession, DateTime creationTime)
         {
-            bool exit = false;
-            SQLiteConnection con = new SQLiteConnection(DBmanager.connectionString);
-            con.Open();
-            SQLiteTransaction transaction = con.BeginTransaction();
             DirectoryStatus newStatus = new DirectoryStatus();
             newStatus.FolderPath = clientSession.CurrentStatus.FolderPath;
             newStatus.Username = clientSession.CurrentStatus.Username;
+            SQLiteConnection con = null;
+            SQLiteTransaction transaction = null;
+            bool success = false;
 
-            while (!exit)
+            try
             {
-                byte[] command = Utility.Networking.my_recv(4, clientSession.Socket);
-                if (command != null)
+                bool exit = false;
+                con = new SQLiteConnection(DBmanager.connectionString);
+                con.Open();
+                transaction = con.BeginTransaction();
+
+                while (!exit)
                 {
-                    Networking.CONNECTION_CODES code = (Networking.CONNECTION_CODES)BitConverter.ToUInt32(command, 0);
-                    switch (code)
+                    byte[] command = Utility.Networking.my_recv(4, clientSession.Socket);
+                    if (command != null)
                     {
-                        case Networking.CONNECTION_CODES.ADD :
-                            if (!this.addFile(con, clientSession, newStatus))
+                        Networking.CONNECTION_CODES code = (Networking.CONNECTION_CODES)BitConverter.ToUInt32(command, 0);
+                        switch (code)
+                        {
+                            case Networking.CONNECTION_CODES.ADD:
+                                if (!this.addFile(con, clientSession, newStatus))
+                                    exit = true;
+                                break;
+                            case Networking.CONNECTION_CODES.UPD:
+                                if (!this.updateFile(con, clientSession, newStatus))
+                                    exit = true;
+                                break;
+                            case Networking.CONNECTION_CODES.DEL:
+                                if (!this.deleteFile(con, clientSession, newStatus))
+                                    exit = true;
+                                break;
+                            case Networking.CONNECTION_CODES.HELLO:
+                                this.Hello(clientSession.Socket);
+                                break;
+                            case Networking.CONNECTION_CODES.SESSION:
+                                if (!this.resumeSession(ref clientSession, clientSession.Socket))
+                                    exit = true;
+                                break;
+                            case Networking.CONNECTION_CODES.END_SYNCH:
+                                if (!DBmanager.insertUnchanged(con, clientSession.CurrentStatus, newStatus))
+                                    exit = true;
+                                else
+                                {
+                                    //success
+                                    success = true;
+                                    clientSession.CurrentStatus = null;
+                                    clientSession.CurrentStatus = newStatus;
+                                    return success;
+                                }
+                                break;
+                            default:
                                 exit = true;
-                            break;
-                        case Networking.CONNECTION_CODES.UPD :
-                            if (!this.updateFile(con, clientSession, newStatus))
-                                exit = true;
-                            break;
-                        case Networking.CONNECTION_CODES.DEL :
-                            if (!this.deleteFile(con, clientSession, newStatus))
-                                exit = true;
-                            break;
-                        case Networking.CONNECTION_CODES.HELLO:
-                            this.Hello(clientSession.Socket);
-                            break;
-                        case Networking.CONNECTION_CODES.SESSION:
-                            if (!this.resumeSession(ref clientSession, clientSession.Socket))
-                                exit = true;
-                            break;
-                        case Networking.CONNECTION_CODES.END_SYNCH:
-                            if (!DBmanager.insertUnchanged(con, clientSession.CurrentStatus, newStatus))
-                                exit = true;
-                            else
-                            {
-                                //success: commit and dispose objects
-                                transaction.Commit();
-                                transaction.Dispose();
-                                con.Dispose();
-                                clientSession.CurrentStatus = null;
-                                clientSession.CurrentStatus = newStatus;
-                                return true;
-                            }
-                            break;
-                        default :
-                            exit = true;
-                            break;
+                                break;
+                        }
                     }
                 }
+                //failure
+                newStatus = null;
             }
-            //failure: rollback and dispose objects
-            transaction.Rollback();
-            transaction.Dispose();
-            con.Dispose();
-            newStatus = null;
-            return false;
+            catch (SocketException)
+            {
+                newStatus = null;
+                return false;
+            }
+            catch (SQLiteException)
+            {
+                newStatus = null;
+                return false;
+            }
+
+            finally
+            {
+                if (transaction != null)
+                {
+                    if (success)
+                        transaction.Commit();
+                    else
+                        transaction.Rollback();
+                    transaction.Dispose();
+                }
+                if (con != null && con.State == System.Data.ConnectionState.Open)
+                    con.Dispose();
+            }
+            return success;
         }
 
         private bool deleteFile(SQLiteConnection conn, ClientSession clientSession, DirectoryStatus newStatus)
@@ -570,6 +596,51 @@ namespace ServerApp
                             encryptedData = Security.AESEncrypt(aes, buf);
                             s.Send(encryptedData);
                         }
+                    }
+                }
+                return true;
+            }
+            catch (SocketException) { }
+            return false;
+        }
+
+        public bool getPreviousVersions(ClientSession clientSession)
+        {
+            try
+            {
+                Socket s = clientSession.Socket;
+                AesCryptoServiceProvider aes = clientSession.AESKey;
+                byte[] recvBuf = Networking.my_recv(4, s);
+                if (recvBuf == null)
+                    return false;
+                int pathLen = BitConverter.ToInt32(recvBuf, 0);
+                recvBuf = Networking.my_recv(pathLen, s);
+                if (recvBuf == null)
+                    return false;
+                String path = Encoding.UTF8.GetString(Security.AESDecrypt(aes, recvBuf));
+                recvBuf = Networking.my_recv(8, s);
+                if (recvBuf == null)
+                    return false;
+                DateTime date = DateTime.FromBinary(BitConverter.ToInt64(recvBuf, 0));
+                byte[] command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.OK);
+                s.Send(command);
+                DirectoryStatus requestedFiles = DBmanager.getPreviousVersion(path, clientSession.User.UserId, date);
+                int count = (requestedFiles == null) ? 0 : requestedFiles.Files.Count;
+                byte[] buf = BitConverter.GetBytes(count);
+                s.Send(buf);
+                if (requestedFiles != null)
+                {
+                    foreach (var item in requestedFiles.Files)
+                    {
+                        DirectoryFile file = item.Value;
+                        buf = BitConverter.GetBytes(file.LastModificationTime.ToBinary());
+                        s.Send(buf);
+                        buf = Encoding.UTF8.GetBytes(file.Filename);
+                        buf = BitConverter.GetBytes(file.Id);
+                        s.Send(buf);
+                        buf = Encoding.UTF8.GetBytes(file.Checksum);
+                        byte[] encryptedData = Security.AESEncrypt(aes, buf);
+                        s.Send(encryptedData);
                     }
                 }
                 return true;

@@ -12,10 +12,10 @@ namespace Utility
     public class DBmanager
     {
         //pc alex
-        public static String connectionString = @"Data Source=C:\Users\John\Desktop\SQLiteStudio\PDS.db;Version=3;";
+        //public static String connectionString = @"Data Source=C:\Users\John\Desktop\SQLiteStudio\PDS.db;Version=3;";
         //pc ernesto
-       // public static String connectionString = @"Data Source=C:\Users\Ernesto\Documents\SQLiteStudio\pds.db;Version=3;";
-        public static String date_format = "dd/MM/yyyy-HH:mm:ss";
+        public static String connectionString = @"Data Source=C:\Users\Ernesto\Documents\SQLiteStudio\pds.db;Version=3;";
+        public static String date_format = "dd/MM/yyyy HH:mm:ss";
 
         public static String find_user(String id)
         {
@@ -193,7 +193,6 @@ namespace Utility
                 }
                 if (fileId == null || fileId <= 0)
                     return false;
-               // String checksum = (file.Length > 0) ? Security.CalculateMD5Hash(file) : String.Empty;
                 String checksum = Security.CalculateMD5Hash(file);
                 using (SQLiteCommand cmd = conn.CreateCommand())
                 {
@@ -423,6 +422,49 @@ namespace Utility
                             }
                         }
                     }
+                }
+            }
+            catch (SQLiteException) { }
+            return ds;
+        }
+
+        public static DirectoryStatus getPreviousVersion(String path, String username, DateTime date)
+        {
+            DirectoryStatus ds = new DirectoryStatus();
+            ds.FolderPath = path;
+            ds.Username = username;
+            try
+            {
+                using (var con = new SQLiteConnection(connectionString))
+                {
+                    con.Open();
+                    using (var cmd = con.CreateCommand())
+                    {
+                        cmd.CommandText = @"select path,filename,file_id,last_mod_time,content"
+                                + " from files where user_id = @id"
+                                + " and path = @dir and filename = @filename"
+                                + " and last_mod_time < @date;";
+                        cmd.Parameters.AddWithValue("@id", username);
+                        cmd.Parameters.AddWithValue("@dir", Path.GetDirectoryName(path));
+                        cmd.Parameters.AddWithValue("@filename", Path.GetFileName(path));
+                        cmd.Parameters.AddWithValue("@date", date.ToString(date_format));
+                        using (var reader = cmd.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                DirectoryFile file = new DirectoryFile();
+                                file.UserId = username;
+                                file.Path = (String)reader["path"];
+                                file.Filename = (String)reader["filename"];
+                                file.Id = (Int64)reader["file_id"];
+                                file.Fullname = Path.Combine(file.Path, file.Filename);
+                                file.Checksum = Security.CalculateMD5Hash((byte[])reader["content"]);
+                                file.LastModificationTime = (DateTime)reader["last_mod_time"];
+                                ds.Files.Add(file.Fullname, file);
+                            }
+                        }
+                    }
+                    
                 }
             }
             catch (SQLiteException) { }

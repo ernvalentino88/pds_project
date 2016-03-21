@@ -524,10 +524,7 @@ namespace ClientApp
                    file.Path = info.DirectoryName;
                    file.Fullname = info.FullName;
                    file.Checksum = getChecksum(info);
-                   lock (local.Files)
-                   {
-                       local.Files.Add(file.Fullname, file);
-                   }
+                   local.Files.Add(file.Fullname, file);
                }
                if (Directory.Exists(path))
                {
@@ -539,61 +536,10 @@ namespace ClientApp
                    file.Filename = info.Name;
                    file.Path = info.Parent.FullName;
                    file.Fullname = info.FullName;
-                   lock (local.Files)
-                   {
-                       local.Files.Add(file.Fullname, file);
-                   }
-                   //State s = new State();
-                   //s.Directory = info.FullName;
-                   //s.Status = local;
-                   //ThreadPool.QueueUserWorkItem(new WaitCallback(fillDirectoryStatus), s);
+                   local.Files.Add(file.Fullname, file);
                    fillDirectoryStatus(local, info.FullName);
                }
            }
-        }
-
-        public void fillDirectoryStatus(Object state)
-        {
-            State s = (State)state;
-            DirectoryStatus local = s.Status;
-            var entries = Directory.EnumerateFileSystemEntries(s.Directory);
-            foreach (var path in entries)
-            {
-                if (File.Exists(path))
-                {
-                    //entry is a file
-                    FileInfo info = new FileInfo(path);
-                    DirectoryFile file = new DirectoryFile();
-                    file.Length = info.Length;
-                    file.UserId = userId;
-                    file.LastModificationTime = info.LastWriteTime;
-                    file.Filename = info.Name;
-                    file.Path = info.DirectoryName;
-                    file.Fullname = info.FullName;
-                    file.Checksum = getChecksum(info);
-                    lock (local)
-                    {
-                        local.Files.Add(file.Fullname, file);
-                    }
-                }
-                if (Directory.Exists(path))
-                {
-                    //entry is a directory
-                    DirectoryFile file = new DirectoryFile();
-                    DirectoryInfo info = new DirectoryInfo(path);
-                    file.UserId = userId;
-                    file.Directory = true;
-                    file.Filename = info.Name;
-                    file.Path = info.Parent.FullName;
-                    file.Fullname = info.FullName;
-                    lock (local)
-                    {
-                        local.Files.Add(file.Fullname, file);
-                    }
-                    //s.Directory = info.FullName;
-                    //ThreadPool.QueueUserWorkItem(new WaitCallback(fillDirectoryStatus), s);
-                }
-            }
         }
 
         public String getChecksum(FileInfo info)
@@ -1108,11 +1054,57 @@ namespace ClientApp
             catch (SocketException) { }
         }
 
-
-    }
-    class State
-    {
-        public DirectoryStatus Status { get; set; }
-        public String Directory { get; set; }
+        public int getPreviousVersions(DirectoryStatus dir, String path)
+        {
+            try
+            {
+                Socket s = tcpClient.Client;
+                byte[] command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.PREV);
+                s.Send(command);
+                byte[] buf = Security.AESEncrypt(aesKey, Encoding.UTF8.GetBytes(path));
+                s.Send(BitConverter.GetBytes(buf.Length));
+                s.Send(buf);
+                long date = File.GetLastWriteTime(path).ToBinary();
+                buf = BitConverter.GetBytes(date);
+                s.Send(buf);
+                command = Networking.my_recv(4, tcpClient.Client);
+                if (command != null && (
+                        ((Networking.CONNECTION_CODES)BitConverter.ToUInt32(command, 0) == Networking.CONNECTION_CODES.OK)))
+                {
+                    byte[] recvBuf = Networking.my_recv(4, s);
+                    if (recvBuf == null)
+                        return -1;
+                    Int32 filesInfoToRecv = BitConverter.ToInt32(recvBuf, 0);
+                    for (int i = 0; i < filesInfoToRecv; i++)
+                    {
+                        DirectoryFile file = new DirectoryFile();
+                        recvBuf = Networking.my_recv(8, s);
+                        if (recvBuf == null)
+                            return -1;
+                        DateTime lastModTime = DateTime.FromBinary(BitConverter.ToInt64(recvBuf, 0));
+                        recvBuf = Networking.my_recv(8, s);
+                        if (recvBuf == null)
+                            return -1;
+                        Int64 id = BitConverter.ToInt64(recvBuf, 0);
+                        byte[] encryptedData = Networking.my_recv(48, s);
+                        if (encryptedData == null)
+                            return -1;
+                        String checksum = Encoding.UTF8.GetString(Security.AESDecrypt(aesKey, encryptedData));
+                        file.Checksum = checksum;
+                        file.Id = id;
+                        file.Deleted = true;
+                        file.UserId = userId;
+                        file.Filename = Path.GetFileName(path);
+                        file.Path = Path.GetDirectoryName(path);
+                        file.Fullname = path;
+                        file.LastModificationTime = lastModTime;
+                        dir.Files.Add(file.Fullname, file);
+                    }
+                    return filesInfoToRecv;
+                }
+            }
+            catch (SocketException) { }
+            return -1;
+        }
     }
 }
