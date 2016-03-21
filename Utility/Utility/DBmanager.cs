@@ -459,7 +459,8 @@ namespace Utility
                                 file.Fullname = Path.Combine(file.Path, file.Filename);
                                 file.Checksum = Security.CalculateMD5Hash((byte[])reader["content"]);
                                 file.LastModificationTime = (DateTime)reader["last_mod_time"];
-                                ds.Files.Add(file.Fullname, file);
+                                String fname = file.Fullname + "_" + file.LastModificationTime;
+                                ds.Files.Add(fname, file);
                             }
                         }
                     }
