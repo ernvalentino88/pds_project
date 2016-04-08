@@ -72,7 +72,7 @@
                                 </Style>
                             </DataGridTextColumn.ElementStyle>
                         </DataGridTextColumn>
-                        <DataGridTextColumn Header="Checksum" Binding="{Binding Checksum}">
+                        <DataGridTextColumn Header="Last Write Time" Binding="{Binding LastModificationTime}">
                             <DataGridTextColumn.ElementStyle>
                                 <Style TargetType="{x:Type TextBlock}">
                                     <Setter Property="Margin" Value="5" />
@@ -89,6 +89,97 @@
                         </DataGridTemplateColumn>
                     </DataGrid.Columns>
                 </DataGrid>
+                
+                <Label x:Name="Label_filename" HorizontalAlignment="Center" VerticalAlignment="Top" 
+                       HorizontalContentAlignment="Center" Visibility="Hidden"
+                       Margin="30" Padding="10" FontSize="14" FontWeight="Bold" ></Label>
+                <DataGrid IsReadOnly="True"
+                          AutoGenerateColumns="False"
+                          CanUserAddRows="False"
+                          Visibility="Hidden"
+                          x:Name="filePrev_grid" Margin="0,103,0,40">
+                    <DataGrid.Columns>
+                        <DataGridTemplateColumn>
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Image Source="{Binding Icon}" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTextColumn Header="Version" Binding="{Binding LastModificationTime}">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="{x:Type TextBlock}">
+                                    <Setter Property="Margin" Value="5" />
+                                    <Setter Property="Padding" Value="5" />
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Header="Checksum" Binding="{Binding Checksum}">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="{x:Type TextBlock}">
+                                    <Setter Property="Margin" Value="5" />
+                                    <Setter Property="Padding" Value="5" />
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+                        <DataGridTemplateColumn>
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Button Content="Restore" Style="{StaticResource AccentedSquareButtonStyle}" Margin="10" Padding="5" Click="Restore_Button_Click"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <DataGrid IsReadOnly="True"
+                          AutoGenerateColumns="False"
+                          CanUserAddRows="False"
+                          Visibility="Hidden"
+                          x:Name="dir_grid" Margin="0,103,0,40">
+                    <DataGrid.Columns>
+                        <DataGridTemplateColumn>
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Image Source="{Binding Icon}" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTextColumn Header="Path" Binding="{Binding Fullname}">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="{x:Type TextBlock}">
+                                    <Setter Property="Margin" Value="5" />
+                                    <Setter Property="Padding" Value="5" />
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Header="Version" Binding="{Binding LastModificationTime}">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="{x:Type TextBlock}">
+                                    <Setter Property="Margin" Value="5" />
+                                    <Setter Property="Padding" Value="5" />
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+                        <DataGridCheckBoxColumn Header="Is Present on Disk" Binding="{Binding IsOnDisk}">
+                        </DataGridCheckBoxColumn>
+                        <DataGridTemplateColumn>
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Button Content="Restore" Style="{StaticResource AccentedSquareButtonStyle}" Margin="10" Padding="5" Click="Restore_Button_Click"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTemplateColumn>
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Button Content="Start Syncing" Style="{StaticResource AccentedSquareButtonStyle}" Margin="10" Padding="5"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+
                 <ProgressBar BorderBrush="RoyalBlue"  x:Name="progressBar_file" Visibility="Hidden" HorizontalAlignment="Center" Height="26" Margin="178,346,160,325" Width="584"/>
                 <Button VerticalAlignment="Top" BorderBrush="Black"  x:Name="Back_button" Style="{DynamicResource MetroCircleButtonStyle}" Margin="10,51,860,0" Height="47" Width="50" Click="Back_button_Click">
                     <Image Source="back_arrow.ico" Width="22" Height="20"></Image>

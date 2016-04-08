@@ -82,6 +82,9 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="DirectoryItem.cs" />
+    <Compile Include="FileVersionItem.cs" />
+    <Compile Include="ListItem.cs" />
     <Compile Include="Watcher.cs" />
     <Compile Include="Client.cs" />
     <Compile Include="FileListItem.cs" />

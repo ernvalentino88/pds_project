@@ -223,7 +223,11 @@ namespace ServerApp
                         {
                             command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.OK);
                             s.Send(command);
-                            clientSession.LastActivationTime = DateTime.Now;
+                            lock (clientSession)
+                            {
+                                clientSession.LastActivationTime = DateTime.Now;
+                                clientSession.Socket = s;
+                            }
                             return true;
                         }
                         else
@@ -240,7 +244,11 @@ namespace ServerApp
                         {
                             command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.OK);
                             s.Send(command);
-                            clientSession.LastActivationTime = DateTime.Now;
+                            lock (clientSession)
+                            {
+                                clientSession.LastActivationTime = DateTime.Now;
+                                clientSession.Socket = s;
+                            }
                             return true;
                         }
                         else
@@ -250,6 +258,41 @@ namespace ServerApp
                             return false;
                         }
                     }
+                }
+            }
+            catch (SocketException) { }
+            return false;
+        }
+
+        public bool resumeSession(ref ClientSession clientSession, Socket s, bool fromWatcher)
+        {
+            try
+            {
+                byte[] command = new byte[4];
+                Random r = new Random();
+                byte[] rand = new byte[8];
+                r.NextBytes(rand);
+                s.Send(rand);
+                byte[] hashClient = Networking.my_recv(20, s);
+                if (hashClient != null)
+                {
+                    clientSession = getClientSessionFromHash(hashClient, rand);
+                    if (clientSession != null)
+                    {
+                        command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.OK);
+                        s.Send(command);
+                        lock (clientSession)
+                        {
+                            clientSession.LastActivationTime = DateTime.Now;
+                        }
+                        return true;
+                    }
+                    else
+                    {
+                        command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.AUTH);
+                        s.Send(command);
+                        return false;
+                    }                
                 }
             }
             catch (SocketException) { }
@@ -287,7 +330,7 @@ namespace ServerApp
             return Interlocked.Increment(ref this.sessionIdCounter);
         }
 
-        public bool synchronizationSession(ClientSession clientSession, DateTime creationTime)
+        public bool synchronizationSession(ClientSession clientSession)
         {
             DirectoryStatus newStatus = new DirectoryStatus();
             newStatus.FolderPath = clientSession.CurrentStatus.FolderPath;
@@ -331,16 +374,18 @@ namespace ServerApp
                                     exit = true;
                                 break;
                             case Networking.CONNECTION_CODES.END_SYNCH:
-                                if (!DBmanager.insertUnchanged(con, clientSession.CurrentStatus, newStatus))
-                                    exit = true;
-                                else
+                                if (DBmanager.insertUnchanged(con, clientSession.CurrentStatus, newStatus))
                                 {
                                     //success
                                     success = true;
-                                    clientSession.CurrentStatus = null;
-                                    clientSession.CurrentStatus = newStatus;
-                                    return success;
+                                    lock (this)
+                                    {
+                                        this.id2client[clientSession.SessionId].CurrentStatus = null;
+                                        this.id2client[clientSession.SessionId].LastStatusTime = newStatus.CreationTime;
+                                        this.id2client[clientSession.SessionId].LastActivationTime = DateTime.Now;
+                                    }
                                 }
+                                exit = true;
                                 break;
                             default:
                                 exit = true;
@@ -378,6 +423,75 @@ namespace ServerApp
             return success;
         }
 
+        public void synchronizationSession(ClientSession clientSession, Socket s)
+        {
+            SQLiteConnection con = null;
+            SQLiteTransaction transaction = null;
+            bool success = false;
+
+            try
+            {
+                bool exit = false;
+                con = new SQLiteConnection(DBmanager.connectionString);
+                con.Open();
+                transaction = con.BeginTransaction();
+
+                while (!exit)
+                {
+                    byte[] command = Utility.Networking.my_recv(4, s);
+                    if (command != null)
+                    {
+                        Networking.CONNECTION_CODES code = (Networking.CONNECTION_CODES)BitConverter.ToUInt32(command, 0);
+                        switch (code)
+                        {
+                            case Networking.CONNECTION_CODES.ADD:
+                                if (!this.addFile(con, clientSession, s))
+                                    exit = true;
+                                break;
+                            case Networking.CONNECTION_CODES.UPD:
+                                if (!this.updateFile(con, clientSession, s))
+                                    exit = true;
+                                break;
+                            case Networking.CONNECTION_CODES.DEL:
+                                if (!this.deleteFile(con, clientSession, s))
+                                    exit = true;
+                                break;
+                            case Networking.CONNECTION_CODES.END_SYNCH:
+                                //success
+                                success = true;
+                                lock (this)
+                                {
+                                    this.id2client[clientSession.SessionId].LastActivationTime = DateTime.Now;
+                                }
+                                exit = true;
+                                break;
+                            default:
+                                exit = true;
+                                break;
+                        }
+                    }
+                }
+            }
+            catch (SocketException) { }
+            catch (SQLiteException) { }
+
+            finally
+            {
+                if (transaction != null)
+                {
+                    if (success)
+                        transaction.Commit();
+                    else
+                        transaction.Rollback();
+                    transaction.Dispose();
+                }
+                if (con != null && con.State == System.Data.ConnectionState.Open)
+                    con.Dispose();
+                if (s != null)
+                    s.Close();
+            }
+        }
+
         private bool deleteFile(SQLiteConnection conn, ClientSession clientSession, DirectoryStatus newStatus)
         {
             Socket s = clientSession.Socket;
@@ -398,6 +512,11 @@ namespace ServerApp
                 if (encryptedData == null)
                     return false;
                 String path = Encoding.UTF8.GetString(Security.AESDecrypt(aes, encryptedData));
+                recvBuf = Networking.my_recv(8, s);
+                if (recvBuf == null)
+                    return false;
+                DateTime lastModTime = DateTime.FromBinary(BitConverter.ToInt64(recvBuf, 0));
+
                 recvBuf = Networking.my_recv(4, s);
                 if (recvBuf == null)
                     return false;
@@ -405,7 +524,7 @@ namespace ServerApp
                 {
                     //directory
                     String fullname = Path.Combine(path, filename);
-                   return DBmanager.deleteDirectory(conn, newStatus, clientSession.CurrentStatus, fullname);
+                    return DBmanager.deleteDirectory(conn, newStatus, clientSession.CurrentStatus, fullname, lastModTime);
                 }
                 if ((Networking.CONNECTION_CODES)BitConverter.ToUInt32(recvBuf, 0) == Networking.CONNECTION_CODES.FILE)
                 {
@@ -440,22 +559,22 @@ namespace ServerApp
                 if (encryptedData == null)
                     return false;
                 String path = Encoding.UTF8.GetString(Security.AESDecrypt(aes, encryptedData));
-                
+                recvBuf = Networking.my_recv(8, s);
+                if (recvBuf == null)
+                    return false;
+                DateTime lastModTime = DateTime.FromBinary(BitConverter.ToInt64(recvBuf, 0));
+
                 recvBuf = Networking.my_recv(4, s);
                 if (recvBuf == null)
                     return false;
                 if ((Networking.CONNECTION_CODES)BitConverter.ToUInt32(recvBuf, 0) == Networking.CONNECTION_CODES.DIR)
                 {
                     //directory
-                    return DBmanager.insertDirectory(conn, newStatus, filename, path);
+                    return DBmanager.insertDirectory(conn, newStatus, filename, path, lastModTime);
                 }
                 if ((Networking.CONNECTION_CODES)BitConverter.ToUInt32(recvBuf, 0) == Networking.CONNECTION_CODES.FILE)
                 {
                     //file
-                    recvBuf = Networking.my_recv(8, s);
-                    if (recvBuf == null)
-                        return false;
-                    DateTime lastModTime = DateTime.FromBinary(BitConverter.ToInt64(recvBuf, 0));
                     byte[] command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.OK);
                     s.Send(command);
                     recvBuf = Networking.my_recv(8, s);
@@ -509,6 +628,142 @@ namespace ServerApp
                     return false;
 
                 return DBmanager.insertFile(conn, newStatus, filename, path, file, lastModTime);
+            }
+            catch (SocketException) { }
+            return false;
+        }
+
+
+        private bool deleteFile(SQLiteConnection conn, ClientSession clientSession, Socket s)
+        {
+            AesCryptoServiceProvider aes = clientSession.AESKey;
+            try
+            {
+                byte[] recvBuf = Networking.my_recv(4, s);
+                if (recvBuf == null)
+                    return false;
+                byte[] encryptedData = Networking.my_recv(BitConverter.ToInt32(recvBuf, 0), s);
+                if (encryptedData == null)
+                    return false;
+                String filename = Encoding.UTF8.GetString(Security.AESDecrypt(aes, encryptedData));
+                recvBuf = Networking.my_recv(4, s);
+                if (recvBuf == null)
+                    return false;
+                encryptedData = Networking.my_recv(BitConverter.ToInt32(recvBuf, 0), s);
+                if (encryptedData == null)
+                    return false;
+                String path = Encoding.UTF8.GetString(Security.AESDecrypt(aes, encryptedData));
+                recvBuf = Networking.my_recv(8, s);
+                if (recvBuf == null)
+                    return false;
+                DateTime lastModTime = DateTime.FromBinary(BitConverter.ToInt64(recvBuf, 0));
+                recvBuf = Networking.my_recv(4, s);
+                if (recvBuf == null)
+                    return false;
+                if ((Networking.CONNECTION_CODES)BitConverter.ToUInt32(recvBuf, 0) == Networking.CONNECTION_CODES.DIR)
+                {
+                    //directory
+                    String fullname = Path.Combine(path, filename);
+                    return DBmanager.deleteDirectory(conn, fullname, clientSession.User.UserId, clientSession.LastStatusTime);
+                }
+                if ((Networking.CONNECTION_CODES)BitConverter.ToUInt32(recvBuf, 0) == Networking.CONNECTION_CODES.FILE)
+                {
+                    //file
+                    return DBmanager.deleteFile(conn, path, filename, clientSession.User.UserId, clientSession.LastStatusTime);
+                }
+
+            }
+            catch (SocketException) { }
+            return false;
+        }
+
+        private bool addFile(SQLiteConnection conn, ClientSession clientSession, Socket s)
+        {
+            AesCryptoServiceProvider aes = clientSession.AESKey;
+            try
+            {
+                byte[] recvBuf = Networking.my_recv(4, s);
+                if (recvBuf == null)
+                    return false;
+                byte[] encryptedData = Networking.my_recv(BitConverter.ToInt32(recvBuf, 0), s);
+                if (encryptedData == null)
+                    return false;
+                String filename = Encoding.UTF8.GetString(Security.AESDecrypt(aes, encryptedData));
+                recvBuf = Networking.my_recv(4, s);
+                if (recvBuf == null)
+                    return false;
+                encryptedData = Networking.my_recv(BitConverter.ToInt32(recvBuf, 0), s);
+                if (encryptedData == null)
+                    return false;
+                String path = Encoding.UTF8.GetString(Security.AESDecrypt(aes, encryptedData));
+                recvBuf = Networking.my_recv(8, s);
+                if (recvBuf == null)
+                    return false;
+                DateTime lastModTime = DateTime.FromBinary(BitConverter.ToInt64(recvBuf, 0));
+
+                recvBuf = Networking.my_recv(4, s);
+                if (recvBuf == null)
+                    return false;
+                if ((Networking.CONNECTION_CODES)BitConverter.ToUInt32(recvBuf, 0) == Networking.CONNECTION_CODES.DIR)
+                {
+                    //directory
+                    return DBmanager.insertDirectory(conn, path, filename, clientSession.User.UserId, clientSession.LastStatusTime, lastModTime);
+                }
+                if ((Networking.CONNECTION_CODES)BitConverter.ToUInt32(recvBuf, 0) == Networking.CONNECTION_CODES.FILE)
+                {
+                    //file
+                    byte[] command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.OK);
+                    s.Send(command);
+                    recvBuf = Networking.my_recv(8, s);
+                    if (recvBuf == null)
+                        return false;
+                    Int64 fileLen = BitConverter.ToInt64(recvBuf, 0);
+                    byte[] file = Networking.recvEncryptedFile(fileLen, s, aes);
+                    if (file == null)
+                        return false;
+                    return DBmanager.insertFile(conn, path, filename, file, clientSession.User.UserId, clientSession.LastStatusTime, lastModTime);
+                }
+            }
+            catch (SocketException) { }
+            return false;
+        }
+
+        private bool updateFile(SQLiteConnection conn, ClientSession clientSession, Socket s)
+        {
+            AesCryptoServiceProvider aes = clientSession.AESKey;
+
+            try
+            {
+                byte[] recvBuf = Networking.my_recv(4, s);
+                if (recvBuf == null)
+                    return false;
+                byte[] encryptedData = Networking.my_recv(BitConverter.ToInt32(recvBuf, 0), s);
+                if (encryptedData == null)
+                    return false;
+                String filename = Encoding.UTF8.GetString(Security.AESDecrypt(aes, encryptedData));
+                recvBuf = Networking.my_recv(4, s);
+                if (recvBuf == null)
+                    return false;
+                encryptedData = Networking.my_recv(BitConverter.ToInt32(recvBuf, 0), s);
+                if (encryptedData == null)
+                    return false;
+                String path = Encoding.UTF8.GetString(Security.AESDecrypt(aes, encryptedData));
+                recvBuf = Networking.my_recv(8, s);
+                if (recvBuf == null)
+                    return false;
+                DateTime lastModTime = DateTime.FromBinary(BitConverter.ToInt64(recvBuf, 0));
+
+                byte[] command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.OK);
+                s.Send(command);
+                recvBuf = Networking.my_recv(8, s);
+                if (recvBuf == null)
+                    return false;
+                Int64 fileLen = BitConverter.ToInt64(recvBuf, 0);
+                byte[] file = Networking.recvEncryptedFile(fileLen, s, aes);
+                if (file == null)
+                    return false;
+
+                return DBmanager.updateFile(conn, path, filename, clientSession.User.UserId, file, clientSession.LastStatusTime, lastModTime);
             }
             catch (SocketException) { }
             return false;
@@ -571,6 +826,9 @@ namespace ServerApp
                         encryptedData = Security.AESEncrypt(aes, buf);
                         s.Send(BitConverter.GetBytes(encryptedData.Length));
                         s.Send(encryptedData);
+                        buf = BitConverter.GetBytes(file.LastModificationTime.ToBinary());
+                        s.Send(buf);
+                        
                         if (file.Deleted)
                         {
                             command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.DEL);
@@ -592,9 +850,6 @@ namespace ServerApp
                             s.Send(command);
                             buf = BitConverter.GetBytes(file.Id);
                             s.Send(buf);
-                            buf = Encoding.UTF8.GetBytes(file.Checksum);
-                            encryptedData = Security.AESEncrypt(aes, buf);
-                            s.Send(encryptedData);
                         }
                     }
                 }
@@ -668,12 +923,13 @@ namespace ServerApp
                 String dir = Encoding.UTF8.GetString(Security.AESDecrypt(aes, recvBuf));
                 DirectoryStatus status = DBmanager.getLastSnapshot(dir, clientSession.User.UserId);
                 clientSession.CurrentStatus = status;
-                int count = (status == null) ? 0 : status.Files.Count;
-                byte[] buf = BitConverter.GetBytes(count);
-                s.Send(buf);
+
                 if (status != null)
                 {
-                    foreach (var item in status.Files)
+                    Dictionary<String, DirectoryFile> diff = status.Files.Where(x => !status.Files[x.Key].Deleted).ToDictionary(x => x.Key, x => x.Value);
+                    byte[] buf = BitConverter.GetBytes(diff.Count);
+                    s.Send(buf);
+                    foreach (var item in diff)
                     {
                         DirectoryFile file = item.Value;
                         buf = Encoding.UTF8.GetBytes(file.Path);
@@ -684,16 +940,9 @@ namespace ServerApp
                         encryptedData = Security.AESEncrypt(aes, buf);
                         s.Send(BitConverter.GetBytes(encryptedData.Length));
                         s.Send(encryptedData);
-                        if (file.Deleted)
-                        {
-                            command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.DEL);
-                            s.Send(command);
-                        }
-                        else
-                        {
-                            command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.OK);
-                            s.Send(command);
-                        }
+                        buf = BitConverter.GetBytes(file.LastModificationTime.ToBinary());
+                        s.Send(buf);
+
                         if (file.Directory)
                         {
                             command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.DIR);
@@ -708,9 +957,128 @@ namespace ServerApp
                             buf = Encoding.UTF8.GetBytes(file.Checksum);
                             encryptedData = Security.AESEncrypt(aes, buf);
                             s.Send(encryptedData);
-                        }
+                        }              
                     }
                 }
+                else
+                {
+                    byte[] buf = BitConverter.GetBytes(0);
+                    s.Send(buf);
+                }
+                return true;
+            }
+            catch (SocketException) { }
+            return false;
+        }
+
+        public bool restoreDirectory(ClientSession clientSession)
+        {
+            try
+            {
+                Socket s = clientSession.Socket;
+                AesCryptoServiceProvider aes = clientSession.AESKey;
+                byte[] recvBuf = Networking.my_recv(4, s);
+                if (recvBuf == null)
+                    return false;
+                int pathLen = BitConverter.ToInt32(recvBuf, 0);
+                recvBuf = Networking.my_recv(pathLen, s);
+                if (recvBuf == null)
+                    return false;
+                byte[] command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.OK);
+                s.Send(command);
+                String dir = Encoding.UTF8.GetString(Security.AESDecrypt(aes, recvBuf));
+
+                DateTime creationTime = DateTime.MinValue;
+                List<Int64> ids = DBmanager.getFilesDeletedIDs(dir, clientSession.User.UserId, ref creationTime);
+                byte[] buf = BitConverter.GetBytes(ids.Count);
+                s.Send(buf);
+
+                for (int i = 0; i < ids.Count; i++)
+                {
+                    String path = "", name = "";
+                    byte[] file = null;
+                    DateTime lastModTime = DateTime.MinValue;
+                    DBmanager.getFileFromID(ids[i], ref path, ref name, ref file);
+
+                    if (file != null && !path.Equals("") && !name.Equals(""))
+                    {
+                        byte[] encryptedData = Security.AESEncrypt(aes, Encoding.UTF8.GetBytes(name));
+                        s.Send(BitConverter.GetBytes(encryptedData.Length));
+                        s.Send(encryptedData);
+                        encryptedData = Security.AESEncrypt(aes, Encoding.UTF8.GetBytes(path));
+                        s.Send(BitConverter.GetBytes(encryptedData.Length));
+                        s.Send(encryptedData);
+                        long left = file.LongLength;
+                        s.Send(BitConverter.GetBytes(left));
+
+                        using (MemoryStream ms = new MemoryStream(file))
+                        {
+
+                            while (left > 0)
+                            {
+                                int dim = (left > 4096) ? 4096 : (int)left;
+                                buf = new byte[dim];
+                                ms.Read(buf, 0, dim);
+                                encryptedData = Security.AESEncrypt(aes, buf);
+                                s.Send(encryptedData);
+                                left -= dim;
+                            }
+                        }
+                        recvBuf = Networking.my_recv(8, s);
+                        if (recvBuf == null)
+                            return false;
+                        lastModTime = DateTime.FromBinary(BitConverter.ToInt64(recvBuf, 0));
+                        DBmanager.restoreFile(ids[i], path, name, clientSession.User.UserId, lastModTime, creationTime);
+                    }
+                }
+
+                return true;
+            }
+            catch (SocketException) { }
+            return false;
+        }
+
+        public bool restoreFile(ClientSession clientSession)
+        {
+            try
+            {
+                Socket s = clientSession.Socket;
+                AesCryptoServiceProvider aes = clientSession.AESKey;
+                byte[] recvBuf = Networking.my_recv(8, s);
+                if (recvBuf == null)
+                    return false;
+                Int64 id = BitConverter.ToInt32(recvBuf, 0);             
+                byte[] command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.OK);
+                s.Send(command);
+                String path = "", name = "";
+                byte[] file = null;
+                DateTime lastModTime = DateTime.MinValue;
+                DBmanager.getFileFromID(id, ref path, ref name, ref file);
+                if (file != null && !path.Equals("") && !name.Equals(""))
+                {
+                    long left = file.LongLength;
+                    s.Send(BitConverter.GetBytes(left));
+                    using (MemoryStream ms = new MemoryStream(file))
+                    {
+
+                        while (left > 0)
+                        {
+                            int dim = (left > 4096) ? 4096 : (int)left;
+                            byte[] buf = new byte[dim];
+                            ms.Read(buf, 0, dim);
+                            byte[] encryptedData = Security.AESEncrypt(aes, buf);
+                            s.Send(encryptedData);
+                            left -= dim;
+                        }
+                    }
+                    recvBuf = Networking.my_recv(8, s);
+                    if (recvBuf == null)
+                        return false;
+                    lastModTime = DateTime.FromBinary(BitConverter.ToInt64(recvBuf, 0));
+                    String checksum = Security.CalculateMD5Hash(file);
+                    DBmanager.restoreFile(id, path, name, clientSession.User.UserId, checksum, lastModTime);
+                }
+                
                 return true;
             }
             catch (SocketException) { }

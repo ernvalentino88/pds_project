@@ -39,12 +39,13 @@ namespace Utility
             this.directory = false;
         }
 
-        public DirectoryFile(String path, String filename, String userId, Boolean isDirectory)
+        public DirectoryFile(String path, String filename, String userId, DateTime lastModTime, Boolean isDirectory)
         {
             this.path = path;
             this.filename = filename;
             this.fullname = System.IO.Path.Combine(path, filename);
             this.userId = userId;
+            this.lastModificationTime = lastModTime;
             this.directory = isDirectory;
             this.deleted = false;
         }
@@ -156,7 +157,8 @@ namespace Utility
                 length = value;
             }
         }
-        public string Fullname
+
+        public String Fullname
         {
             get
             {
@@ -168,6 +170,24 @@ namespace Utility
             }
         }
 
+        public String NameVersion
+        {
+            get
+            {
+                String name;
+                if (deleted)
+                {
+                    name = lastModificationTime.ToString("dd/MM/yyyyTHH:ss");
+                    name += "_" + filename;
+                    name = System.IO.Path.Combine(path, name);
+                }
+                else
+                    name = String.Copy(fullname);
+
+                return name;
+            }
+        }
+
         public DirectoryFile clone()
         {
             DirectoryFile file = new DirectoryFile();
@@ -176,16 +196,17 @@ namespace Utility
             file.Filename = (filename == null) ? null : String.Copy(filename);
             file.Fullname = (fullname == null) ? null : String.Copy(fullname);
             file.Id = id;
-            file.LastModificationTime = new DateTime(lastModificationTime.ToBinary());
             file.Length = length;
             file.Path = (path == null) ? null : String.Copy(path);
+            file.LastModificationTime = lastModificationTime;
             file.UserId = (userId == null) ? null : String.Copy(userId);
+            file.Checksum = (checksum == null) ? null : String.Copy(checksum);
             return file;
         }
 
         public override int GetHashCode()
         {
-            int checksumHash = (directory == true) ? 0 : checksum.GetHashCode();                
+            int checksumHash = (directory == true) ? 0 : checksum.GetHashCode();
             return ( fullname.GetHashCode() +
                 userId.GetHashCode() + checksumHash );
         }
@@ -197,8 +218,10 @@ namespace Utility
                 return (userId.Equals(other.userId) &&
                     fullname.Equals(other.fullname));
             if (!other.directory && !this.directory)
-                return ( userId.Equals(other.userId) && 
-                    fullname.Equals(other.fullname) && checksum.Equals(other.checksum) );
+            {
+                return (userId.Equals(other.userId) &&
+                    fullname.Equals(other.fullname) && checksum.Equals(other.checksum));
+            }
             return false;
         }
     }

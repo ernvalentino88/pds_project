@@ -18,6 +18,7 @@ namespace ServerApp
         private AesCryptoServiceProvider aesKey;
         private DateTime lastActivationTime;
         private DirectoryStatus currentStatus;
+        private DateTime lastStatusTime;
 
         public Int64 SessionId
         {
@@ -88,6 +89,18 @@ namespace ServerApp
             set
             {
                 currentStatus = value;
+            }
+        }
+
+        public DateTime LastStatusTime
+        {
+            get
+            {
+                return lastStatusTime;
+            }
+            set
+            {
+                lastStatusTime = value;
             }
         }
         

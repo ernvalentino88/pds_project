@@ -168,6 +168,10 @@ namespace ServerApp
                             if (!server.resumeSession(ref cs, s))
                                 exit = true;
                             break;
+                        case Networking.CONNECTION_CODES.SESSION_WATCH:
+                            if (!server.resumeSession(ref cs, s, true))
+                                exit = true;
+                            break;
                         case Networking.CONNECTION_CODES.DIR:
                             if (!server.getDirectoryInfo(cs))
                                 exit = true;
@@ -183,9 +187,21 @@ namespace ServerApp
                         case Networking.CONNECTION_CODES.START_SYNCH:
                             if (cs != null)
                             {
-                                if (!server.synchronizationSession(cs, DateTime.Now))
+                                if (!server.synchronizationSession(cs))
                                     exit = true;
                             }
+                            break;
+                        case Networking.CONNECTION_CODES.FS_SYNCH:
+                            server.synchronizationSession(cs, s);
+                            exit = true;
+                            break;
+                        case Networking.CONNECTION_CODES.RESTORE_DIR:
+                            if (!server.restoreDirectory(cs))
+                                exit = true;
+                            break;
+                        case Networking.CONNECTION_CODES.RESTORE_FILE:
+                            if (!server.restoreFile(cs))
+                                exit = true;
                             break;
                         case Networking.CONNECTION_CODES.HELLO:
                             server.Hello(s);

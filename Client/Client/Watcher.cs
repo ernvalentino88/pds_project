@@ -18,11 +18,13 @@ namespace ClientApp
         public FileSystemWatcher watcher { get; set; }
         public String path { get; set; }
         public Client client { get; set; }
+        private DateTime lastRead;
 
         public Watcher(String path, Client client)
         {
             this.client = client;
             this.path = path;
+            lastRead = DateTime.MinValue;
             this.Run();
         }
         
@@ -71,6 +73,16 @@ namespace ClientApp
                 //TODO:wrong folder
             }
         }
+
+        public void Pause()
+        {
+            watcher.EnableRaisingEvents = false;
+        }
+
+        public void Resume()
+        {
+            watcher.EnableRaisingEvents = true;
+        }
     
         // Define the event handlers.
 
@@ -78,7 +90,7 @@ namespace ClientApp
         {
             DirectoryFile file = new DirectoryFile();
             file.Fullname = e.FullPath;
-            file.Filename = e.Name;
+            file.Filename = Path.GetFileName(e.FullPath);
             file.Path = Path.GetDirectoryName(e.FullPath);
             file.UserId = client.UserId;
        
@@ -108,39 +120,16 @@ namespace ClientApp
                 if (Directory.Exists(e.FullPath))
                 {
                     //directory
-                    //DirectoryInfo di = new DirectoryInfo(e.FullPath);
-                    Console.WriteLine("Directory: " + e.FullPath + " Created");
+                    Console.WriteLine(e.FullPath);
                     lock (this)
                     {
                         DirectoryFile file = new DirectoryFile();
                         file.Directory = true;
-                        file.Filename = e.Name;
+                        file.Filename = Path.GetFileName(e.FullPath);
                         file.Fullname = e.FullPath;
                         file.Path = Path.GetDirectoryName(e.FullPath);
                         file.UserId = client.UserId;
                         client.addFile(file, true);
-                    }
-                }
-                if (File.Exists(e.FullPath))
-                {
-                    //exclude files started from '~','$' and '.'(hidden files) and without extensions
-                    if (!Path.GetFileName(e.FullPath)[0].Equals('~') && !Path.GetFileName(e.FullPath)[0].Equals('$') &&
-                        !Path.GetFileName(e.FullPath)[0].Equals('.') && !Path.GetExtension(e.FullPath).Equals(".tmp") &&
-                        !Path.GetExtension(e.FullPath).Equals(".TMP") && !Path.HasExtension(e.FullPath))
-                    {
-                        //file
-                        Console.WriteLine("File: " + e.FullPath + " Created");
-                        lock (this)
-                        {
-                            DirectoryFile file = new DirectoryFile();
-                            file.Filename = e.Name;
-                            file.Fullname = e.FullPath;
-                            file.Path = Path.GetDirectoryName(e.FullPath);
-                            file.UserId = client.UserId;
-                            file.LastModificationTime = File.GetCreationTime(e.FullPath);
-                            file.Length = 0;
-                            client.addFile(file, true);
-                        }
                     }
                 }
             }
@@ -151,36 +140,35 @@ namespace ClientApp
         {
             try
             {
-                //to avoid double changes
                 lock (this)
                 {
-                    watcher.EnableRaisingEvents = false;
-                }
-                if (File.Exists(e.FullPath))
-                {
-                    //exclude files started from '~','$' and '.'(hidden files) and without extensions
-                    FileInfo info = new FileInfo(e.FullPath);
-                    if ( !info.Name[0].Equals('~') && !info.Name[0].Equals('$') &&
-                         !info.Name[0].Equals('.') && !info.Extension.Equals(".tmp") &&
-                         !info.Extension.Equals(".TMP") && !info.Extension.Equals("") )
+                    if (File.Exists(e.FullPath))
                     {
-                        //file
-                        DirectoryFile file = new DirectoryFile();
-                        file.Filename = e.Name;
-                        file.Fullname = e.FullPath;
-                        file.Path = info.DirectoryName;
-                        file.UserId = client.UserId;
-                        file.LastModificationTime = info.LastWriteTime;
-                        file.Length = info.Length;
-                        client.updateFile(file, true);
-                    } 
+                        DateTime lastWriteTime = File.GetLastWriteTime(e.FullPath);
+                        if (lastWriteTime != lastRead)
+                        {
+                            //exclude files started from '~','$' and '.'(hidden files) and without extensions
+                            FileInfo info = new FileInfo(e.FullPath);
+                            if (!info.Name[0].Equals('~') && !info.Name[0].Equals('$') &&
+                                 !info.Name[0].Equals('.') && !info.Extension.Equals(".tmp") &&
+                                 !info.Extension.Equals(".TMP") && !info.Extension.Equals(""))
+                            {
+                                //file
+                                DirectoryFile file = new DirectoryFile();
+                                file.Filename = info.Name;
+                                file.Fullname = info.FullName;
+                                file.Path = info.DirectoryName;
+                                file.UserId = client.UserId;
+                                file.LastModificationTime = info.LastWriteTime;
+                                file.Length = info.Length;
+                                client.updateFile(file, true);
+                            }
+                            lastRead = lastWriteTime;
+                        }
+                    }
                 }
             }
             catch (Exception) { }
-            finally
-            {
-                watcher.EnableRaisingEvents = true;
-            }
         }
 
         private void OnRenamed(object source, RenamedEventArgs e)
@@ -192,19 +180,18 @@ namespace ClientApp
                 if (Directory.Exists(e.FullPath))
                 {
                     // a directory is renamed
-                    Console.WriteLine("Directory: {0} renamed to {1}", e.OldFullPath, e.FullPath);
                     lock (this)
                     {
                         DirectoryFile file = new DirectoryFile();
                         file.Fullname = e.OldFullPath;
-                        file.Filename = e.OldName;
+                        file.Filename = Path.GetFileName(e.OldFullPath);
                         file.Path = Path.GetDirectoryName(e.OldFullPath);
                         file.UserId = client.UserId;
                         file.Directory = true;
                         client.deleteFile(file, true);
                         file = new DirectoryFile();
                         file.Fullname = e.FullPath;
-                        file.Filename = e.Name;
+                        file.Filename = Path.GetFileName(e.OldFullPath);
                         file.Path = Path.GetDirectoryName(e.FullPath);
                         file.UserId = client.UserId;
                         file.Directory = true;
@@ -228,12 +215,11 @@ namespace ClientApp
                           (fi_old.Extension.Equals("") && !fi_new.Extension.Equals("")))
                     {
                         //file Microsoft changed
-                        Console.WriteLine("File MICROSOFT: " + e.FullPath + " Changed");
                         lock (this)
                         {
                             DirectoryFile file = new DirectoryFile();
-                            file.Filename = e.Name;
-                            file.Fullname = e.FullPath;
+                            file.Filename = fi_new.Name;
+                            file.Fullname = fi_new.FullName;
                             file.Path = fi_new.DirectoryName;
                             file.UserId = client.UserId;
                             file.LastModificationTime = fi_new.LastWriteTime;
@@ -246,18 +232,17 @@ namespace ClientApp
                         if (!fi_new.Name[0].Equals('~') && !fi_new.Name[0].Equals('$') && !fi_new.Name[0].Equals('.') &&
                                     !fi_new.Extension.Equals(".tmp") && !fi_new.Extension.Equals(".TMP") && !fi_new.Extension.Equals(""))
                         {
-                            Console.WriteLine("File: {0} renamed to {1}", e.OldFullPath, e.FullPath);
                             lock (this)
                             {
                                 DirectoryFile file = new DirectoryFile();
-                                file.Fullname = e.OldFullPath;
-                                file.Filename = e.OldName;
+                                file.Fullname = fi_old.FullName;
+                                file.Filename = fi_old.Name;
                                 file.Path = fi_old.DirectoryName;
                                 file.UserId = client.UserId;
                                 client.deleteFile(file, true);
                                 file = new DirectoryFile();
-                                file.Fullname = e.FullPath;
-                                file.Filename = e.Name;
+                                file.Fullname = fi_new.FullName;
+                                file.Filename = fi_new.Name;
                                 file.Path = fi_new.DirectoryName;
                                 file.UserId = client.UserId;
                                 file.LastModificationTime = fi_new.LastWriteTime;

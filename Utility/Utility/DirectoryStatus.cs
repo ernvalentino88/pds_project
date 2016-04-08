@@ -123,12 +123,14 @@ namespace Utility
                 return false;
             if (!this.folderPath.Equals(other.folderPath))
                 return false;
+            if (files.Count != other.files.Count)
+                return false;
             foreach (var item in files)
             {
                 DirectoryFile file = item.Value;
-                if (!other.files.ContainsKey(file.Filename))
+                if (!other.files.ContainsKey(file.Fullname))
                     return false;
-                DirectoryFile otherFile = other.files[file.Filename];
+                DirectoryFile otherFile = other.files[file.Fullname];
                 if (!file.Equals(otherFile))
                     return false;
             }

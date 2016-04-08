@@ -875,3 +875,23 @@ Parameter name: hostNameOrAddress
 21/03/2016 09:29:34 ***Fatal Error***  Impossibile stabilire la connessione. Rifiuto persistente del computer di destinazione 127.0.0.1:8001
    in System.Net.Sockets.TcpClient.Connect(String hostname, Int32 port)
    in ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 180
+21/03/2016 12:08:51 ***Fatal Error***  Impossibile stabilire la connessione. Rifiuto persistente del computer di destinazione 127.0.0.1:8001
+   in System.Net.Sockets.TcpClient.Connect(String hostname, Int32 port)
+   in ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 180
+21/03/2016 12:08:52 ***Fatal Error***  Impossibile stabilire la connessione. Rifiuto persistente del computer di destinazione 127.0.0.1:8001
+   in System.Net.Sockets.TcpClient.Connect(String hostname, Int32 port)
+   in ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 180
+21/03/2016 14:14:19 ***Fatal Error***  Impossibile stabilire la connessione. Rifiuto persistente del computer di destinazione 127.0.0.1:8001
+   in System.Net.Sockets.TcpClient.Connect(String hostname, Int32 port)
+   in ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 182
+21/03/2016 15:31:56 ***Fatal Error***  Impossibile stabilire la connessione. Rifiuto persistente del computer di destinazione 127.0.0.1:8001
+   in System.Net.Sockets.TcpClient.Connect(String hostname, Int32 port)
+   in ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 183
+21/03/2016 16:42:24 ***Fatal Error***  Impossibile stabilire la connessione. Rifiuto persistente del computer di destinazione 127.0.0.1:8001
+   in System.Net.Sockets.TcpClient.Connect(String hostname, Int32 port)
+   in ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 183
+23/03/2016 04:18:31 ***Fatal Error***  Impossibile stabilire la connessione. Rifiuto persistente del computer di destinazione 127.0.0.1:8001 code: ConnectionRefused
+   in System.Net.Sockets.Socket.DoConnect(EndPoint endPointSnapshot, SocketAddress socketAddress)
+   in System.Net.Sockets.Socket.Connect(EndPoint remoteEP)
+   in System.Net.Sockets.TcpClient.Connect(IPEndPoint remoteEP)
+   in ClientApp.Client.keepAlive() in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\Client.cs:riga 290

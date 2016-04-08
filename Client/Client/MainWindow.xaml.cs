@@ -44,35 +44,32 @@ namespace ClientApp
         private Client client;
         private String CurrentDirectory;
         private String RootDirectory;
-        private ObservableCollection<FileListItem> FileList;
-        private BackgroundWorker bw = new BackgroundWorker();
+        private ObservableCollection<ListItem> FileList;
+        private BackgroundWorker sync_worker;
+        private BackgroundWorker restore_worker;
         private Watcher watcher;
-
-        public BackgroundWorker BackgroundWorker
-        {
-            get
-            {
-                return bw;
-            }
-            private set
-            {
-                bw = value;
-            }
-        }
 
         public MainWindow()
         {
             InitializeComponent();
             connected = false;
-            FileList = new ObservableCollection<FileListItem>();
-            bw.WorkerReportsProgress = true;
-            bw.WorkerSupportsCancellation = true;
-            bw.DoWork += new DoWorkEventHandler(bw_DoWork);
-            bw.ProgressChanged += new ProgressChangedEventHandler(bw_ProgressChanged);
-            bw.RunWorkerCompleted += new RunWorkerCompletedEventHandler(bw_RunWorkerCompleted);
+            FileList = new ObservableCollection<ListItem>();
+            sync_worker = new BackgroundWorker();
+            sync_worker.WorkerReportsProgress = true;
+            sync_worker.WorkerSupportsCancellation = true;
+            sync_worker.DoWork += new DoWorkEventHandler(sw_DoWork);
+            sync_worker.ProgressChanged += new ProgressChangedEventHandler(sw_ProgressChanged);
+            sync_worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(sw_RunWorkerCompleted);
+            restore_worker = new BackgroundWorker();
+            restore_worker.WorkerReportsProgress = true;
+            restore_worker.WorkerSupportsCancellation = true;
+            restore_worker.DoWork += new DoWorkEventHandler(rw_DoWork);
+            restore_worker.ProgressChanged += new ProgressChangedEventHandler(rw_ProgressChanged);
+            restore_worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(rw_RunWorkerCompleted);
         }
 
-        private void bw_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+
+        private void sw_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
             if (!connected)
                 return;
@@ -112,12 +109,12 @@ namespace ClientApp
             }
         }
 
-        private void bw_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        private void sw_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
-            this.Dispatcher.BeginInvoke(DispatcherPriority.Background, new UpdateBar(update_bar2), e.ProgressPercentage);
+            this.Dispatcher.BeginInvoke(DispatcherPriority.Background, new UpdateBar(update_bar), e.ProgressPercentage);
         }
 
-        private void bw_DoWork(object sender, DoWorkEventArgs e)
+        private void sw_DoWork(object sender, DoWorkEventArgs e)
         {
             BackgroundWorker worker = sender as BackgroundWorker;
             PbUpdater up = (PbUpdater)e.Argument;
@@ -138,8 +135,19 @@ namespace ClientApp
                 }
                 else
                 {
-                    this.Dispatcher.BeginInvoke(DispatcherPriority.Background, new InitBar(update_bar1));
-                    client.firstSynch(up.local, up.remote, RootDirectory, this);
+                    this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, (Action)(() =>
+                    {
+                        this.progressBar_file.IsIndeterminate = false;
+                        this.Label_log.Content = "Checking last session of the direcroty from server ...";
+                    }));
+                    if (client.getRemoteStatus(up.remote, RootDirectory) >= 0)
+                    {
+                        this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, (Action)(() =>
+                        {
+                            this.Label_log.Content = "Checking last session of the direcroty from server ... Done";
+                        }));
+                        client.synchronize(up.local, up.remote, sync_worker);
+                    }
                 }
             }
         }
@@ -160,8 +168,11 @@ namespace ClientApp
             {
                 connected = false;
                 client.closeConnectionTcpClient();
-                if (bw.IsBusy)
-                    bw.CancelAsync(); 
+                if (sync_worker.IsBusy)
+                    sync_worker.CancelAsync();
+                sync_worker.Dispose();
+                if (watcher != null)
+                    watcher.Stop();
                 String msg = "Log in to the remote server";
                 this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegate(updateUI), msg);
             }
@@ -190,10 +201,16 @@ namespace ClientApp
                             if (sessionId == -1)
                             {
                                 //network or other error
+                                msg = "Log in to the remote server";
+                                this.Dispatcher.BeginInvoke(DispatcherPriority.Normal,
+                                    new UpdateDelegateAsync(updateUI_banner), msg, "Server Unreachable", "A network error occurred");
                             }
                             if (sessionId == -2 || sessionId == -1)
                             {
                                 //username or password not correct
+                                msg = "Log in to the remote server";
+                                this.Dispatcher.BeginInvoke(DispatcherPriority.Normal,
+                                    new UpdateDelegateAsync(updateUI_banner), msg, "Log in incorrect", "The combination email/password you provided is incorrect");
                             }
                         }
                         client.Server = new IPEndPoint(IPAddress.Parse(address), portInt);
@@ -212,39 +229,16 @@ namespace ClientApp
                             DirectoryStatus remote = new DirectoryStatus();
                             remote.Username = username;
                             remote.FolderPath = RootDirectory;
-                            //client.firstSynch(local, remote, RootDirectory, this);
-                            
+                            // for updating the progress bar
                             PbUpdater up = new PbUpdater();
                             up.rootDir = RootDirectory;
                             up.remote = remote;
                             up.local = local;
-                            bw.RunWorkerAsync(up);
-                            //this.getRemoteStatus(remote, RootDirectory);
-                            //client.synchronize(local, remote);
+                            sync_worker.RunWorkerAsync(up);
+                            // try to free some memory ...
                             local = null;
                             remote = null;
-                            //this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, (Action)( () => {
-                            //    this.progressBar_file.Visibility = Visibility.Hidden;
-                            //    this.file_grid.Visibility = Visibility.Visible;
-                            //    this.Back_button.Visibility = Visibility.Visible;
-                            //    this.Refresh_button.Visibility = Visibility.Visible;
-                            //    this.Label_log.Visibility = Visibility.Hidden;
-                            //}) );
                             GC.Collect();
-                            //remote = new DirectoryStatus();
-                            //remote.Username = username;
-                            //remote.FolderPath = RootDirectory;
-                            //if (client.getDirectoryInfo(remote, RootDirectory) < 0)
-                            //{
-                            //    connected = false;
-                            //    tcpClient.Close();
-                            //    msg = "Log in to the remote server";
-                            //    String title = "You were disconncted";
-                            //    String bannerMsg = "A Network Error occurred, please try later";
-                            //    this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegateAsync(updateUI_banner), msg, title, bannerMsg);
-                            //}
-                            //else
-                            //    this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new FillGrid(fill_grid), remote);
                         }
                     }
                 }
@@ -280,13 +274,9 @@ namespace ClientApp
             }
         }
 
-        private void update_bar1()
+        private void update_bar(int n)
         {
             this.progressBar_file.IsIndeterminate = false;
-        }
-
-        private void update_bar2(int n)
-        {
             this.Label_log.Content = "Synchronization progress: " + n + "%";
             this.progressBar_file.Value = n;
         }
@@ -310,6 +300,8 @@ namespace ClientApp
                 FileList.Add(file);
             }
             this.Label_log.Visibility = Visibility.Hidden;
+            this.filePrev_grid.Visibility = Visibility.Hidden;
+            this.file_grid.Visibility = Visibility.Visible;
             this.file_grid.ItemsSource = FileList;        
         }
 
@@ -516,6 +508,8 @@ namespace ClientApp
                 {
                     connected = false;
                     client.TcpClient.Close();
+                    if (watcher != null)
+                        watcher.Stop();
                     String msg = "Log in to the remote server";
                     String title = "You were disconnected";
                     String bannerMsg = "A Network Error occurred, please try later";
@@ -535,11 +529,14 @@ namespace ClientApp
                 {
                     this.Back_button.IsEnabled = true;
                     this.Refresh_button.IsEnabled = true;
+                    this.Label_filename.Visibility = Visibility.Hidden;
                 }));
                 if (client.getDirectoryInfo(dir, CurrentDirectory) < 0)
                 {
                     connected = false;
                     client.TcpClient.Close();
+                    if (watcher != null)
+                        watcher.Stop();
                     String msg = "Log in to the remote server";
                     String title = "You were disconnected";
                     String bannerMsg = "A Network Error occurred, please try later";
@@ -559,6 +556,8 @@ namespace ClientApp
                 {
                     connected = false;
                     client.TcpClient.Close();
+                    if (watcher != null)
+                        watcher.Stop();
                     String msg = "Log in to the remote server";
                     String title = "You were disconnected";
                     String bannerMsg = "A Network Error occurred, please try later";
@@ -571,20 +570,35 @@ namespace ClientApp
 
         private void Restore_Button_Click(object sender, RoutedEventArgs e)
         {
-            FileListItem item = ((FrameworkElement)sender).DataContext as FileListItem;
-            CurrentDirectory = System.IO.Path.Combine(item.Path, item.Filename);
+            ListItem item = ((FrameworkElement)sender).DataContext as ListItem;
+            String path = System.IO.Path.Combine(item.Path, item.Filename);
             if (item.Directory)
             {
                 //restore directory
+                if (!Directory.Exists(path))
+                    Directory.CreateDirectory(path);
+                PbUpdater up = new PbUpdater();
+                up.path = path;
+                watcher.Stop();
+                restore_worker.RunWorkerAsync(up);               
             }
             else
             {
                 if (item.Deleted)
                 {
                     //restore file
+                    if (!Directory.Exists(item.Path))
+                        Directory.CreateDirectory(item.Path);
+                    PbUpdater up = new PbUpdater();
+                    up.path = path;
+                    up.id = item.Id;
+                    watcher.Stop();
+                    restore_worker.RunWorkerAsync(up);
                 }
                 else
                 {
+                    //for turn back on the directory
+                    CurrentDirectory = path;
                     //see older versions of a file
                     DirectoryStatus dir = new DirectoryStatus();
                     this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, (Action)(() =>
@@ -597,6 +611,8 @@ namespace ClientApp
                     {
                         connected = false;
                         client.TcpClient.Close();
+                        if (watcher != null)
+                            watcher.Stop();
                         String msg = "Log in to the remote server";
                         String title = "You were disconnected";
                         String bannerMsg = "A Network Error occurred, please try later";
@@ -614,14 +630,114 @@ namespace ClientApp
                         }));
                     }
                     else
-                        this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new FillGrid(fill_grid), dir);
+                        this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new FillGrid(fill_prev_grid), dir);
                 }
             }
         }
 
-        
+        private void rw_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, (Action)(() =>
+            {
+                this.progressBar_file.Visibility = Visibility.Visible;
+                this.progressBar_file.IsIndeterminate = true;
+                this.Label_log.Content = "Resyncing with the server . . .";
+                this.Label_log.Visibility = Visibility.Visible;
+            }));
+            
+            DirectoryStatus local = new DirectoryStatus();
+            local.FolderPath = RootDirectory;
+            local.Username = client.UserId;
+            CurrentDirectory = String.Copy(RootDirectory);
+            client.fillDirectoryStatus(local, RootDirectory);
+            DirectoryStatus remote = new DirectoryStatus();
+            remote.Username = client.UserId;
+            remote.FolderPath = RootDirectory;
+            // for updating the progress bar
+            PbUpdater up = new PbUpdater();
+            up.rootDir = RootDirectory;
+            up.remote = remote;
+            up.local = local;
+            sync_worker.RunWorkerAsync(up);
+            // try to free some memory ...
+            local = null;
+            remote = null;
+            //GC.Collect();
+        }
+
+        private void rw_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        {
+            this.Dispatcher.BeginInvoke(DispatcherPriority.Background, new UpdateBar(update_bar), e.ProgressPercentage);
+        }
+
+        private void rw_DoWork(object sender, DoWorkEventArgs e)
+        {
+            BackgroundWorker worker = sender as BackgroundWorker;
+            PbUpdater up = (PbUpdater)e.Argument;
+            if (worker.CancellationPending)
+            {
+                e.Cancel = true;
+            }
+            else
+            {
+                if (!client.resumeSession())
+                {
+                    connected = false;
+                    client.TcpClient.Close();
+                    String msg = "Log in to the remote server";
+                    String title = "You were disconncted";
+                    String bannerMsg = "Your session is expired, please login again";
+                    this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegateAsync(updateUI_banner), msg, title, bannerMsg);
+                }
+                else
+                {
+                    this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, (Action)(() =>
+                    {
+                        this.progressBar_file.IsIndeterminate = true;
+                        this.progressBar_file.Visibility = Visibility.Visible;
+                        this.file_grid.Visibility = Visibility.Hidden;
+                        this.Back_button.Visibility = Visibility.Hidden;
+                        this.Refresh_button.Visibility = Visibility.Hidden;
+                        this.Label_log.Content = "Restoring directory " + up.rootDir + "...";
+                        this.Label_log.Visibility = Visibility.Visible;
+                    }));
+                    //TODO check low disk space
+                    if (Directory.Exists(up.path))
+                        client.restoreDirectory(up.path, restore_worker);
+                    else
+                        client.restoreFile(up.path, up.id, restore_worker);
+                }
+            }
+        }
+
+        private void fill_prev_grid(DirectoryStatus status)
+        {
+            FileList.Clear();
+            if (CurrentDirectory.Equals(RootDirectory))
+            {
+                //see turn back botton
+                this.Back_button.IsEnabled = false;
+            }
+            else
+            {
+                //don't see botton
+                this.Back_button.IsEnabled = true;
+            }
+            foreach (var item in status.Files)
+            {
+                FileVersionItem file = new FileVersionItem(item.Value);
+                FileList.Add(file);
+            }
+            this.Label_log.Visibility = Visibility.Hidden;
+            this.file_grid.Visibility = Visibility.Hidden;
+            this.filePrev_grid.Visibility = Visibility.Visible;
+            this.Label_filename.Content = "Previous versions of the file " + FileList[0].Filename;
+            this.Label_filename.Visibility = Visibility.Visible;
+            this.filePrev_grid.ItemsSource = FileList;
+        }
 
     }
+
     class PbUpdater
     {
         public int value { get; set; }
@@ -629,5 +745,7 @@ namespace ClientApp
         public DirectoryStatus remote { get; set; }
         public DirectoryStatus local { get; set; }
         public String rootDir { get; set; }
+        public String path { get; set; }
+        public Int64 id { get; set; }
     }
 }

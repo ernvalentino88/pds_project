@@ -36,7 +36,11 @@ namespace Utility
             INIT_SYNCH = 16,
             DIR = 17,
             FILE = 18,
-            PREV = 19
+            PREV = 19,
+            SESSION_WATCH = 20,
+            FS_SYNCH = 21,
+            RESTORE_DIR = 22,
+            RESTORE_FILE = 23
         };
 
         public static byte[] my_recv(int size, Socket s)
@@ -102,8 +106,6 @@ namespace Utility
         {
             Int64 left = size;
             byte[] received = new byte[size];
-            //adjust size for receive correct number of bytes after encrypt
-            //left = (left % 16 == 0) ? left + 16 : left + (16 - (left % 16));
             
             try
             {
@@ -130,6 +132,74 @@ namespace Utility
                 return null;
             }
             return received;
+        }
+
+        public static void recvEncryptedFile(long size, Socket s, AesCryptoServiceProvider key, String filename)
+        {
+            Int64 left = size;
+            byte[] received = new byte[size];
+
+            try
+            {
+                using (FileStream writer = File.Create(filename))
+                {
+                    while (left > 0)
+                    {
+                        int dim = (left > 4096) ? 4096 : (int)left;
+                        dim = (dim % 16 == 0) ? dim + 16 : dim + (16 - (dim % 16));
+                        byte[] buffer = my_recv(dim, s);
+                        if (buffer == null)
+                            return;
+                        byte[] decryptedData = Security.AESDecrypt(key, buffer);
+                        if (decryptedData == null)
+                            return;
+                        writer.Write(decryptedData, 0, decryptedData.Length);
+                        left -= decryptedData.Length;
+                    }
+                }
+            }
+            catch (SocketException)
+            {
+            }
+            catch (IOException)
+            {
+                //IO error : disk full?
+            }
+        }
+
+        public static void recvEncryptedFile(long size, Socket s, AesCryptoServiceProvider key, String path, System.ComponentModel.BackgroundWorker worker)
+        {
+            Int64 left = size;
+            byte[] received = new byte[size];
+
+            try
+            {
+                using (FileStream writer = File.Create(path))
+                {
+                    while (left > 0)
+                    {
+                        int dim = (left > 4096) ? 4096 : (int)left;
+                        dim = (dim % 16 == 0) ? dim + 16 : dim + (16 - (dim % 16));
+                        byte[] buffer = my_recv(dim, s);
+                        if (buffer == null)
+                            return;
+                        byte[] decryptedData = Security.AESDecrypt(key, buffer);
+                        if (decryptedData == null)
+                            return;
+                        writer.Write(decryptedData, 0, decryptedData.Length);
+                        left -= decryptedData.Length;
+                        double percentage = (double)decryptedData.Length / size;
+                        worker.ReportProgress((int)(percentage * 100));
+                    }
+                }
+            }
+            catch (SocketException)
+            {
+            }
+            catch (IOException)
+            {
+                //IO error : disk full?
+            }
         }
     }
 }
