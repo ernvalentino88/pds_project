@@ -895,3 +895,63 @@ Parameter name: hostNameOrAddress
    in System.Net.Sockets.Socket.Connect(EndPoint remoteEP)
    in System.Net.Sockets.TcpClient.Connect(IPEndPoint remoteEP)
    in ClientApp.Client.keepAlive() in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\Client.cs:riga 290
+20/04/2016 11:48:11 ***Fatal Error***  No connection could be made because the target machine actively refused it 192.168.1.134:8000
+   at System.Net.Sockets.TcpClient.Connect(String hostname, Int32 port)
+   at ClientApp.MainWindow.register(String address, String port, String user, String pwd1, String pwd2) in c:\Users\John\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:line 366
+20/04/2016 12:10:56 ***Fatal Error***  No connection could be made because the target machine actively refused it 192.162.1.134:8000
+   at System.Net.Sockets.TcpClient.Connect(String hostname, Int32 port)
+   at ClientApp.MainWindow.register(String address, String port, String user, String pwd1, String pwd2) in c:\Users\John\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:line 366
+20/04/2016 12:11:09 ***Fatal Error***  No connection could be made because the target machine actively refused it 192.162.1.134:8000
+   at System.Net.Sockets.TcpClient.Connect(String hostname, Int32 port)
+   at ClientApp.MainWindow.register(String address, String port, String user, String pwd1, String pwd2) in c:\Users\John\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:line 366
+20/04/2016 12:34:29 ***Fatal Error***  A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond 192.168.1.135:8000
+   at System.Net.Sockets.TcpClient.Connect(String hostname, Int32 port)
+   at ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\John\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:line 191
+20/04/2016 12:35:00 ***Fatal Error***  No connection could be made because the target machine actively refused it 192.168.1.134:8001
+   at System.Net.Sockets.TcpClient.Connect(String hostname, Int32 port)
+   at ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\John\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:line 191
+20/04/2016 12:37:45 ***Fatal Error***  Access to the path 'C:\Users\John\Documents\My Music' is denied.
+   at System.IO.__Error.WinIOError(Int32 errorCode, String maybeFullPath)
+   at System.IO.FileSystemEnumerableIterator`1.CommonInit()
+   at System.IO.FileSystemEnumerableIterator`1..ctor(String path, String originalUserPath, String searchPattern, SearchOption searchOption, SearchResultHandler`1 resultHandler, Boolean checkHost)
+   at System.IO.Directory.EnumerateFileSystemEntries(String path)
+   at ClientApp.Client.fillDirectoryStatus(DirectoryStatus local, String directory) in c:\Users\John\Documents\GitHub\pds_project\Client\Client\Client.cs:line 499
+   at ClientApp.Client.fillDirectoryStatus(DirectoryStatus local, String directory) in c:\Users\John\Documents\GitHub\pds_project\Client\Client\Client.cs:line 528
+   at ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\John\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:line 228
+20/04/2016 12:43:14 ***Fatal Error***  Access to the path 'C:\Users\John\Documents\My Music' is denied.
+   at System.IO.__Error.WinIOError(Int32 errorCode, String maybeFullPath)
+   at System.IO.FileSystemEnumerableIterator`1.CommonInit()
+   at System.IO.FileSystemEnumerableIterator`1..ctor(String path, String originalUserPath, String searchPattern, SearchOption searchOption, SearchResultHandler`1 resultHandler, Boolean checkHost)
+   at System.IO.Directory.EnumerateFileSystemEntries(String path)
+   at ClientApp.Client.fillDirectoryStatus(DirectoryStatus local, String directory) in c:\Users\John\Documents\GitHub\pds_project\Client\Client\Client.cs:line 499
+   at ClientApp.Client.fillDirectoryStatus(DirectoryStatus local, String directory) in c:\Users\John\Documents\GitHub\pds_project\Client\Client\Client.cs:line 528
+   at ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\John\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:line 228
+20/04/2016 12:44:45 ***Fatal Error***  Exception of type 'System.OutOfMemoryException' was thrown.
+   at ClientApp.Client.getChecksum(FileInfo info) in c:\Users\John\Documents\GitHub\pds_project\Client\Client\Client.cs:line 535
+   at ClientApp.Client.fillDirectoryStatus(DirectoryStatus local, String directory) in c:\Users\John\Documents\GitHub\pds_project\Client\Client\Client.cs:line 513
+   at ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\John\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:line 228
+20/04/2016 12:44:52 ***Fatal Error***  Exception of type 'System.OutOfMemoryException' was thrown.
+   at ClientApp.Client.getChecksum(FileInfo info) in c:\Users\John\Documents\GitHub\pds_project\Client\Client\Client.cs:line 535
+   at ClientApp.Client.fillDirectoryStatus(DirectoryStatus local, String directory) in c:\Users\John\Documents\GitHub\pds_project\Client\Client\Client.cs:line 513
+   at ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\John\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:line 228
+20/04/2016 12:47:21 ***Fatal Error***  Exception of type 'System.OutOfMemoryException' was thrown.
+   at ClientApp.Client.getChecksum(FileInfo info) in c:\Users\John\Documents\GitHub\pds_project\Client\Client\Client.cs:line 535
+   at ClientApp.Client.fillDirectoryStatus(DirectoryStatus local, String directory) in c:\Users\John\Documents\GitHub\pds_project\Client\Client\Client.cs:line 513
+   at ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\John\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:line 228
+20/04/2016 12:47:32 ***Fatal Error***  Access to the path 'C:\$Recycle.Bin\S-1-5-18' is denied.
+   at System.IO.__Error.WinIOError(Int32 errorCode, String maybeFullPath)
+   at System.IO.FileSystemEnumerableIterator`1.CommonInit()
+   at System.IO.FileSystemEnumerableIterator`1..ctor(String path, String originalUserPath, String searchPattern, SearchOption searchOption, SearchResultHandler`1 resultHandler, Boolean checkHost)
+   at System.IO.Directory.EnumerateFileSystemEntries(String path)
+   at ClientApp.Client.fillDirectoryStatus(DirectoryStatus local, String directory) in c:\Users\John\Documents\GitHub\pds_project\Client\Client\Client.cs:line 499
+   at ClientApp.Client.fillDirectoryStatus(DirectoryStatus local, String directory) in c:\Users\John\Documents\GitHub\pds_project\Client\Client\Client.cs:line 528
+   at ClientApp.Client.fillDirectoryStatus(DirectoryStatus local, String directory) in c:\Users\John\Documents\GitHub\pds_project\Client\Client\Client.cs:line 528
+   at ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\John\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:line 228
+20/04/2016 12:48:07 ***Fatal Error***  Access to the path 'C:\Users\John\Documents\My Music' is denied.
+   at System.IO.__Error.WinIOError(Int32 errorCode, String maybeFullPath)
+   at System.IO.FileSystemEnumerableIterator`1.CommonInit()
+   at System.IO.FileSystemEnumerableIterator`1..ctor(String path, String originalUserPath, String searchPattern, SearchOption searchOption, SearchResultHandler`1 resultHandler, Boolean checkHost)
+   at System.IO.Directory.EnumerateFileSystemEntries(String path)
+   at ClientApp.Client.fillDirectoryStatus(DirectoryStatus local, String directory) in c:\Users\John\Documents\GitHub\pds_project\Client\Client\Client.cs:line 499
+   at ClientApp.Client.fillDirectoryStatus(DirectoryStatus local, String directory) in c:\Users\John\Documents\GitHub\pds_project\Client\Client\Client.cs:line 528
+   at ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\John\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:line 228

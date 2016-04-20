@@ -210,7 +210,7 @@ namespace ClientApp
                                 //username or password not correct
                                 msg = "Log in to the remote server";
                                 this.Dispatcher.BeginInvoke(DispatcherPriority.Normal,
-                                    new UpdateDelegateAsync(updateUI_banner), msg, "Log in incorrect", "The combination email/password you provided is incorrect");
+                                    new UpdateDelegateAsync(updateUI_banner), msg, "Log in incorrect", "The combination username/password you provided is incorrect");
                             }
                         }
                         client.Server = new IPEndPoint(IPAddress.Parse(address), portInt);
@@ -373,7 +373,15 @@ namespace ClientApp
                     int ret = client.registrationTcpClient(user, pwd1);
                     msg = "Create account";
                     String title = "Registration result";
-                    String bannerMsg = "" + ret;
+                    //String bannerMsg = "" + ret;
+                    String bannerMsg="";
+                    switch (ret) { 
+                        case 1: bannerMsg="Success"; break;
+                        case 0: bannerMsg = "Registration failed. User already exists"; break;
+                        case -1: bannerMsg = "Registration failed due to technical reason"; break;
+                        default: bannerMsg = "" + ret; break;
+                        
+                    }
                     this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, 
                         new UpdateDelegateAsync(updateUI_regBanner), msg, title, bannerMsg);
                 }
