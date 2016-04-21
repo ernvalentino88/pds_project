@@ -82,30 +82,33 @@ namespace ClientApp
                 String bannerMsg = "Your session is expired, please login again";
                 this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegateAsync(updateUI_banner), msg, title, bannerMsg);
             }
-            this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, (Action)(() =>
-            {
-                this.progressBar_file.Visibility = Visibility.Hidden;
-                this.file_grid.Visibility = Visibility.Visible;
-                this.Back_button.Visibility = Visibility.Visible;
-                this.Refresh_button.Visibility = Visibility.Visible;
-                this.Label_log.Visibility = Visibility.Hidden;
-            }));
-            DirectoryStatus remote = new DirectoryStatus();
-            remote.Username = client.UserId;
-            remote.FolderPath = RootDirectory;
-            if (client.getDirectoryInfo(remote, RootDirectory) < 0)
-            {
-                connected = false;
-                client.TcpClient.Close();
-                String msg = "Log in to the remote server";
-                String title = "You were disconncted";
-                String bannerMsg = "A Network Error occurred, please try later";
-                this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegateAsync(updateUI_banner), msg, title, bannerMsg);
-            }
             else
             {
-                this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new FillGrid(fill_grid), remote);
-                watcher = new Watcher(RootDirectory, client);
+                this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, (Action)(() =>
+                {
+                    this.progressBar_file.Visibility = Visibility.Hidden;
+                    this.file_grid.Visibility = Visibility.Visible;
+                    this.Back_button.Visibility = Visibility.Visible;
+                    this.Refresh_button.Visibility = Visibility.Visible;
+                    this.Label_log.Visibility = Visibility.Hidden;
+                }));
+                DirectoryStatus remote = new DirectoryStatus();
+                remote.Username = client.UserId;
+                remote.FolderPath = RootDirectory;
+                if (client.getDirectoryInfo(remote, RootDirectory) < 0)
+                {
+                    connected = false;
+                    client.TcpClient.Close();
+                    String msg = "Log in to the remote server";
+                    String title = "You were disconncted";
+                    String bannerMsg = "A Network Error occurred, please try later";
+                    this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegateAsync(updateUI_banner), msg, title, bannerMsg);
+                }
+                else
+                {
+                    this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new FillGrid(fill_grid), remote);
+                    watcher = new Watcher(RootDirectory, client);
+                }
             }
         }
 

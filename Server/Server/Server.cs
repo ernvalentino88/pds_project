@@ -393,7 +393,6 @@ namespace ServerApp
                         }
                     }
                 }
-                //failure
                 newStatus = null;
             }
             catch (SocketException)
