@@ -194,7 +194,7 @@ namespace ClientApp
                     tcpClient.Connect(address, portInt);
                     tcpClient.ReceiveTimeout = Networking.TIME_OUT_SHORT;
                     tcpClient.SendTimeout = Networking.TIME_OUT_SHORT;
-                    
+
 
                     if (client.keyExchangeTcpClient())
                     {
@@ -216,32 +216,35 @@ namespace ClientApp
                                     new UpdateDelegateAsync(updateUI_banner), msg, "Log in incorrect", "The combination username/password you provided is incorrect");
                             }
                         }
-                        client.Server = new IPEndPoint(IPAddress.Parse(address), portInt);
-                        client.UserId = username;
-                        DispatcherOperation result = this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new LoginDelegate(updateUI_logged));
-                        result.Wait();
-                        RootDirectory = (String)result.Result;
-                        if (RootDirectory != null && RootDirectory != String.Empty)
+                        else
                         {
+                            client.Server = new IPEndPoint(IPAddress.Parse(address), portInt);
+                            client.UserId = username;
+                            DispatcherOperation result = this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new LoginDelegate(updateUI_logged));
+                            result.Wait();
+                            RootDirectory = (String)result.Result;
+                            if (RootDirectory != null && RootDirectory != String.Empty)
+                            {
 
-                            DirectoryStatus local = new DirectoryStatus();
-                            local.FolderPath = RootDirectory;
-                            local.Username = username;
-                            CurrentDirectory = String.Copy(RootDirectory);
-                            client.fillDirectoryStatus(local, RootDirectory);
-                            DirectoryStatus remote = new DirectoryStatus();
-                            remote.Username = username;
-                            remote.FolderPath = RootDirectory;
-                            // for updating the progress bar
-                            PbUpdater up = new PbUpdater();
-                            up.rootDir = RootDirectory;
-                            up.remote = remote;
-                            up.local = local;
-                            sync_worker.RunWorkerAsync(up);
-                            // try to free some memory ...
-                            local = null;
-                            remote = null;
-                            GC.Collect();
+                                DirectoryStatus local = new DirectoryStatus();
+                                local.FolderPath = RootDirectory;
+                                local.Username = username;
+                                CurrentDirectory = String.Copy(RootDirectory);
+                                client.fillDirectoryStatus(local, RootDirectory);
+                                DirectoryStatus remote = new DirectoryStatus();
+                                remote.Username = username;
+                                remote.FolderPath = RootDirectory;
+                                // for updating the progress bar
+                                PbUpdater up = new PbUpdater();
+                                up.rootDir = RootDirectory;
+                                up.remote = remote;
+                                up.local = local;
+                                sync_worker.RunWorkerAsync(up);
+                                // try to free some memory ...
+                                local = null;
+                                remote = null;
+                                GC.Collect();
+                            }
                         }
                     }
                 }
