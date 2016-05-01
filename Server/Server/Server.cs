@@ -18,7 +18,7 @@ namespace ServerApp
     {
         private ConcurrentDictionary<Int64, ClientSession> id2client;
         private Int64 sessionIdCounter;
-        private static String con_string = @"Data Source=C:\Users\John\Desktop\SQLiteStudio\PDS.db;Version=3;";
+        
 
         public Int64 SessionIdCounter
         {

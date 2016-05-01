@@ -73,7 +73,7 @@ namespace ClientApp
         {
             if (!connected)
                 return;
-            if (!client.resumeSession())
+            if ( !client.resumeSession() )
             {
                 connected = false;
                 client.TcpClient.Close();
@@ -208,7 +208,7 @@ namespace ClientApp
                                 this.Dispatcher.BeginInvoke(DispatcherPriority.Normal,
                                     new UpdateDelegateAsync(updateUI_banner), msg, "Server Unreachable", "A network error occurred");
                             }
-                            if (sessionId == -2 || sessionId == -1)
+                            if (sessionId == -2 || sessionId == -3)
                             {
                                 //username or password not correct
                                 msg = "Log in to the remote server";
@@ -216,8 +216,8 @@ namespace ClientApp
                                     new UpdateDelegateAsync(updateUI_banner), msg, "Log in incorrect", "The combination username/password you provided is incorrect");
                             }
                         }
-                        else
-                        {
+                       else
+                       {
                             client.Server = new IPEndPoint(IPAddress.Parse(address), portInt);
                             client.UserId = username;
                             DispatcherOperation result = this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new LoginDelegate(updateUI_logged));
@@ -245,7 +245,7 @@ namespace ClientApp
                                 remote = null;
                                 GC.Collect();
                             }
-                        }
+                       }
                     }
                 }
                 catch (SocketException se)

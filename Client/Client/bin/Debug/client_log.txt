@@ -961,3 +961,11 @@ Parameter name: hostNameOrAddress
 28/04/2016 16:58:59 ***Fatal Error***  A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond 172.20.93.64:1800
    at System.Net.Sockets.TcpClient.Connect(String hostname, Int32 port)
    at ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\John\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:line 194
+01/05/2016 18:44:07 ***Fatal Error***  Access to the path 'C:\Users\John\Documents\My Music' is denied.
+   at System.IO.__Error.WinIOError(Int32 errorCode, String maybeFullPath)
+   at System.IO.FileSystemEnumerableIterator`1.CommonInit()
+   at System.IO.FileSystemEnumerableIterator`1..ctor(String path, String originalUserPath, String searchPattern, SearchOption searchOption, SearchResultHandler`1 resultHandler, Boolean checkHost)
+   at System.IO.Directory.EnumerateFileSystemEntries(String path)
+   at ClientApp.Client.fillDirectoryStatus(DirectoryStatus local, String directory) in c:\Users\John\Documents\GitHub\pds_project\Client\Client\Client.cs:line 499
+   at ClientApp.Client.fillDirectoryStatus(DirectoryStatus local, String directory) in c:\Users\John\Documents\GitHub\pds_project\Client\Client\Client.cs:line 528
+   at ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\John\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:line 233

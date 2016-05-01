@@ -31,9 +31,7 @@ namespace ServerApp
     /// 
     public partial class MainWindow : MetroWindow
     {
-        public static int receive_timeout_long = 1000 * 5*60;
-        public static int send_timeout_short = 1000 * 10;
-        public static int receive_timeout_short = 1000 * 10;
+       
 
         public delegate void start_server_delegate(String port);
         public delegate void update_ui_delegate(String msg);
