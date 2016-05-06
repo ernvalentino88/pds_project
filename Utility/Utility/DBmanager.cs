@@ -12,9 +12,9 @@ namespace Utility
     public class DBmanager
     {
         //pc alex
-        public static String connectionString = @"Data Source=C:\Users\John\Desktop\SQLiteStudio\PDS.db;Version=3;";
+        //public static String connectionString = @"Data Source=C:\Users\John\Desktop\SQLiteStudio\PDS.db;Version=3;";
         //pc ernesto
-       // public static String connectionString = @"Data Source=C:\Users\Ernesto\Documents\SQLiteStudio\pds.db;Version=3;";
+        public static String connectionString = @"Data Source=C:\Users\Ernesto\Documents\SQLiteStudio\pds.db;Version=3;";
         public static String date_format = "yyyy-MM-dd HH:mm:ss";
 
         public static String find_user(String id)
@@ -683,7 +683,7 @@ namespace Utility
                     cmd.Parameters.AddWithValue("@lastModTime", lastModTime.ToString(date_format));
                     cmd.Parameters.AddWithValue("@user", user);
                     cmd.Parameters.AddWithValue("@creationTime", creationTime.ToString(date_format));
-                    cmd.Parameters.AddWithValue("@path", path + "\\");
+                    cmd.Parameters.AddWithValue("@dir", path + "\\");
                     cmd.Parameters.AddWithValue("@filename", filename);
                     cmd.ExecuteNonQuery();
                 }
