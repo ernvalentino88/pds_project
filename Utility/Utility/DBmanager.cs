@@ -545,7 +545,8 @@ namespace Utility
                     cmd.Parameters.AddWithValue("@path", path + "\\");
                     cmd.Parameters.AddWithValue("@filename", filename);
                     object val = cmd.ExecuteScalar();
-                    n = (val == System.DBNull.Value) ? -1 : (int)val;
+              
+                    n = (val.ToString().Equals("0")) ? 0 : 1;
                 }
                 if (n > 0)
                 {
