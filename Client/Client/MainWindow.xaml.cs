@@ -143,13 +143,12 @@ namespace ClientApp
                 {
                     if (client.getRemoteStatus(up.remote, RootDirectory) >= 0)
                     {
-                        client.synchronize(up.local, up.remote, sync_worker);
-                        e.Result = true;
+                        e.Result = client.synchronize(up.local, up.remote, sync_worker);
                         return;
                     }
                 }
             }
-            e.Result = false;
+           // e.Result = false;
         }
 
         private void Connect_button_Click(object sender, RoutedEventArgs e)

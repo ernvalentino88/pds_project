@@ -1000,3 +1000,19 @@ Parameter name: hostNameOrAddress
    at System.Net.Dns.GetHostAddresses(String hostNameOrAddress)
    at System.Net.Sockets.TcpClient.Connect(String hostname, Int32 port)
    at ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\John\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:line 191
+14/05/2016 18:03:38 ***Fatal Error***  A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond 192.168.1.130:8001
+   at System.Net.Sockets.TcpClient.Connect(String hostname, Int32 port)
+   at ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\John\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:line 191
+14/05/2016 18:10:29 ***Fatal Error***  Exception of type 'System.OutOfMemoryException' was thrown.
+   at ClientApp.Client.getChecksum(FileInfo info) in c:\Users\John\Documents\GitHub\pds_project\Client\Client\Client.cs:line 535
+   at ClientApp.Client.fillDirectoryStatus(DirectoryStatus local, String directory) in c:\Users\John\Documents\GitHub\pds_project\Client\Client\Client.cs:line 513
+   at ClientApp.Client.fillDirectoryStatus(DirectoryStatus local, String directory) in c:\Users\John\Documents\GitHub\pds_project\Client\Client\Client.cs:line 528
+   at ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\John\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:line 230
+14/05/2016 18:10:47 ***Fatal Error***  Exception of type 'System.OutOfMemoryException' was thrown.
+   at ClientApp.Client.getChecksum(FileInfo info) in c:\Users\John\Documents\GitHub\pds_project\Client\Client\Client.cs:line 535
+   at ClientApp.Client.fillDirectoryStatus(DirectoryStatus local, String directory) in c:\Users\John\Documents\GitHub\pds_project\Client\Client\Client.cs:line 513
+   at ClientApp.Client.fillDirectoryStatus(DirectoryStatus local, String directory) in c:\Users\John\Documents\GitHub\pds_project\Client\Client\Client.cs:line 528
+   at ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\John\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:line 230
+14/05/2016 18:28:02 ***Fatal Error***  A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond 192.168.1.132:8001
+   at System.Net.Sockets.TcpClient.Connect(String hostname, Int32 port)
+   at ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\John\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:line 191

@@ -496,7 +496,7 @@ namespace ClientApp
 
         public void fillDirectoryStatus(DirectoryStatus local, String directory)
         {
-            var entries = Directory.EnumerateFileSystemEntries(directory);
+           var entries = Directory.EnumerateFileSystemEntries(directory);
            foreach (var path in entries)
            {
                if (File.Exists(path))
@@ -552,12 +552,12 @@ namespace ClientApp
             return Security.CalculateMD5Hash(fileBytes);
         }
 
-        public void synchronize(DirectoryStatus local, DirectoryStatus remote, BackgroundWorker worker)
+        public bool synchronize(DirectoryStatus local, DirectoryStatus remote, BackgroundWorker worker)
         {
             try
             {
                 if (local.Equals(remote))
-                    return;
+                    return true;
                 byte[] command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.START_SYNCH);
                 tcpClient.Client.Send(command);
                 var fileAdded = local.getDifference(remote);
@@ -596,8 +596,16 @@ namespace ClientApp
                 }
                 command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.END_SYNCH);
                 tcpClient.Client.Send(command);
+                //added ok to be sure server commited
+                command = Networking.my_recv(4, tcpClient.Client);
+                if (command != null && (
+                        ((Networking.CONNECTION_CODES)BitConverter.ToUInt32(command, 0) == Networking.CONNECTION_CODES.OK)))
+                {
+                    return true;
+                }
+                else return false;
             }
-            catch (Exception) { }
+            catch (Exception) { return false; }
         }
 
         private void updateFile(DirectoryFile file)
@@ -641,7 +649,7 @@ namespace ClientApp
                 }
                 
             }
-            catch (SocketException) { }
+            catch (SocketException se) { throw se; }
         }
 
         public void updateFile(DirectoryFile file, bool openSocket)
@@ -744,7 +752,7 @@ namespace ClientApp
                     s.Send(command);
                 }
             }
-            catch (SocketException) { }
+            catch (SocketException se) { throw se; }
         }
 
         public void deleteFile(DirectoryFile file, bool openSocket)
@@ -939,7 +947,7 @@ namespace ClientApp
                     }
                 }
             }
-            catch (SocketException) { }
+            catch (SocketException se) { throw se; }
         }
 
         public int getPreviousVersions(DirectoryStatus dir, String path)
