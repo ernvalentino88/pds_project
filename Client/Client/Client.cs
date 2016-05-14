@@ -1042,6 +1042,7 @@ namespace ClientApp
                         s.Send(buf);
                         double percentage = (double)i / filesToRecv;
                         worker.ReportProgress((int)(percentage * 100));
+                        command = Networking.my_recv(4, s);
                         if (command != null && (
                             ((Networking.CONNECTION_CODES)BitConverter.ToUInt32(command, 0) == Networking.CONNECTION_CODES.OK)))
                             continue;
