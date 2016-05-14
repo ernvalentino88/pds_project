@@ -394,28 +394,36 @@ namespace ServerApp
                     }
                 }
                 newStatus = null;
+                if (success)
+                {
+                    transaction.Commit();
+                    transaction.Dispose();
+                    byte[] command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.OK);
+                    clientSession.Socket.Send(command);
+                }
+                else
+                {
+                    transaction.Rollback();
+                    transaction.Dispose();
+                }
             }
             catch (SocketException)
             {
                 newStatus = null;
+                transaction.Rollback();
+                transaction.Dispose();
                 return false;
             }
             catch (SQLiteException)
             {
                 newStatus = null;
+                transaction.Rollback();
+                transaction.Dispose();
                 return false;
             }
 
             finally
             {
-                if (transaction != null)
-                {
-                    if (success)
-                        transaction.Commit();
-                    else
-                        transaction.Rollback();
-                    transaction.Dispose();
-                }
                 if (con != null && con.State == System.Data.ConnectionState.Open)
                     con.Dispose();
             }
