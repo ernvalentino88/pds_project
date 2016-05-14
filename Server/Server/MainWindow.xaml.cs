@@ -185,10 +185,8 @@ namespace ServerApp
                         case Networking.CONNECTION_CODES.START_SYNCH:
                             if (cs != null)
                             {
-                                s.ReceiveTimeout = Timeout.Infinite;
                                 if (!server.synchronizationSession(cs))
                                     exit = true;
-                                s.ReceiveTimeout = Networking.TIME_OUT_SHORT;
                             }
                             break;
                         case Networking.CONNECTION_CODES.FS_SYNCH:

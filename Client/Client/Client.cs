@@ -995,7 +995,7 @@ namespace ClientApp
             return -1;
         }
 
-        public void restoreDirectory(String path, BackgroundWorker worker)
+        public bool restoreDirectory(String path, BackgroundWorker worker)
         {
             try
             {
@@ -1006,47 +1006,59 @@ namespace ClientApp
                 s.Send(BitConverter.GetBytes(buf.Length));
                 s.Send(buf);
                 command = Networking.my_recv(4, tcpClient.Client);
+                bool result = true;
+
                 if (command != null && (
                         ((Networking.CONNECTION_CODES)BitConverter.ToUInt32(command, 0) == Networking.CONNECTION_CODES.OK)))
                 {
                     byte[] recvBuf = Networking.my_recv(4, s);
                     if (recvBuf == null)
-                        return;
+                        return false;
                     Int32 filesToRecv = BitConverter.ToInt32(recvBuf, 0);
                     for (int i = 0; i < filesToRecv; i++)
                     {
                         recvBuf = Networking.my_recv(4, s);
                         if (recvBuf == null)
-                            return;
+                            return false;
                         byte[] encryptedData = Networking.my_recv(BitConverter.ToInt32(recvBuf, 0), s);
                         if (encryptedData == null)
-                            return;
+                            return false;
                         String filename = Encoding.UTF8.GetString(Security.AESDecrypt(aesKey, encryptedData));
                         recvBuf = Networking.my_recv(4, s);
                         if (recvBuf == null)
-                            return;
+                            return false;
                         encryptedData = Networking.my_recv(BitConverter.ToInt32(recvBuf, 0), s);
                         if (encryptedData == null)
-                            return;
+                            return false;
                         String filePath = Encoding.UTF8.GetString(Security.AESDecrypt(aesKey, encryptedData));
                         if (!Directory.Exists(filePath))
                             Directory.CreateDirectory(filePath);
                         recvBuf = Networking.my_recv(8, s);
                         if (recvBuf == null)
-                            return;
+                            return false;
                         Int64 fileLen = BitConverter.ToInt64(recvBuf, 0);
                         Networking.recvEncryptedFile(fileLen, s, aesKey, Path.Combine(filePath,filename));
                         buf = BitConverter.GetBytes( File.GetLastWriteTime(Path.Combine(filePath, filename)).ToBinary() );
                         s.Send(buf);
                         double percentage = (double)i / filesToRecv;
                         worker.ReportProgress((int)(percentage * 100));
+                        if (command != null && (
+                            ((Networking.CONNECTION_CODES)BitConverter.ToUInt32(command, 0) == Networking.CONNECTION_CODES.OK)))
+                            continue;
+                        else
+                        {
+                            result = false;
+                            break;
+                        }
                     }
+                    return result;
                 }
             }
             catch (SocketException) { }
+            return false;
         }
 
-        internal void restoreFile(String path, Int64 id, BackgroundWorker worker)
+        public bool restoreFile(String path, Int64 id, BackgroundWorker worker)
         {
             try
             {
@@ -1060,14 +1072,22 @@ namespace ClientApp
                 {                 
                     byte[] recvBuf = Networking.my_recv(8, s);
                     if (recvBuf == null)
-                        return;
+                        return false;
                     Int64 fileLen = BitConverter.ToInt64(recvBuf, 0);
-                    Networking.recvEncryptedFile(fileLen, s, aesKey, path, worker);
-                    byte[] buf = BitConverter.GetBytes(File.GetLastWriteTime(path).ToBinary());
-                    s.Send(buf); 
+                    if (Networking.recvEncryptedFile(fileLen, s, aesKey, path, worker))
+                    {
+                        byte[] buf = BitConverter.GetBytes(File.GetLastWriteTime(path).ToBinary());
+                        s.Send(buf);
+                        if (command != null && (
+                            ((Networking.CONNECTION_CODES)BitConverter.ToUInt32(command, 0) == Networking.CONNECTION_CODES.OK)))
+                            return true;
+                        else
+                            return false;
+                    }
                 }
             }
             catch (SocketException) { }
+            return false;
         }
     }
 }

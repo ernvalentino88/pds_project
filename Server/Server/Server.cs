@@ -991,6 +991,7 @@ namespace ServerApp
                 List<Int64> ids = DBmanager.getFilesDeletedIDs(dir, clientSession.User.UserId, ref creationTime);
                 byte[] buf = BitConverter.GetBytes(ids.Count);
                 s.Send(buf);
+                bool result = true;
 
                 for (int i = 0; i < ids.Count; i++)
                 {
@@ -1027,11 +1028,21 @@ namespace ServerApp
                         if (recvBuf == null)
                             return false;
                         lastModTime = DateTime.FromBinary(BitConverter.ToInt64(recvBuf, 0));
-                        DBmanager.restoreFile(ids[i], path, name, clientSession.User.UserId, lastModTime, creationTime);
+                        if (DBmanager.restoreFile(ids[i], path, name, clientSession.User.UserId, lastModTime, creationTime))
+                        {
+                            command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.OK);
+                            s.Send(command);
+                        }
+                        else
+                        {
+                            command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.ERR);
+                            s.Send(command);
+                            result = false;
+                            break;
+                        }
                     }
                 }
-
-                return true;
+                return result;
             }
             catch (SocketException) { }
             return false;
@@ -1075,10 +1086,19 @@ namespace ServerApp
                         return false;
                     lastModTime = DateTime.FromBinary(BitConverter.ToInt64(recvBuf, 0));
                     String checksum = Security.CalculateMD5Hash(file);
-                    DBmanager.restoreFile(id, path, name, clientSession.User.UserId, checksum, lastModTime);
-                }
-                
-                return true;
+                    if (DBmanager.restoreFile(id, path, name, clientSession.User.UserId, checksum, lastModTime))
+                    {
+                        command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.OK);
+                        s.Send(command);
+                        return true;
+                    }
+                    else
+                    {
+                        command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.ERR);
+                        s.Send(command);
+                        return false;
+                    }
+                }    
             }
             catch (SocketException) { }
             return false;

@@ -73,41 +73,52 @@ namespace ClientApp
         {
             if (!connected)
                 return;
+            bool result = (bool)e.Result;
             if ( !client.resumeSession() )
             {
                 connected = false;
                 client.TcpClient.Close();
                 String msg = "Log in to the remote server";
-                String title = "You were disconncted";
+                String title = "You were disconnected";
                 String bannerMsg = "Your session is expired, please login again";
                 this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegateAsync(updateUI_banner), msg, title, bannerMsg);
             }
             else
             {
-                this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, (Action)(() =>
+                if (result)
                 {
-                    this.progressBar_file.Visibility = Visibility.Hidden;
-                    this.file_grid.Visibility = Visibility.Visible;
-                    this.Back_button.Visibility = Visibility.Visible;
-                    this.Refresh_button.Visibility = Visibility.Visible;
-                    this.Label_log.Visibility = Visibility.Hidden;
-                }));
-                DirectoryStatus remote = new DirectoryStatus();
-                remote.Username = client.UserId;
-                remote.FolderPath = RootDirectory;
-                if (client.getDirectoryInfo(remote, RootDirectory) < 0)
-                {
-                    connected = false;
-                    client.TcpClient.Close();
-                    String msg = "Log in to the remote server";
-                    String title = "You were disconncted";
-                    String bannerMsg = "A Network Error occurred, please try later";
-                    this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegateAsync(updateUI_banner), msg, title, bannerMsg);
+                    this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, (Action)(() =>
+                    {
+                        this.progressBar_file.Visibility = Visibility.Hidden;
+                        this.file_grid.Visibility = Visibility.Visible;
+                        this.Back_button.Visibility = Visibility.Visible;
+                        this.Refresh_button.Visibility = Visibility.Visible;
+                        this.Label_log.Visibility = Visibility.Hidden;
+                    }));
+                    DirectoryStatus remote = new DirectoryStatus();
+                    remote.Username = client.UserId;
+                    remote.FolderPath = RootDirectory;
+                    if (client.getDirectoryInfo(remote, RootDirectory) < 0)
+                    {
+                        connected = false;
+                        client.TcpClient.Close();
+                        String msg = "Log in to the remote server";
+                        String title = "You were disconncted";
+                        String bannerMsg = "A Network Error occurred, please try later";
+                        this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegateAsync(updateUI_banner), msg, title, bannerMsg);
+                    }
+                    else
+                    {
+                        this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new FillGrid(fill_grid), remote);
+                        watcher = new Watcher(RootDirectory, client);
+                    }
                 }
                 else
                 {
-                    this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new FillGrid(fill_grid), remote);
-                    watcher = new Watcher(RootDirectory, client);
+                    String msg = "Log in to the remote server";
+                    String title = "You were disconnected";
+                    String bannerMsg = "An error occurred during synchronization, pleasy try later";
+                    this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegateAsync(updateUI_banner), msg, title, bannerMsg);
                 }
             }
         }
@@ -124,35 +135,21 @@ namespace ClientApp
             if (worker.CancellationPending)
             {
                 e.Cancel = true;
+                e.Result = false;
             }
             else
             {
-                if (!client.resumeSession())
+                if (client.resumeSession())
                 {
-                    connected = false;
-                    client.TcpClient.Close();
-                    String msg = "Log in to the remote server";
-                    String title = "You were disconncted";
-                    String bannerMsg = "Your session is expired, please login again";
-                    this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegateAsync(updateUI_banner), msg, title, bannerMsg);
-                }
-                else
-                {
-                    this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, (Action)(() =>
-                    {
-                        this.progressBar_file.IsIndeterminate = false;
-                        this.Label_log.Content = "Checking last session of the direcroty from server ...";
-                    }));
                     if (client.getRemoteStatus(up.remote, RootDirectory) >= 0)
                     {
-                        this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, (Action)(() =>
-                        {
-                            this.Label_log.Content = "Checking last session of the direcroty from server ... Done";
-                        }));
                         client.synchronize(up.local, up.remote, sync_worker);
+                        e.Result = true;
+                        return;
                     }
                 }
             }
+            e.Result = false;
         }
 
         private void Connect_button_Click(object sender, RoutedEventArgs e)
@@ -240,6 +237,11 @@ namespace ClientApp
                                 up.remote = remote;
                                 up.local = local;
                                 sync_worker.RunWorkerAsync(up);
+                                this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, (Action)(() =>
+                                {
+                                    this.progressBar_file.IsIndeterminate = false;
+                                    this.Label_log.Content = "Checking for previous sessions of the directory ...";
+                                }));
                                 // try to free some memory ...
                                 local = null;
                                 remote = null;
@@ -594,7 +596,7 @@ namespace ClientApp
                 PbUpdater up = new PbUpdater();
                 up.path = path;
                 watcher.Stop();
-                restore_worker.RunWorkerAsync(up);               
+                restore_worker.RunWorkerAsync(up);
             }
             else
             {
@@ -651,32 +653,56 @@ namespace ClientApp
 
         private void rw_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, (Action)(() =>
+            bool result = (bool)e.Result;
+            if (result)
             {
-                this.progressBar_file.Visibility = Visibility.Visible;
-                this.progressBar_file.IsIndeterminate = true;
-                this.Label_log.Content = "Resyncing with the server . . .";
-                this.Label_log.Visibility = Visibility.Visible;
-            }));
-            
-            DirectoryStatus local = new DirectoryStatus();
-            local.FolderPath = RootDirectory;
-            local.Username = client.UserId;
-            CurrentDirectory = String.Copy(RootDirectory);
-            client.fillDirectoryStatus(local, RootDirectory);
-            DirectoryStatus remote = new DirectoryStatus();
-            remote.Username = client.UserId;
-            remote.FolderPath = RootDirectory;
-            // for updating the progress bar
-            PbUpdater up = new PbUpdater();
-            up.rootDir = RootDirectory;
-            up.remote = remote;
-            up.local = local;
-            sync_worker.RunWorkerAsync(up);
-            // try to free some memory ...
-            local = null;
-            remote = null;
-            //GC.Collect();
+                this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, (Action)(() =>
+                {
+                    this.progressBar_file.Visibility = Visibility.Visible;
+                    this.progressBar_file.IsIndeterminate = true;
+                    this.Label_log.Content = "Resyncing with the server . . .";
+                    this.Label_log.Visibility = Visibility.Visible;
+                }));
+
+                DirectoryStatus local = new DirectoryStatus();
+                local.FolderPath = RootDirectory;
+                local.Username = client.UserId;
+                CurrentDirectory = String.Copy(RootDirectory);
+                client.fillDirectoryStatus(local, RootDirectory);
+                DirectoryStatus remote = new DirectoryStatus();
+                remote.Username = client.UserId;
+                remote.FolderPath = RootDirectory;
+                // for updating the progress bar
+                PbUpdater up = new PbUpdater();
+                up.rootDir = RootDirectory;
+                up.remote = remote;
+                up.local = local;
+                sync_worker.RunWorkerAsync(up);
+                this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, (Action)(() =>
+                {
+                    this.progressBar_file.IsIndeterminate = true;
+                    this.progressBar_file.Visibility = Visibility.Visible;
+                    this.file_grid.Visibility = Visibility.Hidden;
+                    this.Back_button.Visibility = Visibility.Hidden;
+                    this.Refresh_button.Visibility = Visibility.Hidden;
+                    this.Label_log.Content = "Restoring directory " + up.rootDir + "...";
+                    this.Label_log.Visibility = Visibility.Visible;
+                }));
+                // try to free some memory ...
+                local = null;
+                remote = null;
+                //GC.Collect();
+            }
+            else
+            {
+                //something went wrong during restore
+                connected = false;
+                client.TcpClient.Close();
+                String msg = "Log in to the remote server";
+                String title = "You were disconnected";
+                String bannerMsg = "An error on the server occurred, please try later";
+                this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegateAsync(updateUI_banner), msg, title, bannerMsg);
+            }
         }
 
         private void rw_ProgressChanged(object sender, ProgressChangedEventArgs e)
@@ -696,30 +722,15 @@ namespace ClientApp
             {
                 if (!client.resumeSession())
                 {
-                    connected = false;
-                    client.TcpClient.Close();
-                    String msg = "Log in to the remote server";
-                    String title = "You were disconncted";
-                    String bannerMsg = "Your session is expired, please login again";
-                    this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegateAsync(updateUI_banner), msg, title, bannerMsg);
+                    e.Result = false;
                 }
                 else
                 {
-                    this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, (Action)(() =>
-                    {
-                        this.progressBar_file.IsIndeterminate = true;
-                        this.progressBar_file.Visibility = Visibility.Visible;
-                        this.file_grid.Visibility = Visibility.Hidden;
-                        this.Back_button.Visibility = Visibility.Hidden;
-                        this.Refresh_button.Visibility = Visibility.Hidden;
-                        this.Label_log.Content = "Restoring directory " + up.rootDir + "...";
-                        this.Label_log.Visibility = Visibility.Visible;
-                    }));
                     //TODO check low disk space
                     if (Directory.Exists(up.path))
-                        client.restoreDirectory(up.path, restore_worker);
+                        e.Result = client.restoreDirectory(up.path, restore_worker);
                     else
-                        client.restoreFile(up.path, up.id, restore_worker);
+                        e.Result = client.restoreFile(up.path, up.id, restore_worker);
                 }
             }
         }

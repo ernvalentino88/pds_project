@@ -167,7 +167,7 @@ namespace Utility
             }
         }
 
-        public static void recvEncryptedFile(long size, Socket s, AesCryptoServiceProvider key, String path, System.ComponentModel.BackgroundWorker worker)
+        public static bool recvEncryptedFile(long size, Socket s, AesCryptoServiceProvider key, String path, System.ComponentModel.BackgroundWorker worker)
         {
             Int64 left = size;
             byte[] received = new byte[size];
@@ -182,24 +182,34 @@ namespace Utility
                         dim = (dim % 16 == 0) ? dim + 16 : dim + (16 - (dim % 16));
                         byte[] buffer = my_recv(dim, s);
                         if (buffer == null)
-                            return;
+                        {
+                            worker.CancelAsync();
+                            return false;
+                        }
                         byte[] decryptedData = Security.AESDecrypt(key, buffer);
                         if (decryptedData == null)
-                            return;
+                        {
+                            worker.CancelAsync();
+                            return false;
+                        }
                         writer.Write(decryptedData, 0, decryptedData.Length);
                         left -= decryptedData.Length;
                         double percentage = (double)decryptedData.Length / size;
                         worker.ReportProgress((int)(percentage * 100));
                     }
+                    return true;
                 }
             }
             catch (SocketException)
             {
+                worker.CancelAsync();
             }
             catch (IOException)
             {
                 //IO error : disk full?
+                worker.CancelAsync();
             }
+            return false;
         }
     }
 }

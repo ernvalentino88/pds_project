@@ -772,7 +772,7 @@ namespace Utility
             catch (SQLiteException) { }
         }
 
-        public static void restoreFile(Int64 id, String path, String name, String user, DateTime lastModTime, DateTime creationTime)
+        public static bool restoreFile(Int64 id, String path, String name, String user, DateTime lastModTime, DateTime creationTime)
         {
             try
             {
@@ -805,13 +805,15 @@ namespace Utility
                             cmd.ExecuteNonQuery();
                         }
                         tr.Commit();
+                        return true;
                     }
                 }
             }
             catch (SQLiteException) { }
+            return false;
         }
 
-        public static void restoreFile(Int64 id, String path, String name, String user, String checksum, DateTime lastModTime)
+        public static bool restoreFile(Int64 id, String path, String name, String user, String checksum, DateTime lastModTime)
         {
             String date = null;
             path += "\\";
@@ -846,7 +848,7 @@ namespace Utility
                                 cmd.Parameters.AddWithValue("@del", false);
                                 cmd.Parameters.AddWithValue("@user", user);
                                 cmd.Parameters.AddWithValue("@creationTime", date);
-                                cmd.Parameters.AddWithValue("@path", path);
+                                cmd.Parameters.AddWithValue("@dir", path);
                                 cmd.Parameters.AddWithValue("@filename", name);
                                 cmd.ExecuteNonQuery();
                             }
@@ -861,11 +863,13 @@ namespace Utility
                                 cmd.ExecuteNonQuery();
                             }
                             tr.Commit();
+                            return true;
                         }
                     }
                 }
             }
             catch (SQLiteException) { }
+            return false;
         }
     }
 }
