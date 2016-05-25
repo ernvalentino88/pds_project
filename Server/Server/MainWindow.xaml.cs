@@ -63,8 +63,9 @@ namespace ServerApp
                 connected = false;
                 this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new update_ui_delegate(updateUI), "Insert port number for listening to ingress connection");
                 //close_all();
-                myList.Server.Close();
                 myList.Stop();
+                myList.Server.Close();
+               
             }
             else
             {
