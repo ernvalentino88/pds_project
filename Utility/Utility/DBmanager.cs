@@ -7,15 +7,19 @@ using System.Threading.Tasks;
 using System.Data.SQLite;
 using System.Security.Cryptography;
 
+
+
 namespace Utility
 {
     public class DBmanager
-    {
+    {   
         //pc alex
-        //public static String connectionString = @"Data Source=C:\Users\John\Desktop\SQLiteStudio\PDS.db;Version=3;";
+        public static String connectionString = @"Data Source=C:\Users\John\Desktop\SQLiteStudio\PDS.db;Version=3;";
         //pc ernesto
-        public static String connectionString = @"Data Source=C:\Users\Ernesto\Documents\SQLiteStudio\pds.db;Version=3;";
+        //public static String connectionString = @"Data Source=C:\Users\Ernesto\Documents\SQLiteStudio\pds.db;Version=3;";
         public static String date_format = "yyyy-MM-dd HH:mm:ss";
+        public static Int64 max_versions=3;
+        public static int days_limit = 30;//espresso in giorni
 
         public static String find_user(String id)
         {
@@ -86,6 +90,7 @@ namespace Utility
                 using (var con = new SQLiteConnection(connectionString))
                 {
                     con.Open();
+                    if (!cleanDBsnapshots(username)) return null;
                     using (var cmd = con.CreateCommand())
                     {
                         int len = directory.Length;
@@ -133,7 +138,7 @@ namespace Utility
                     }
                 }
             }
-            catch (SQLiteException) { }
+            catch (SQLiteException) { return null; }
             return ds;
         }
 
@@ -161,11 +166,206 @@ namespace Utility
             catch (SQLiteException) { }
             return false;
         }
+        /***** Clean DB functions ******/
+        
+        public static bool cleanDBsnapshots(DirectoryStatus newStatus)
+        {
+            return cleanDBsnapshots(newStatus.Username);
+        }
 
-        public static bool insertFile(SQLiteConnection conn, DirectoryStatus newStatus, String filename, String path, byte[] file, DateTime lastModTime)
+        public static bool cleanDBsnapshots(String user)
         {
             try
             {
+                using (var conn = new SQLiteConnection(connectionString))
+                {
+                    conn.Open();
+                    using (var transaction = conn.BeginTransaction())
+                    {
+                        Int64? ver_count = -1;
+                        DateTime? oldest = null;//? per farlo nullable
+                        using (SQLiteCommand cmd = conn.CreateCommand())
+                        {
+                            cmd.CommandText = "select count(distinct(creation_time)),min(creation_time) from snapshots where user_id=@user;";
+                            cmd.Parameters.AddWithValue("@user", user);
+                            using (var reader = cmd.ExecuteReader())
+                            {
+                                while (reader.Read())
+                                {
+                                    ver_count = (Int64?)reader[0];
+                                    if (ver_count > 0)
+                                    {
+                                        //oldest = (DateTime?)reader[1];
+                                        oldest = Convert.ToDateTime(reader[1]);
+                                    }
+                                }
+                            }
+
+                        }
+                        //se count=0 quindi file non esiste ancora->ok(oldest ==null)
+                        //se ver_count >0 oldest non puo valere null
+                        if (ver_count < 0 || (ver_count > 0 && oldest == null))
+                        {
+                            return false;
+                        }
+                        if (ver_count >= max_versions)
+                        {
+                            using (SQLiteCommand cmd = conn.CreateCommand())
+                            {
+                                cmd.CommandText = @"DELETE from snapshots where user_id=@user and creation_time= @creationTime;";
+                                cmd.Parameters.AddWithValue("@user", user);
+                                cmd.Parameters.AddWithValue("@creationTime", ((DateTime)oldest).ToString(date_format));
+                                cmd.ExecuteNonQuery();
+                            }
+
+                        }
+                    }
+                }
+            }
+            catch (SQLiteException) { return false; }
+            catch (Exception) { return false; }
+            return true;
+        }
+        
+        //n.b ho 2 funzioni per pulire files una con tipo DirectoryStatus per user e altro con String
+        public static bool cleanDBfiles(SQLiteConnection conn, String user, String filename, String path)
+        {
+            try
+            {/*
+                List<Int64> idsToDelete = new List<Int64>();
+                DateTime now = DateTime.Now;
+                DateTime limit = now.Subtract(new TimeSpan(days_limit, 0, 0, 0));
+                Boolean cleaned = false;
+                using (SQLiteCommand cmd = conn.CreateCommand()) 
+                {
+                    cmd.CommandText = "select file_id from files where user_id = @user and path = @path and"
+                        + " filename = @filename and last_mod_time < @lastModTime;";
+                    cmd.Parameters.AddWithValue("@user", user);
+                    cmd.Parameters.AddWithValue("@path", path + "\\");
+                    cmd.Parameters.AddWithValue("@filename", filename);
+                    cmd.Parameters.AddWithValue("@lastModTime", ((DateTime)limit).ToString(date_format));
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            idsToDelete.Add((Int64)reader[0]);
+                        }
+                    }
+                }
+                if (idsToDelete.Count > 0) 
+                { 
+                    cleaned = true; 
+                }
+                foreach (Int64 id in idsToDelete)
+                {
+                    using (SQLiteCommand cmd = conn.CreateCommand())
+                    {
+                        cmd.CommandText = @"DELETE from files where user_id=@user and file_id=@id;";
+                        cmd.Parameters.AddWithValue("@user", user);
+                        cmd.Parameters.AddWithValue("@id", id);
+                        cmd.ExecuteNonQuery();
+                    }
+                    using (SQLiteCommand cmd = conn.CreateCommand())
+                    {
+                        cmd.CommandText = @"DELETE from snapshots where user_id=@user and file_id=@id;";
+                        cmd.Parameters.AddWithValue("@user", user);
+                        cmd.Parameters.AddWithValue("@id", id);
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+                
+
+                //se ho cancellato almeno una riga sono sicuro che sto sotto limite
+                if (!cleaned)
+                {*/
+                    Int64? ver_count = -1;
+                    DateTime? oldest = null;//? per farlo nullable
+                    Int64 fileid = -1;
+
+                    using (SQLiteCommand cmd = conn.CreateCommand())
+                    {
+                        cmd.CommandText = "select count(*),min(last_mod_time) from files where user_id = @user and path = @path and"
+                                + " filename = @filename;";
+                        cmd.Parameters.AddWithValue("@user", user);
+                        cmd.Parameters.AddWithValue("@path", path + "\\");
+                        cmd.Parameters.AddWithValue("@filename", filename);
+                        using (var reader = cmd.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                ver_count = (Int64?)reader[0];
+                                if (ver_count > 0)
+                                {
+                                    //oldest = (DateTime?)reader[1];
+                                    oldest = Convert.ToDateTime(reader[1]);
+                                }
+                            }
+                        }
+
+                    }
+                    //se count=0 quindi file non esiste ancora->ok(oldest ==null)
+                    //se ver_count >0 oldest non puo valere null
+                    if (ver_count < 0 || (ver_count > 0 && oldest == null))
+                    {
+                        return false;
+                    }
+
+                    if (ver_count >= max_versions)
+                    {
+                        using (SQLiteCommand cmd = conn.CreateCommand())
+                        {
+                            cmd.CommandText = "select file_id from files where user_id = @user and path = @path and"
+                               + " filename = @filename and last_mod_time= @lastModTime;";
+                            cmd.Parameters.AddWithValue("@user", user);
+                            cmd.Parameters.AddWithValue("@path", path + "\\");
+                            cmd.Parameters.AddWithValue("@filename", filename);
+                            cmd.Parameters.AddWithValue("@lastModTime", ((DateTime)oldest).ToString(date_format));
+                            using (var reader = cmd.ExecuteReader())
+                            {
+                                while (reader.Read())
+                                {
+                                    fileid = (Int64)reader[0];
+                                }
+                            }
+                            if (fileid < 0) return false;
+
+                        }
+                        using (SQLiteCommand cmd = conn.CreateCommand())
+                        {
+                            cmd.CommandText = @"DELETE from files where user_id=@user and path=@path and filename=@filename and last_mod_time= @lastModTime;";
+                            cmd.Parameters.AddWithValue("@user", user);
+                            cmd.Parameters.AddWithValue("@path", path + "\\");
+                            cmd.Parameters.AddWithValue("@filename", filename);
+                            cmd.Parameters.AddWithValue("@lastModTime", ((DateTime)oldest).ToString(date_format));
+                            cmd.ExecuteNonQuery();
+                        }
+                        using (SQLiteCommand cmd = conn.CreateCommand())
+                        {
+                            cmd.CommandText = @"DELETE from snapshots where user_id=@user and file_id=@id ;";
+                            cmd.Parameters.AddWithValue("@user", user);
+                            cmd.Parameters.AddWithValue("@id", fileid);
+                            cmd.ExecuteNonQuery();
+                        }
+                    }
+               // }
+            }
+            catch (SQLiteException) { return false; }
+            catch (Exception) { return false; }
+            return true;
+        
+        }
+
+        public static bool cleanDBfiles(SQLiteConnection conn, DirectoryStatus newStatus, String filename, String path)
+        {
+          return cleanDBfiles(conn, newStatus.Username, filename, path);
+        }
+        /***** END CLEAN DB ******/
+        public static bool insertFile(SQLiteConnection conn, DirectoryStatus newStatus, String filename, String path, byte[] file, DateTime lastModTime)
+        {
+            try
+            {   /*****DB cleaning******/
+                if (!cleanDBfiles(conn, newStatus, filename, path)) return false;
+                /*****END CLEANING******/
                 using (SQLiteCommand cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = @"insert into files (user_id,path,filename,content,last_mod_time) values"
@@ -587,7 +787,9 @@ namespace Utility
         public static bool insertFile(SQLiteConnection conn, String path, String filename, byte[] file, String user, DateTime creationTime, DateTime lastModTime)
         {
             try
-            {
+            {   /*****DB cleaning******/
+                if (!cleanDBfiles(conn, user, filename, path)) return false;
+                /*****END CLEANING******/
                 using (SQLiteCommand cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = @"insert into files (user_id,path,filename,content,last_mod_time) values"
@@ -641,7 +843,9 @@ namespace Utility
         public static bool updateFile(SQLiteConnection conn, String path, String filename, String user, byte[] file, DateTime creationTime, DateTime lastModTime)
         {
             try
-            {
+            {   /*****DB cleaning******/
+                if (!cleanDBfiles(conn, user, filename, path)) return false;
+                /*****END CLEANING******/
                 using (SQLiteCommand cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = @"insert into files (user_id,path,filename,content,last_mod_time) values"

@@ -971,11 +971,11 @@ namespace ServerApp
                 {
                     byte[] buf = BitConverter.GetBytes(0);
                     s.Send(buf);
+                    return false;
                 }
                 return true;
             }
-            catch (SocketException) { }
-            return false;
+            catch (SocketException) { return false; }
         }
 
         public bool restoreDirectory(ClientSession clientSession)
