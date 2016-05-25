@@ -212,7 +212,7 @@ namespace Utility
                         {
                             using (SQLiteCommand cmd = conn.CreateCommand())
                             {
-                                cmd.CommandText = @"DELETE from snapshots where user_id=@user creation_time= @creationTime;";
+                                cmd.CommandText = @"DELETE from snapshots where user_id=@user and creation_time= @creationTime;";
                                 cmd.Parameters.AddWithValue("@user", user);
                                 cmd.Parameters.AddWithValue("@creationTime", ((DateTime)oldest).ToString(date_format));
                                 cmd.ExecuteNonQuery();
@@ -231,7 +231,7 @@ namespace Utility
         public static bool cleanDBfiles(SQLiteConnection conn, String user, String filename, String path)
         {
             try
-            {
+            {/*
                 List<Int64> idsToDelete = new List<Int64>();
                 DateTime now = DateTime.Now;
                 DateTime limit = now.Subtract(new TimeSpan(days_limit, 0, 0, 0));
@@ -239,7 +239,7 @@ namespace Utility
                 using (SQLiteCommand cmd = conn.CreateCommand()) 
                 {
                     cmd.CommandText = "select file_id from files where user_id = @user and path = @path and"
-                        + " filename = @filename and last_mod_time< @lastModTime;";
+                        + " filename = @filename and last_mod_time < @lastModTime;";
                     cmd.Parameters.AddWithValue("@user", user);
                     cmd.Parameters.AddWithValue("@path", path + "\\");
                     cmd.Parameters.AddWithValue("@filename", filename);
@@ -267,7 +267,7 @@ namespace Utility
                     }
                     using (SQLiteCommand cmd = conn.CreateCommand())
                     {
-                        cmd.CommandText = @"DELETE from snapshots where user_id=@user and file_id=@id ;";
+                        cmd.CommandText = @"DELETE from snapshots where user_id=@user and file_id=@id;";
                         cmd.Parameters.AddWithValue("@user", user);
                         cmd.Parameters.AddWithValue("@id", id);
                         cmd.ExecuteNonQuery();
@@ -277,7 +277,7 @@ namespace Utility
 
                 //se ho cancellato almeno una riga sono sicuro che sto sotto limite
                 if (!cleaned)
-                {
+                {*/
                     Int64? ver_count = -1;
                     DateTime? oldest = null;//? per farlo nullable
                     Int64 fileid = -1;
@@ -347,7 +347,7 @@ namespace Utility
                             cmd.ExecuteNonQuery();
                         }
                     }
-                }
+               // }
             }
             catch (SQLiteException) { return false; }
             catch (Exception) { return false; }
