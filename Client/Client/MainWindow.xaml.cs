@@ -170,6 +170,9 @@ namespace ClientApp
                 if (sync_worker.IsBusy)
                     sync_worker.CancelAsync();
                 sync_worker.Dispose();
+                if (restore_worker.IsBusy)
+                    restore_worker.CancelAsync();
+                restore_worker.Dispose();
                 if (watcher != null)
                     watcher.Stop();
                 String msg = "Log in to the remote server";
@@ -216,36 +219,20 @@ namespace ClientApp
                        {
                             client.Server = new IPEndPoint(IPAddress.Parse(address), portInt);
                             client.UserId = username;
-                            DispatcherOperation result = this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new LoginDelegate(updateUI_logged));
-                            result.Wait();
-                            RootDirectory = (String)result.Result;
-                            if (RootDirectory != null && RootDirectory != String.Empty)
+                            this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, (Action)(() =>
                             {
+                                this.Grid_initial.Visibility = Visibility.Collapsed;
+                                this.Grid_logged.Visibility = Visibility.Visible;
+                                this.file_grid.Visibility = Visibility.Hidden;
+                                this.Back_button.Visibility = Visibility.Hidden;
+                                this.Refresh_button.Visibility = Visibility.Hidden;
+                                this.Sync_init_button.Visibility = Visibility.Visible;
+                                this.Restore_init_button.Visibility = Visibility.Visible;
+                                this.Label_log.Visibility = Visibility.Visible;
+                                this.Label_log.Content = "Welcome back, " + client.UserId + "! Choose one of the following options";
 
-                                DirectoryStatus local = new DirectoryStatus();
-                                local.FolderPath = RootDirectory;
-                                local.Username = username;
-                                CurrentDirectory = String.Copy(RootDirectory);
-                                client.fillDirectoryStatus(local, RootDirectory);
-                                DirectoryStatus remote = new DirectoryStatus();
-                                remote.Username = username;
-                                remote.FolderPath = RootDirectory;
-                                // for updating the progress bar
-                                PbUpdater up = new PbUpdater();
-                                up.rootDir = RootDirectory;
-                                up.remote = remote;
-                                up.local = local;
-                                sync_worker.RunWorkerAsync(up);
-                                this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, (Action)(() =>
-                                {
-                                    this.progressBar_file.IsIndeterminate = false;
-                                    this.Label_log.Content = "Checking for previous sessions of the directory ...";
-                                }));
-                                // try to free some memory ...
-                                local = null;
-                                remote = null;
-                                GC.Collect();
-                            }
+                            }));
+                            
                        }
                     }
                 }
@@ -314,18 +301,10 @@ namespace ClientApp
 
         private String updateUI_logged()
         {
-            this.Grid_initial.Visibility = Visibility.Collapsed;
-            this.Grid_logged.Visibility = Visibility.Visible;
-            this.file_grid.Visibility = Visibility.Hidden;
-            this.Back_button.Visibility = Visibility.Hidden;
-            this.Refresh_button.Visibility = Visibility.Hidden;
             FolderBrowserDialog dlg = new FolderBrowserDialog();
             dlg.Description = "Choose the folder you want to start synchronize";
             dlg.ShowDialog();
-            this.progressBar_file.Visibility = Visibility.Visible;
-            this.progressBar_file.IsIndeterminate = true;
-            this.Label_log.Content = "Retrieving directory infromation . . .";
-            this.Label_log.Visibility = Visibility.Visible;
+            
             return dlg.SelectedPath;
         }
 
@@ -506,6 +485,14 @@ namespace ClientApp
             {
                 client.closeConnectionTcpClient();
                 connected = false;
+                if (sync_worker.IsBusy)
+                    sync_worker.CancelAsync();
+                sync_worker.Dispose();
+                if (restore_worker.IsBusy)
+                    restore_worker.CancelAsync();
+                restore_worker.Dispose();
+                if (watcher != null)
+                    watcher.Stop();
             }
         }
 
@@ -771,6 +758,54 @@ namespace ClientApp
             this.Label_filename.Content = "Previous versions of the file " + FileList[0].Filename;
             this.Label_filename.Visibility = Visibility.Visible;
             this.filePrev_grid.ItemsSource = FileList;
+        }
+
+        private void Sync_init_button_Click(object sender, RoutedEventArgs e)
+        {
+            DispatcherOperation result = this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new LoginDelegate(updateUI_logged));
+            result.Wait();
+            RootDirectory = (String)result.Result;
+            if (RootDirectory != null && RootDirectory != String.Empty)
+            {
+                this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, (Action)(() =>
+                {
+                    this.Sync_init_button.Visibility = Visibility.Hidden;
+                    this.Restore_init_button.Visibility = Visibility.Hidden;
+                    this.progressBar_file.Visibility = Visibility.Visible;
+                    this.progressBar_file.IsIndeterminate = true;
+                    this.Label_log.Content = "Retrieving directory infromation . . .";
+                    this.Label_log.Visibility = Visibility.Visible;
+                }));
+                DirectoryStatus local = new DirectoryStatus();
+                local.FolderPath = RootDirectory;
+                local.Username = client.UserId;
+                CurrentDirectory = String.Copy(RootDirectory);
+                client.fillDirectoryStatus(local, RootDirectory);
+                DirectoryStatus remote = new DirectoryStatus();
+                remote.Username = client.UserId;
+                remote.FolderPath = RootDirectory;
+                // for updating the progress bar
+                PbUpdater up = new PbUpdater();
+                up.rootDir = RootDirectory;
+                up.remote = remote;
+                up.local = local;
+                sync_worker.RunWorkerAsync(up);
+                this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, (Action)(() =>
+                {
+                    this.progressBar_file.IsIndeterminate = false;
+                    this.Label_log.Content = "Checking for previous sessions of the directory ...";
+                }));
+                // try to free some memory ...
+                local = null;
+                remote = null;
+                GC.Collect();
+            }
+
+        }
+
+        private void Restore_init_button_Click(object sender, RoutedEventArgs e)
+        {
+
         }
 
     }

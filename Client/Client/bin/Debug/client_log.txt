@@ -1033,3 +1033,6 @@ Parameter name: hostNameOrAddress
    at System.Net.Sockets.TcpClient.Connect(IPEndPoint remoteEP)
    at ClientApp.Client.keepAlive() in c:\Users\John\Documents\GitHub\pds_project\Client\Client\Client.cs:line 290
 >>>>>>> origin/master
+02/06/2016 15:39:17 ***Fatal Error***  Impossibile stabilire la connessione. Risposta non corretta della parte connessa dopo l'intervallo di tempo oppure mancata risposta dall'host collegato 192.182.1.128:8001
+   in System.Net.Sockets.TcpClient.Connect(String hostname, Int32 port)
+   in ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 190

@@ -47,7 +47,7 @@
                 <DataGrid IsReadOnly="True"
                           AutoGenerateColumns="False"
                           CanUserAddRows="False"
-                          x:Name="file_grid" MouseDoubleClick="file_grid_MouseDoubleClick" Margin="0,103,0,40">
+                          x:Name="file_grid" MouseDoubleClick="file_grid_MouseDoubleClick" Margin="0,103,0,40" Visibility="Collapsed">
                     <DataGrid.Columns>
                         <DataGridTemplateColumn>
                             <DataGridTemplateColumn.CellTemplate>
@@ -89,7 +89,7 @@
                         </DataGridTemplateColumn>
                     </DataGrid.Columns>
                 </DataGrid>
-                
+
                 <Label x:Name="Label_filename" HorizontalAlignment="Center" VerticalAlignment="Top" 
                        HorizontalContentAlignment="Center" Visibility="Hidden"
                        Margin="30" Padding="10" FontSize="14" FontWeight="Bold" ></Label>
@@ -190,6 +190,18 @@
                 <Grid HorizontalAlignment="Center">
                     <Label HorizontalContentAlignment="Center" x:Name="Label_log" FontSize="16" FontWeight="ExtraBold" FontFamily="Calibri" Foreground="SteelBlue" Height="43" Margin="219,199,219,455" />
                 </Grid>
+                <Button BorderBrush="SkyBlue" x:Name="Sync_init_button" Style="{StaticResource AccentedSquareButtonStyle}" Margin="365,326,318,285" Height="86" Width="239" Click="Sync_init_button_Click" Visibility="Collapsed">
+                    <StackPanel>
+                        <Image Source="sync.ico" Width="40" Height="40"  HorizontalAlignment="Center" />
+                        <Label Content="Start new synchronization session!" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Width="201" Height="34" FontSize="12" FontWeight="Bold" Foreground="White"/>
+                    </StackPanel>
+                </Button>
+                <Button BorderBrush="SkyBlue"  x:Name="Restore_init_button" Style="{StaticResource AccentedSquareButtonStyle}" Margin="365,449,318,162" Height="86" Width="239" Click="Restore_init_button_Click" Visibility="Collapsed">
+                    <StackPanel>
+                        <Image Source="download.ico" Width="40" Height="40"  HorizontalAlignment="Center" />
+                        <Label Content="Download directory" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Width="201" Height="34" FontSize="12" FontWeight="Bold" Foreground="White"/>
+                    </StackPanel>
+                </Button>
             </Grid>
         </Grid>
     </Controls:WindowCommands>

@@ -8,6 +8,6 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-[assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("update_24px_1143807_easyicon.net.ico")]
+[assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("shaunkleyn-phlat-blue-folders-downloads.ico")]
 
 
