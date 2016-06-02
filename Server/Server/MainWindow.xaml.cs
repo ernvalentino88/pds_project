@@ -128,96 +128,104 @@ namespace ServerApp
             Socket s = (Socket)state;
             ClientSession cs = null;
             bool exit = false;
-            while (!exit)
+            try
             {
-                s.ReceiveTimeout = Networking.TIME_OUT_LONG;
-                s.SendTimeout = Networking.TIME_OUT_SHORT;
-                byte[] buffer_command = Utility.Networking.my_recv(4, s);
-                if (buffer_command != null)
+                while (!exit)
                 {
-                    s.ReceiveTimeout = Networking.TIME_OUT_SHORT;
-                    Networking.CONNECTION_CODES code = (Networking.CONNECTION_CODES)BitConverter.ToUInt32(buffer_command, 0);
-                    switch (code)
+                    s.ReceiveTimeout = Networking.TIME_OUT_LONG;
+                    s.SendTimeout = Networking.TIME_OUT_SHORT;
+                    byte[] buffer_command = Utility.Networking.my_recv(4, s);
+                    if (buffer_command != null)
                     {
-                        case Networking.CONNECTION_CODES.KEY_EXC:
-                            cs = server.keyExchangeTcpServer(s);
-                            if (cs == null)
-                            {
-                                exit = true;
-                            }
-                            break;
-                        case Networking.CONNECTION_CODES.AUTH:
-                            if (cs != null)
-                            {
-                                Int64 sessionId = server.authenticationTcpServer(cs);
-                                if (sessionId <= 0)
+                        s.ReceiveTimeout = Networking.TIME_OUT_SHORT;
+                        Networking.CONNECTION_CODES code = (Networking.CONNECTION_CODES)BitConverter.ToUInt32(buffer_command, 0);
+                        switch (code)
+                        {
+                            case Networking.CONNECTION_CODES.KEY_EXC:
+                                cs = server.keyExchangeTcpServer(s);
+                                if (cs == null)
                                 {
                                     exit = true;
                                 }
-                            }
-                            break;
-                        case Networking.CONNECTION_CODES.NEW_REG:
-                            if (cs != null)
-                            {
-                                server.registrationTcpServer(cs);
-                            }
-                            exit = true;
-                            break;
-                        case Networking.CONNECTION_CODES.SESSION:
-                            if (!server.resumeSession(ref cs, s))
+                                break;
+                            case Networking.CONNECTION_CODES.AUTH:
+                                if (cs != null)
+                                {
+                                    Int64 sessionId = server.authenticationTcpServer(cs);
+                                    if (sessionId <= 0)
+                                    {
+                                        exit = true;
+                                    }
+                                }
+                                break;
+                            case Networking.CONNECTION_CODES.NEW_REG:
+                                if (cs != null)
+                                {
+                                    server.registrationTcpServer(cs);
+                                }
                                 exit = true;
-                            break;
-                        case Networking.CONNECTION_CODES.SESSION_WATCH:
-                            if (!server.resumeSession(ref cs, s, true))
-                                exit = true;
-                            break;
-                        case Networking.CONNECTION_CODES.DIR:
-                            if (!server.getDirectoryInfo(cs))
-                                exit = true;
-                            break;
-                        case Networking.CONNECTION_CODES.PREV:
-                            if (!server.getPreviousVersions(cs))
-                                exit = true;
-                            break;
-                        case Networking.CONNECTION_CODES.INIT_SYNCH:
-                            if (!server.beginSynchronization(cs))
-                                exit = true;
-                            break;
-                        case Networking.CONNECTION_CODES.START_SYNCH:
-                            if (cs != null)
-                            {
-                                if (!server.synchronizationSession(cs))
+                                break;
+                            case Networking.CONNECTION_CODES.SESSION:
+                                if (!server.resumeSession(ref cs, s))
                                     exit = true;
-                            }
-                            break;
-                        case Networking.CONNECTION_CODES.FS_SYNCH:
-                            server.synchronizationSession(cs, s);
-                            exit = true;
-                            break;
-                        case Networking.CONNECTION_CODES.RESTORE_DIR:
-                            if (!server.restoreDirectory(cs))
+                                break;
+                            case Networking.CONNECTION_CODES.SESSION_WATCH:
+                                if (!server.resumeSession(ref cs, s, true))
+                                    exit = true;
+                                break;
+                            case Networking.CONNECTION_CODES.DIR:
+                                if (!server.getDirectoryInfo(cs))
+                                    exit = true;
+                                break;
+                            case Networking.CONNECTION_CODES.PREV:
+                                if (!server.getPreviousVersions(cs))
+                                    exit = true;
+                                break;
+                            case Networking.CONNECTION_CODES.INIT_SYNCH:
+                                if (!server.beginSynchronization(cs))
+                                    exit = true;
+                                break;
+                            case Networking.CONNECTION_CODES.START_SYNCH:
+                                if (cs != null)
+                                {
+                                    if (!server.synchronizationSession(cs))
+                                        exit = true;
+                                }
+                                break;
+                            case Networking.CONNECTION_CODES.FS_SYNCH:
+                                server.synchronizationSession(cs, s);
                                 exit = true;
-                            break;
-                        case Networking.CONNECTION_CODES.RESTORE_FILE:
-                            if (!server.restoreFile(cs))
+                                break;
+                            case Networking.CONNECTION_CODES.RESTORE_DIR:
+                                if (!server.restoreDirectory(cs))
+                                    exit = true;
+                                break;
+                            case Networking.CONNECTION_CODES.RESTORE_FILE:
+                                if (!server.restoreFile(cs))
+                                    exit = true;
+                                break;
+                            case Networking.CONNECTION_CODES.HELLO:
+                                server.Hello(s);
+                                break;
+                            case Networking.CONNECTION_CODES.EXIT:
                                 exit = true;
-                            break;
-                        case Networking.CONNECTION_CODES.HELLO:
-                            server.Hello(s);
-                            break;
-                        case Networking.CONNECTION_CODES.EXIT:
-                            exit = true;
-                            break;
-                        default:
-                            exit = true;
-                            break;
+                                break;
+                            default:
+                                exit = true;
+                                break;
+                        }
                     }
+                    else
+                        exit = true;
                 }
-                else
-                    exit = true;
             }
+            catch (SocketException) { return; }
             //all_sockets.Remove(s);
-            s.Close(); 
+            finally
+            {
+                if(s!=null)
+                s.Close();
+            }
         }
 
         private void updateUI_msg(String msg)

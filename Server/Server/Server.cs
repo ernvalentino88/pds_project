@@ -392,6 +392,10 @@ namespace ServerApp
                                 break;
                         }
                     }
+                    else
+                    {
+                        exit = true;
+                    }
                 }
                 newStatus = null;
                 if (success)
@@ -435,10 +439,10 @@ namespace ServerApp
             SQLiteConnection con = null;
             SQLiteTransaction transaction = null;
             bool success = false;
-
+            bool exit = false;
             try
             {
-                bool exit = false;
+                
                 con = new SQLiteConnection(DBmanager.connectionString);
                 con.Open();
                 transaction = con.BeginTransaction();
@@ -476,11 +480,15 @@ namespace ServerApp
                                 exit = true;
                                 break;
                         }
+                    } 
+                    else 
+                    {
+                        exit=true;
                     }
                 }
             }
-            catch (SocketException) { }
-            catch (SQLiteException) { }
+            catch (SocketException) { return; }
+            catch (SQLiteException) { return; }
 
             finally
             {

@@ -231,7 +231,7 @@ namespace Utility
         public static bool cleanDBfiles(SQLiteConnection conn, String user, String filename, String path)
         {
             try
-            {/*
+            {/*//clean i dati vecchi
                 List<Int64> idsToDelete = new List<Int64>();
                 DateTime now = DateTime.Now;
                 DateTime limit = now.Subtract(new TimeSpan(days_limit, 0, 0, 0));
@@ -1075,5 +1075,86 @@ namespace Utility
             catch (SQLiteException) { }
             return false;
         }
-    }
+
+
+        public DirectoryStatus  getAllSnapshots(String username) {
+            DirectoryStatus ds = new DirectoryStatus();
+            try
+            {
+                using (var con = new SQLiteConnection(DBmanager.connectionString))
+                {
+                    con.Open();
+                    using (var cmd = con.CreateCommand())
+                    {
+                        cmd.CommandText = @"select distinct path,last_mod_time from snapshots where user_id=@id";
+                        cmd.Parameters.AddWithValue("@id", username);
+                        using (var reader = cmd.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                DirectoryFile file = new DirectoryFile();
+                                file.UserId = username;
+                                file.Directory = true;
+                                file.Path = (String)reader["path"];
+                                file.Path = file.Path.Substring(0, file.Path.LastIndexOf('\\'));
+                                file.LastModificationTime = (DateTime)reader["last_mod_time"];
+                                ds.Files.Add(file.Path, file);
+                            }
+                        }
+                    }
+                }
+            }
+            catch (SQLiteException) { return null; }
+
+            return ds;
+        }
+
+        public static DirectoryStatus getSnapshotFiles(String directory, String username, DateTime creationTime)
+        {
+            DirectoryStatus ds = new DirectoryStatus();
+            ds.FolderPath = directory;
+            ds.Username = username;
+            try
+            {
+                using (var con = new SQLiteConnection(connectionString))
+                {
+                    con.Open();
+                        using (var cmd = con.CreateCommand())
+                        {
+                            int len = directory.Length;
+                            cmd.CommandText = @"select * from snapshots where user_id = @id"
+                                    + " and path = @dir and creation_time = @date;";
+                            cmd.Parameters.AddWithValue("@id", username);
+                            cmd.Parameters.AddWithValue("@dir", directory + "\\");
+                            cmd.Parameters.AddWithValue("@date", creationTime.ToString(date_format));
+                            using (var reader = cmd.ExecuteReader())
+                            {
+                                while (reader.Read())
+                                {
+                                    DirectoryFile file = new DirectoryFile();
+                                    file.UserId = username;
+                                    file.Directory = (Boolean)reader["directory"];
+                                    file.Path = (String)reader["path"];
+                                    file.Path = file.Path.Substring(0, file.Path.LastIndexOf('\\'));
+                                    file.Filename = (String)reader["filename"];
+                                    file.Deleted = (Boolean)reader["deleted"];
+                                    file.LastModificationTime = (DateTime)reader["last_mod_time"];
+                                    if (!file.Directory)
+                                    {
+                                        file.Id = (Int64)reader["file_id"];
+                                        file.Checksum = (String)reader["checksum"];
+                                    }
+                                    file.Fullname = Path.Combine(file.Path, file.Filename);
+                                    ds.Files.Add(file.Fullname, file);
+                                }   
+                        }
+                    }
+                }
+            }
+            catch (SQLiteException) { }
+            return ds;
+        }
+
+
+    }     
 }
