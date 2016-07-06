@@ -90,7 +90,7 @@ namespace Utility
                 using (var con = new SQLiteConnection(connectionString))
                 {
                     con.Open();
-                    if (!cleanDBsnapshots(username)) return null;
+                    if (!cleanDBsnapshots(con, username, directory)) return ds;
                     using (var cmd = con.CreateCommand())
                     {
                         int len = directory.Length;
@@ -167,57 +167,58 @@ namespace Utility
             return false;
         }
         /***** Clean DB functions ******/
-        
-        public static bool cleanDBsnapshots(DirectoryStatus newStatus)
+
+        public static bool cleanDBsnapshots(SQLiteConnection conn, DirectoryStatus newStatus, String directory)
         {
-            return cleanDBsnapshots(newStatus.Username);
+            return cleanDBsnapshots(conn, newStatus.Username, directory);
         }
 
-        public static bool cleanDBsnapshots(String user)
+        public static bool cleanDBsnapshots(SQLiteConnection conn, String user, String directory)
         {
             try
             {
-                using (var conn = new SQLiteConnection(connectionString))
+                using (var transaction = conn.BeginTransaction())
                 {
-                    conn.Open();
-                    using (var transaction = conn.BeginTransaction())
+                    Int64? ver_count = -1;
+                    DateTime? oldest = null;//? per farlo nullable
+                    int len = directory.Length;
+
+                    using (SQLiteCommand cmd = conn.CreateCommand())
                     {
-                        Int64? ver_count = -1;
-                        DateTime? oldest = null;//? per farlo nullable
-                        using (SQLiteCommand cmd = conn.CreateCommand())
+                        cmd.CommandText = "select count(distinct(creation_time)),min(creation_time) from snapshots " + 
+                                           "where user_id = @user and substr(path,1," + len + ") = @dir;";
+                        cmd.Parameters.AddWithValue("@user", user);
+                        cmd.Parameters.AddWithValue("@dir", directory);
+                        using (var reader = cmd.ExecuteReader())
                         {
-                            cmd.CommandText = "select count(distinct(creation_time)),min(creation_time) from snapshots where user_id=@user;";
-                            cmd.Parameters.AddWithValue("@user", user);
-                            using (var reader = cmd.ExecuteReader())
+                            while (reader.Read())
                             {
-                                while (reader.Read())
+                                ver_count = (Int64?)reader[0];
+                                if (ver_count > 0)
                                 {
-                                    ver_count = (Int64?)reader[0];
-                                    if (ver_count > 0)
-                                    {
-                                        //oldest = (DateTime?)reader[1];
-                                        oldest = Convert.ToDateTime(reader[1]);
-                                    }
+                                    //oldest = (DateTime?)reader[1];
+                                    oldest = Convert.ToDateTime(reader[1]);
                                 }
                             }
-
                         }
-                        //se count=0 quindi file non esiste ancora->ok(oldest ==null)
-                        //se ver_count >0 oldest non puo valere null
-                        if (ver_count < 0 || (ver_count > 0 && oldest == null))
+                    }
+                    //se count=0 quindi file non esiste ancora->ok(oldest ==null)
+                    //se ver_count >0 oldest non puo valere null
+                    if (ver_count < 0 || (ver_count > 0 && oldest == null))
+                    {
+                        return false;
+                    }
+                    if (ver_count >= max_versions)
+                    {
+                        using (SQLiteCommand cmd = conn.CreateCommand())
                         {
-                            return false;
-                        }
-                        if (ver_count >= max_versions)
-                        {
-                            using (SQLiteCommand cmd = conn.CreateCommand())
-                            {
-                                cmd.CommandText = @"DELETE from snapshots where user_id=@user and creation_time= @creationTime;";
-                                cmd.Parameters.AddWithValue("@user", user);
-                                cmd.Parameters.AddWithValue("@creationTime", ((DateTime)oldest).ToString(date_format));
-                                cmd.ExecuteNonQuery();
-                            }
-
+                            cmd.CommandText = @"DELETE from snapshots where user_id = @user and " +
+                                            "substr(path,1," + len + ") = @dir and creation_time = @creationTime;";
+                            cmd.Parameters.AddWithValue("@user", user);
+                            cmd.Parameters.AddWithValue("@dir", directory);
+                            cmd.Parameters.AddWithValue("@creationTime", ((DateTime)oldest).ToString(date_format));
+                            cmd.ExecuteNonQuery();
+                            transaction.Commit();
                         }
                     }
                 }
