@@ -204,6 +204,14 @@ namespace ServerApp
                                 if (!server.restoreFile(cs))
                                     exit = true;
                                 break;
+                            case Networking.CONNECTION_CODES.GET_SNAP:
+                                if (!server.getAllSnapshots(cs))
+                                    exit = true;
+                                break;
+                            case Networking.CONNECTION_CODES.SNAP:
+                                if (!server.getSnapshotInfo(cs))
+                                    exit = true;
+                                break;
                             case Networking.CONNECTION_CODES.HELLO:
                                 server.Hello(s);
                                 break;
