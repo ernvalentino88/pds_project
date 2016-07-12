@@ -1107,5 +1107,125 @@ namespace ClientApp
             catch (SocketException) { }
             return false;
         }
+
+        public int getAllSnapshots(DirectoryStatus ds)
+        {
+            try
+            {
+                Socket s = tcpClient.Client;
+                byte[] command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.GET_SNAP);
+                s.Send(command);
+                byte[] recvBuf = Networking.my_recv(4, s);
+                if (recvBuf == null)
+                    return -1;
+                Int32 snapToRecv = BitConverter.ToInt32(recvBuf, 0);
+                for (int i = 0; i < snapToRecv; i++)
+                {
+                    DirectoryFile file = new DirectoryFile();
+                    file.Directory = true;
+                    file.UserId = userId;
+                    recvBuf = Networking.my_recv(4, s);
+                    if (recvBuf == null)
+                        return -1;
+                    byte[] encryptedData = Networking.my_recv(BitConverter.ToInt32(recvBuf, 0), s);
+                    if (encryptedData == null)
+                        return -1;
+                    String path = Encoding.UTF8.GetString(Security.AESDecrypt(aesKey, encryptedData));
+                    recvBuf = Networking.my_recv(8, s);
+                    if (recvBuf == null)
+                        return -1;
+                    DateTime lastModTime = DateTime.FromBinary(BitConverter.ToInt64(recvBuf, 0));
+                    file.Path = path;
+                    file.LastModificationTime = lastModTime;
+                    file.Fullname = lastModTime.ToString("dd/MM/yyyyTHH:ss") + "_" + path;
+                    ds.Files.Add(file.Fullname, file);
+                }
+                return snapToRecv;
+            }
+            catch (SocketException)
+            {
+                return -1;
+            }
+        }
+
+        public Int64 getSnapshotInfo(DirectoryStatus current, String directory, DateTime creationTime)
+        {
+            try
+            {
+                Socket s = tcpClient.Client;
+                byte[] command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.DIR);
+                s.Send(command);
+                byte[] buf = Security.AESEncrypt(aesKey, Encoding.UTF8.GetBytes(directory));
+                s.Send(BitConverter.GetBytes(buf.Length));
+                s.Send(buf);
+                buf = BitConverter.GetBytes(creationTime.ToBinary());
+                s.Send(buf);
+
+                command = Networking.my_recv(4, tcpClient.Client);
+                if (command != null && (
+                        ((Networking.CONNECTION_CODES)BitConverter.ToUInt32(command, 0) == Networking.CONNECTION_CODES.OK)))
+                {
+                    byte[] recvBuf = Networking.my_recv(4, s);
+                    if (recvBuf == null)
+                        return -1;
+                    Int32 filesInfoToRecv = BitConverter.ToInt32(recvBuf, 0);
+                    for (int i = 0; i < filesInfoToRecv; i++)
+                    {
+                        DirectoryFile file = new DirectoryFile();
+                        recvBuf = Networking.my_recv(4, s);
+                        if (recvBuf == null)
+                            return -1;
+                        int len = BitConverter.ToInt32(recvBuf, 0);
+                        byte[] encryptedData = Networking.my_recv(len, s);
+                        if (encryptedData == null)
+                            return -1;
+                        String path = Encoding.UTF8.GetString(Security.AESDecrypt(aesKey, encryptedData));
+                        recvBuf = Networking.my_recv(4, s);
+                        if (recvBuf == null)
+                            return -1;
+                        len = BitConverter.ToInt32(recvBuf, 0);
+                        encryptedData = Networking.my_recv(len, s);
+                        if (encryptedData == null)
+                            return -1;
+                        String filename = Encoding.UTF8.GetString(Security.AESDecrypt(aesKey, encryptedData));
+                        recvBuf = Networking.my_recv(8, s);
+                        if (recvBuf == null)
+                            return -1;
+                        DateTime lastModTime = DateTime.FromBinary(BitConverter.ToInt64(recvBuf, 0));
+
+                        command = Networking.my_recv(4, s);
+                        if (command == null)
+                            return -1;
+                        if ((Networking.CONNECTION_CODES)BitConverter.ToUInt32(command, 0) == Networking.CONNECTION_CODES.DEL)
+                        {
+                            file.Deleted = true;
+                        }
+                        command = Networking.my_recv(4, s);
+                        if (command == null)
+                            return -1;
+                        if ((Networking.CONNECTION_CODES)BitConverter.ToUInt32(command, 0) == Networking.CONNECTION_CODES.DIR)
+                        {
+                            file.Directory = true;
+                        }
+                        if ((Networking.CONNECTION_CODES)BitConverter.ToUInt32(command, 0) == Networking.CONNECTION_CODES.FILE)
+                        {
+                            recvBuf = Networking.my_recv(8, s);
+                            if (recvBuf == null)
+                                return -1;
+                            file.Id = BitConverter.ToInt64(recvBuf, 0);
+                        }
+                        file.LastModificationTime = lastModTime;
+                        file.UserId = userId;
+                        file.Filename = filename;
+                        file.Path = path;
+                        file.Fullname = Path.Combine(path, filename);
+                        current.Files.Add(file.Fullname, file);
+                    }
+                    return filesInfoToRecv;
+                }
+            }
+            catch (SocketException) { }
+            return -1;
+        }
     }
 }
