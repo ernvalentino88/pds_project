@@ -72,9 +72,10 @@ namespace ServerApp
                         }
                     }
                 }
+                return null;
             }
-            catch (SocketException) { }
-            return null;
+            catch (SocketException) { return null; }
+           
         }
 
         public Int64 authenticationTcpServer(ClientSession clientSession)
@@ -144,9 +145,10 @@ namespace ServerApp
                         return -3;
                     }
                 }
+                return -1;
             }
-            catch (SocketException) { }
-            return -1;
+            catch (SocketException) { return -1; }
+          
         }
 
         public void registrationTcpServer(ClientSession clientSession)
@@ -188,7 +190,7 @@ namespace ServerApp
                     }
                 }
             }
-            catch (SocketException) { }
+            catch (SocketException) { return; }
         }
 
         public void Hello(Socket s)
@@ -199,7 +201,7 @@ namespace ServerApp
                 command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.HELLO);
                 s.Send(command);
             }
-            catch (SocketException) { }
+            catch (SocketException) { return; }
         }
 
         public bool resumeSession(ref ClientSession clientSession, Socket s)
@@ -259,9 +261,10 @@ namespace ServerApp
                         }
                     }
                 }
+                return false;
             }
-            catch (SocketException) { }
-            return false;
+            catch (SocketException) { return false; }
+           
         }
 
         public bool resumeSession(ref ClientSession clientSession, Socket s, bool fromWatcher)
@@ -294,9 +297,10 @@ namespace ServerApp
                         return false;
                     }                
                 }
+                return false;
             }
-            catch (SocketException) { }
-            return false;
+            catch (SocketException) { return false;}
+            
         }
 
         private ClientSession getClientSessionFromHash(byte[] hashClient, byte[] rand)
@@ -414,20 +418,28 @@ namespace ServerApp
             catch (SocketException)
             {
                 newStatus = null;
-                transaction.Rollback();
-                transaction.Dispose();
+                if (transaction != null)
+                {
+                    transaction.Rollback();
+                }
                 return false;
             }
             catch (SQLiteException)
             {
                 newStatus = null;
-                transaction.Rollback();
-                transaction.Dispose();
+                if (transaction != null)
+                {
+                    transaction.Rollback();  
+                }
                 return false;
             }
 
             finally
             {
+                if (transaction != null)
+                {
+                    transaction.Dispose();
+                }
                 if (con != null && con.State == System.Data.ConnectionState.Open)
                     con.Dispose();
             }
@@ -486,18 +498,18 @@ namespace ServerApp
                         exit=true;
                     }
                 }
+                if (success)
+                    transaction.Commit();
+                else
+                    transaction.Rollback();
             }
-            catch (SocketException) { return; }
-            catch (SQLiteException) { return; }
+            catch (SocketException) { if (transaction != null)transaction.Rollback(); return; }
+            catch (SQLiteException) { if (transaction != null)transaction.Rollback(); return; }
 
             finally
             {
                 if (transaction != null)
-                {
-                    if (success)
-                        transaction.Commit();
-                    else
-                        transaction.Rollback();
+                {    
                     transaction.Dispose();
                 }
                 if (con != null && con.State == System.Data.ConnectionState.Open)
@@ -548,10 +560,11 @@ namespace ServerApp
                     DirectoryFile file = clientSession.CurrentStatus.Files[fullname];
                     return DBmanager.deleteFile(conn, file, newStatus);
                 }
+                return false;
                 
             }
-            catch (SocketException) { }
-            return false;
+            catch (SocketException) {return false; }
+            
         }
 
         private bool addFile(SQLiteConnection conn, ClientSession clientSession, DirectoryStatus newStatus)
@@ -601,9 +614,10 @@ namespace ServerApp
                         return false;
                     return DBmanager.insertFile(conn, newStatus, filename, path, file, lastModTime);
                 }
+                return false;
             }
-            catch (SocketException) { }
-            return false;
+            catch (SocketException) { return false; }
+           
         }
 
         private bool updateFile(SQLiteConnection conn, ClientSession clientSession, DirectoryStatus newStatus)
@@ -644,8 +658,8 @@ namespace ServerApp
 
                 return DBmanager.insertFile(conn, newStatus, filename, path, file, lastModTime);
             }
-            catch (SocketException) { }
-            return false;
+            catch (SocketException) { return false;}
+            
         }
 
 
@@ -686,10 +700,10 @@ namespace ServerApp
                     //file
                     return DBmanager.deleteFile(conn, path, filename, clientSession.User.UserId, clientSession.LastStatusTime);
                 }
-
+                return false;
             }
-            catch (SocketException) { }
-            return false;
+            catch (SocketException) { return false; }
+           
         }
 
         private bool addFile(SQLiteConnection conn, ClientSession clientSession, Socket s)
@@ -738,9 +752,10 @@ namespace ServerApp
                         return false;
                     return DBmanager.insertFile(conn, path, filename, file, clientSession.User.UserId, clientSession.LastStatusTime, lastModTime);
                 }
+                return false;
             }
-            catch (SocketException) { }
-            return false;
+            catch (SocketException) { return false; }
+           
         }
 
         private bool updateFile(SQLiteConnection conn, ClientSession clientSession, Socket s)
@@ -802,9 +817,10 @@ namespace ServerApp
                         return true;
                     }
                 }
+                return false; 
             }
-            catch (SocketException) { }
-            return false;
+            catch (SocketException) { return false; }
+            
         }
 
         public bool getDirectoryInfo(ClientSession clientSession)
@@ -870,8 +886,8 @@ namespace ServerApp
                 }
                 return true;
             }
-            catch (SocketException) { }
-            return false;
+            catch (SocketException) { return false; }
+           
         }
 
         public bool getPreviousVersions(ClientSession clientSession)
@@ -915,8 +931,8 @@ namespace ServerApp
                 }
                 return true;
             }
-            catch (SocketException) { }
-            return false;
+            catch (SocketException) {  return false; }
+           
         }
 
         public bool beginSynchronization(ClientSession clientSession)
@@ -1060,8 +1076,8 @@ namespace ServerApp
                 }
                 return result;
             }
-            catch (SocketException) { }
-            return false;
+            catch (SocketException) { return false; }
+            
         }
 
         public bool restoreFile(ClientSession clientSession)
@@ -1114,10 +1130,11 @@ namespace ServerApp
                         s.Send(command);
                         return false;
                     }
-                }    
+                }
+                return false;
             }
-            catch (SocketException) { }
-            return false;
+            catch (SocketException) { return false; }
+           
         }
     }
 }
