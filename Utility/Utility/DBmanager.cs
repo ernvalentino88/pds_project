@@ -1087,7 +1087,7 @@ namespace Utility
                     con.Open();
                     using (var cmd = con.CreateCommand())
                     {
-                        cmd.CommandText = @"select distinct path,last_mod_time from snapshots where user_id=@id";
+                        cmd.CommandText = @"select distinct path,creation_time from snapshots where user_id=@id";
                         cmd.Parameters.AddWithValue("@id", username);
                         using (var reader = cmd.ExecuteReader())
                         {
@@ -1098,8 +1098,10 @@ namespace Utility
                                 file.Directory = true;
                                 file.Path = (String)reader["path"];
                                 file.Path = file.Path.Substring(0, file.Path.LastIndexOf('\\'));
-                                file.LastModificationTime = (DateTime)reader["last_mod_time"];
-                                ds.Files.Add(file.Path, file);
+                                DateTime prefix = (DateTime)reader["creation_time"];
+                                file.Fullname = (String)prefix.ToString("dd/MM/yyyyTHH:ss") + "_" + (String)reader["path"];
+                                file.LastModificationTime = (DateTime)reader["creation_time"];
+                                ds.Files.Add(file.Fullname, file);
                             }
                         }
                     }
@@ -1110,7 +1112,7 @@ namespace Utility
             return ds;
         }
 
-        public static DirectoryStatus getSnapshotFiles(String directory, String username, DateTime creationTime)
+        public static DirectoryStatus getSnapshotFilesOfDirectory(String directory, String username, DateTime creationTime)
         {
             DirectoryStatus ds = new DirectoryStatus();
             ds.FolderPath = directory;
