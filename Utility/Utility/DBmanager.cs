@@ -1118,7 +1118,7 @@ namespace Utility
         }
 
 
-        public DirectoryStatus  getAllSnapshots(String username) {
+        public static DirectoryStatus  getAllSnapshots(String username) {
             DirectoryStatus ds = new DirectoryStatus();
             try
             {

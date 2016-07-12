@@ -40,7 +40,8 @@ namespace Utility
             SESSION_WATCH = 20,
             FS_SYNCH = 21,
             RESTORE_DIR = 22,
-            RESTORE_FILE = 23
+            RESTORE_FILE = 23,
+            GET_SNAP=24
         };
 
         public static byte[] my_recv(int size, Socket s)

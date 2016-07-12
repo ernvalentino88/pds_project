@@ -890,6 +890,36 @@ namespace ServerApp
            
         }
 
+
+        public bool getAllSnapshots(ClientSession clientSession)
+        {
+            try
+            {
+                Socket s = clientSession.Socket;
+                AesCryptoServiceProvider aes = clientSession.AESKey;
+                DirectoryStatus snapshots = DBmanager.getAllSnapshots(clientSession.User.UserId);
+                int count = (snapshots == null) ? 0 : snapshots.Files.Count;
+                byte[] buf = BitConverter.GetBytes(count);
+                s.Send(buf);
+                if (snapshots != null)
+                {
+                    foreach (var item in snapshots.Files)
+                    {
+                        DirectoryFile file = item.Value;
+                        buf = Encoding.UTF8.GetBytes(file.Path);
+                        byte[] encryptedData = Security.AESEncrypt(aes, buf);
+                        s.Send(BitConverter.GetBytes(encryptedData.Length));
+                        s.Send(encryptedData);
+                        buf = BitConverter.GetBytes(file.LastModificationTime.ToBinary());
+                        s.Send(buf);
+                    }
+                }
+                return true;
+            }
+            catch (SocketException) { return false; }
+
+        }
+
         public bool getPreviousVersions(ClientSession clientSession)
         {
             try
