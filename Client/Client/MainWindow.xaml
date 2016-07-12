@@ -135,7 +135,8 @@
                 <DataGrid IsReadOnly="True"
                           AutoGenerateColumns="False"
                           CanUserAddRows="False"
-                          Visibility="Hidden"
+                          Visibility="Collapsed"
+                          MouseDoubleClick="dir_grid_MouseDoubleClick"
                           x:Name="dir_grid" Margin="0,103,0,40">
                     <DataGrid.Columns>
                         <DataGridTemplateColumn>
@@ -145,7 +146,7 @@
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
-                        <DataGridTextColumn Header="Path" Binding="{Binding Fullname}">
+                        <DataGridTextColumn Header="Path" Binding="{Binding Path}">
                             <DataGridTextColumn.ElementStyle>
                                 <Style TargetType="{x:Type TextBlock}">
                                     <Setter Property="Margin" Value="5" />
@@ -161,22 +162,59 @@
                                 </Style>
                             </DataGridTextColumn.ElementStyle>
                         </DataGridTextColumn>
-                        <DataGridCheckBoxColumn Header="Is Present on Disk" Binding="{Binding IsOnDisk}">
-                        </DataGridCheckBoxColumn>
+                        
                         <DataGridTemplateColumn>
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
-                                    <Button Content="Restore" Style="{StaticResource AccentedSquareButtonStyle}" Margin="10" Padding="5" Click="Restore_Button_Click"/>
+                                    <Button Content="Download" Style="{StaticResource AccentedSquareButtonStyle}" Margin="10" Padding="5" Click="Download_Button_Click"/>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
+                        
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <Label x:Name="Label_snapshot" HorizontalAlignment="Center" VerticalAlignment="Top" 
+                       HorizontalContentAlignment="Center" Visibility="Hidden"
+                       Margin="30" Padding="10" FontSize="14" FontWeight="Bold" ></Label>
+                <DataGrid IsReadOnly="True"
+                          AutoGenerateColumns="False"
+                          CanUserAddRows="False"
+                          Visibility="Hidden"
+                          MouseDoubleClick="fileSnap_grid_MouseDoubleClick"
+                          x:Name="fileSnap_grid" Margin="0,103,0,40">
+                    <DataGrid.Columns>
                         <DataGridTemplateColumn>
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
-                                    <Button Content="Start Syncing" Style="{StaticResource AccentedSquareButtonStyle}" Margin="10" Padding="5"/>
+                                    <Image Source="{Binding Icon}" />
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
+                        <DataGridTextColumn Header="File Name" Binding="{Binding Filename}">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="{x:Type TextBlock}">
+                                    <Setter Property="Margin" Value="5" />
+                                    <Setter Property="Padding" Value="5" />
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Header="Path" Binding="{Binding Path}">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="{x:Type TextBlock}">
+                                    <Setter Property="Margin" Value="5" />
+                                    <Setter Property="Padding" Value="5" />
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Header="Last Write Time" Binding="{Binding LastModificationTime}">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="{x:Type TextBlock}">
+                                    <Setter Property="Margin" Value="5" />
+                                    <Setter Property="Padding" Value="5" />
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
                     </DataGrid.Columns>
                 </DataGrid>
 

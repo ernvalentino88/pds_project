@@ -85,6 +85,7 @@
     <Compile Include="DirectoryItem.cs" />
     <Compile Include="FileVersionItem.cs" />
     <Compile Include="ListItem.cs" />
+    <Compile Include="SnapshotItem.cs" />
     <Compile Include="Watcher.cs" />
     <Compile Include="Client.cs" />
     <Compile Include="FileListItem.cs" />

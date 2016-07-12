@@ -44,6 +44,7 @@ namespace ClientApp
         private Client client;
         private String CurrentDirectory;
         private String RootDirectory;
+        private DateTime CurrentSnapshotTime;
         private ObservableCollection<ListItem> FileList;
         private BackgroundWorker sync_worker;
         private BackgroundWorker restore_worker;
@@ -294,6 +295,8 @@ namespace ClientApp
                 FileList.Add(file);
             }
             this.Label_log.Visibility = Visibility.Hidden;
+            this.dir_grid.Visibility = Visibility.Hidden;
+            this.fileSnap_grid.Visibility = Visibility.Hidden;
             this.filePrev_grid.Visibility = Visibility.Hidden;
             this.file_grid.Visibility = Visibility.Visible;
             this.file_grid.ItemsSource = FileList;        
@@ -754,6 +757,8 @@ namespace ClientApp
             }
             this.Label_log.Visibility = Visibility.Hidden;
             this.file_grid.Visibility = Visibility.Hidden;
+            this.dir_grid.Visibility = Visibility.Hidden;
+            this.fileSnap_grid.Visibility = Visibility.Hidden;
             this.filePrev_grid.Visibility = Visibility.Visible;
             this.Label_filename.Content = "Previous versions of the file " + FileList[0].Filename;
             this.Label_filename.Visibility = Visibility.Visible;
@@ -805,7 +810,132 @@ namespace ClientApp
 
         private void Restore_init_button_Click(object sender, RoutedEventArgs e)
         {
+            this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, (Action)(() =>
+            {
+                this.Sync_init_button.Visibility = Visibility.Hidden;
+                this.Restore_init_button.Visibility = Visibility.Hidden;
+                this.progressBar_file.Visibility = Visibility.Visible;
+                this.progressBar_file.IsIndeterminate = true;
+                this.Label_log.Content = "Retrieving previous synchronized directories . . .";
+                this.Label_log.Visibility = Visibility.Visible;
+            }));
+            DirectoryStatus ds = new DirectoryStatus();
+            int directories = client.getAllSnapshots(ds);
+            if (directories >= 0)
+            {
+                if (directories == 0)
+                {
+                    // no previous sync
+                    this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, (Action)(() =>
+                    {
+                        this.progressBar_file.Visibility = Visibility.Hidden;
+                        this.Label_log.Content = "No previous synchronization found.\nGo back and start synchronize one folder";
+                    }));
+                }
+                else
+                {
+                    this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new FillGrid(fill_dir_grid), ds);
+                }
+                
+            }
+            else
+            {
+                //error
+            }
 
+        }
+
+        private void fill_dir_grid(DirectoryStatus status)
+        {
+            FileList.Clear();
+            
+            foreach (var item in status.Files)
+            {
+                SnapshotItem file = new SnapshotItem(item.Value);
+                FileList.Add(file);
+            }
+            this.progressBar_file.Visibility = Visibility.Hidden;
+            this.fileSnap_grid.Visibility = Visibility.Hidden;
+            this.Label_log.Visibility = Visibility.Hidden;
+            this.Label_log.Visibility = Visibility.Hidden;
+            this.file_grid.Visibility = Visibility.Hidden;
+            this.filePrev_grid.Visibility = Visibility.Hidden;
+            this.dir_grid.Visibility = Visibility.Visible;
+            this.dir_grid.ItemsSource = FileList;
+        }
+
+        private void Download_Button_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void dir_grid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            if (this.file_grid.SelectedItem == null)
+                return;
+            var item = this.dir_grid.SelectedItem as SnapshotItem;
+            DirectoryStatus dir = new DirectoryStatus();
+            CurrentDirectory = item.Path;
+            RootDirectory = item.Path;
+            CurrentSnapshotTime = Convert.ToDateTime(item.LastModificationTime);
+            if (client.getSnapshotInfo(dir, CurrentDirectory, CurrentSnapshotTime) < 0)
+            {
+                connected = false;
+                client.TcpClient.Close();
+                String msg = "Log in to the remote server";
+                String title = "You were disconnected";
+                String bannerMsg = "A Network Error occurred, please try later";
+                this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegateAsync(updateUI_banner), msg, title, bannerMsg);
+            }
+            this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new FillGrid(fill_snap_grid), dir);
+        }
+
+        private void fill_snap_grid(DirectoryStatus status)
+        {
+            FileList.Clear();
+            if (CurrentDirectory.Equals(RootDirectory))
+            {
+                //see turn back botton
+                this.Back_button.IsEnabled = false;
+            }
+            else
+            {
+                //don't see botton
+                this.Back_button.IsEnabled = true;
+            }
+            foreach (var item in status.Files)
+            {
+                SnapshotItem file = new SnapshotItem(item.Value);
+                FileList.Add(file);
+            }
+            this.Back_button.Visibility = Visibility.Visible;
+            this.progressBar_file.Visibility = Visibility.Hidden;
+            this.Label_log.Visibility = Visibility.Hidden;
+            this.Label_log.Visibility = Visibility.Hidden;
+            this.file_grid.Visibility = Visibility.Hidden;
+            this.filePrev_grid.Visibility = Visibility.Hidden;
+            this.dir_grid.Visibility = Visibility.Hidden;
+            this.fileSnap_grid.Visibility = Visibility.Visible;
+            this.fileSnap_grid.ItemsSource = FileList;
+        }
+
+        private void fileSnap_grid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            if (this.file_grid.SelectedItem == null)
+                return;
+            var item = this.dir_grid.SelectedItem as SnapshotItem;
+            DirectoryStatus dir = new DirectoryStatus();
+            CurrentDirectory = item.Path;
+            if (client.getSnapshotInfo(dir, CurrentDirectory, CurrentSnapshotTime) < 0)
+            {
+                connected = false;
+                client.TcpClient.Close();
+                String msg = "Log in to the remote server";
+                String title = "You were disconnected";
+                String bannerMsg = "A Network Error occurred, please try later";
+                this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegateAsync(updateUI_banner), msg, title, bannerMsg);
+            }
+            this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new FillGrid(fill_snap_grid), dir);
         }
 
     }
