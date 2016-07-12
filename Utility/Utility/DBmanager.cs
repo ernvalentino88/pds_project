@@ -942,13 +942,53 @@ namespace Utility
                                 }
                             }
                         }
-                        return ids;
                     }
                 }
+                return ids;
             }
-            catch (SQLiteException) { }
-            return ids;
+            catch (SQLiteException) {  return ids;}
+           
         }
+
+        public static List<Int64> getFilesIdToDownload(String directory, String user, DateTime creationTime)
+        {
+            List<Int64> ids = new List<Int64>();
+            directory += "\\";
+            
+            try
+            {
+                using (var con = new SQLiteConnection(connectionString))
+                {
+                    con.Open();
+                 
+                        using (var cmd = con.CreateCommand())
+                        {
+                            int len = directory.Length;
+                            cmd.CommandText = @"select file_id, directory from snapshots where user_id = @id"
+                                    + " and substr(path,1," + len + ") = @dir  and creation_time = @date;";
+                            cmd.Parameters.AddWithValue("@id", user);
+                            cmd.Parameters.AddWithValue("@dir", directory);
+                            cmd.Parameters.AddWithValue("@date", creationTime.ToString(date_format));
+                            using (var reader = cmd.ExecuteReader())
+                            {
+                                while (reader.Read())
+                                {
+                                    Boolean isDir = (Boolean)reader["directory"];
+                                    if (!isDir)
+                                    {
+                                        Int64 id = (Int64)reader["file_id"];
+                                        ids.Add(id);
+                                    }
+                                }
+                            }
+                        }
+                        return ids;             
+                }
+            }
+            catch (SQLiteException) {  return ids;}
+           
+        }
+
 
         public static void getFileFromID(Int64 id, ref String path, ref String filename, ref byte[] file)
         {

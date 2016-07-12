@@ -795,8 +795,8 @@ namespace ServerApp
 
                 return DBmanager.updateFile(conn, path, filename, clientSession.User.UserId, file, clientSession.LastStatusTime, lastModTime);
             }
-            catch (SocketException) { }
-            return false;
+            catch (SocketException) {    return false;}
+         
         }
 
         public bool getDirectoryName(ClientSession clientSession)
@@ -1078,6 +1078,83 @@ namespace ServerApp
             }
             catch (SocketException) { return false; }
             
+        }
+
+
+        public bool DownloadDirectory(ClientSession clientSession,DateTime creationTime)
+        {
+            try
+            {
+                Socket s = clientSession.Socket;
+                AesCryptoServiceProvider aes = clientSession.AESKey;
+                byte[] recvBuf = Networking.my_recv(4, s);
+                if (recvBuf == null)
+                    return false;
+                int pathLen = BitConverter.ToInt32(recvBuf, 0);
+                recvBuf = Networking.my_recv(pathLen, s);
+                if (recvBuf == null)
+                    return false;
+                byte[] command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.OK);
+                s.Send(command);
+                String dir = Encoding.UTF8.GetString(Security.AESDecrypt(aes, recvBuf));
+                List<Int64> ids = DBmanager.getFilesIdToDownload(dir, clientSession.User.UserId, creationTime);
+                byte[] buf = BitConverter.GetBytes(ids.Count);
+                s.Send(buf);
+                bool result = true;
+
+                for (int i = 0; i < ids.Count; i++)
+                {
+                    String path = "", name = "";
+                    byte[] file = null;
+                    DateTime lastModTime = DateTime.MinValue;
+                    DBmanager.getFileFromID(ids[i], ref path, ref name, ref file);
+
+                    if (file != null && !path.Equals("") && !name.Equals(""))
+                    {
+                        byte[] encryptedData = Security.AESEncrypt(aes, Encoding.UTF8.GetBytes(name));
+                        s.Send(BitConverter.GetBytes(encryptedData.Length));
+                        s.Send(encryptedData);
+                        encryptedData = Security.AESEncrypt(aes, Encoding.UTF8.GetBytes(path));
+                        s.Send(BitConverter.GetBytes(encryptedData.Length));
+                        s.Send(encryptedData);
+                        long left = file.LongLength;
+                        s.Send(BitConverter.GetBytes(left));
+
+                        using (MemoryStream ms = new MemoryStream(file))
+                        {
+
+                            while (left > 0)
+                            {
+                                int dim = (left > 4096) ? 4096 : (int)left;
+                                buf = new byte[dim];
+                                ms.Read(buf, 0, dim);
+                                encryptedData = Security.AESEncrypt(aes, buf);
+                                s.Send(encryptedData);
+                                left -= dim;
+                            }
+                        }
+                        recvBuf = Networking.my_recv(8, s);
+                        if (recvBuf == null)
+                            return false;
+                        lastModTime = DateTime.FromBinary(BitConverter.ToInt64(recvBuf, 0));
+                        if (DBmanager.restoreFile(ids[i], path, name, clientSession.User.UserId, lastModTime, creationTime))
+                        {
+                            command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.OK);
+                            s.Send(command);
+                        }
+                        else
+                        {
+                            command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.ERR);
+                            s.Send(command);
+                            result = false;
+                            break;
+                        }
+                    }
+                }
+                return result;
+            }
+            catch (SocketException) { return false; }
+
         }
 
         public bool restoreFile(ClientSession clientSession)
