@@ -41,8 +41,9 @@ namespace Utility
             FS_SYNCH = 21,
             RESTORE_DIR = 22,
             RESTORE_FILE = 23,
-            GET_SNAP=24,
-            SNAP=25
+            GET_SNAP = 24,
+            SNAP = 25,
+            DOWN = 26
         };
 
         public static byte[] my_recv(int size, Socket s)

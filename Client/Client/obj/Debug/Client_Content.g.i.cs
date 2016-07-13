@@ -8,6 +8,6 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-[assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("shaunkleyn-phlat-blue-folders-downloads.ico")]
+[assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("custom-icon-design-mono-general-3-home.ico")]
 
 

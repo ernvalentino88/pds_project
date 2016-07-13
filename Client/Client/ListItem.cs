@@ -120,7 +120,7 @@ namespace ClientApp
             path = file.Path;
             deleted = file.Deleted;
             id = file.Id;
-            lastModTime = file.LastModificationTime.ToString("R");
+            lastModTime = file.LastModificationTime.ToString("ddd, d MMM yyyy HH:mm:ss");
         }
     }
 }

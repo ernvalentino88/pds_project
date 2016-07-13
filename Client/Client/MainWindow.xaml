@@ -219,10 +219,16 @@
                 </DataGrid>
 
                 <ProgressBar BorderBrush="RoyalBlue"  x:Name="progressBar_file" Visibility="Hidden" HorizontalAlignment="Center" Height="26" Margin="178,346,160,325" Width="584"/>
-                <Button VerticalAlignment="Top" BorderBrush="Black"  x:Name="Back_button" Style="{DynamicResource MetroCircleButtonStyle}" Margin="10,51,860,0" Height="47" Width="50" Click="Back_button_Click">
+                <Button VerticalAlignment="Top" BorderBrush="Black"  x:Name="Back_button" Style="{DynamicResource MetroCircleButtonStyle}" Margin="80,51,792,0" Height="47" Width="50" Click="Back_button_Click">
                     <Image Source="back_arrow.ico" Width="22" Height="20"></Image>
                 </Button>
-                <Button VerticalAlignment="Top" HorizontalAlignment="Center" BorderBrush="Black"  x:Name="Refresh_button" Style="{DynamicResource MetroCircleButtonStyle}" Margin="79,51,793,0" Height="47" Width="50" Click="Refresh_button_Click">
+                <Button VerticalAlignment="Top" BorderBrush="Black"  x:Name="Back_button_2" Style="{DynamicResource MetroCircleButtonStyle}" Margin="80,51,792,0" Height="47" Width="50" Click="Back_button_2_Click" Visibility="Collapsed">
+                    <Image Source="back_arrow.ico" Width="22" Height="20"></Image>
+                </Button>
+                <Button VerticalAlignment="Top" BorderBrush="Black"  x:Name="Home_button" Style="{DynamicResource MetroCircleButtonStyle}" Margin="10,51,862,0" Height="47" Width="50" Click="Home_button_Click">
+                    <Image Source="home.ico" Width="22" Height="20"></Image>
+                </Button>
+                <Button VerticalAlignment="Top" HorizontalAlignment="Center" BorderBrush="Black"  x:Name="Refresh_button" Style="{DynamicResource MetroCircleButtonStyle}" Margin="150,51,722,0" Height="47" Width="50" Click="Refresh_button_Click">
                     <Image Source="refresh.ico" Width="22" Height="20"></Image>
                 </Button>
                 <Grid HorizontalAlignment="Center">

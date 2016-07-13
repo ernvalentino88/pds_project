@@ -1153,7 +1153,7 @@ namespace ClientApp
             try
             {
                 Socket s = tcpClient.Client;
-                byte[] command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.DIR);
+                byte[] command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.SNAP);
                 s.Send(command);
                 byte[] buf = Security.AESEncrypt(aesKey, Encoding.UTF8.GetBytes(directory));
                 s.Send(BitConverter.GetBytes(buf.Length));
@@ -1227,5 +1227,74 @@ namespace ClientApp
             catch (SocketException) { }
             return -1;
         }
+
+
+        public bool downloadDirectory(String path, DateTime creationTime, BackgroundWorker worker)
+        {
+            try
+            {
+                Socket s = tcpClient.Client;
+                byte[] command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.DOWN);
+                s.Send(command);
+                byte[] buf = Security.AESEncrypt(aesKey, Encoding.UTF8.GetBytes(path));
+                s.Send(BitConverter.GetBytes(buf.Length));
+                s.Send(buf);
+                buf = BitConverter.GetBytes(creationTime.ToBinary());
+                s.Send(buf);
+                command = Networking.my_recv(4, tcpClient.Client);
+                bool result = true;
+
+                if (command != null && (
+                        ((Networking.CONNECTION_CODES)BitConverter.ToUInt32(command, 0) == Networking.CONNECTION_CODES.OK)))
+                {
+                    byte[] recvBuf = Networking.my_recv(4, s);
+                    if (recvBuf == null)
+                        return false;
+                    Int32 filesToRecv = BitConverter.ToInt32(recvBuf, 0);
+                    for (int i = 0; i < filesToRecv; i++)
+                    {
+                        recvBuf = Networking.my_recv(4, s);
+                        if (recvBuf == null)
+                            return false;
+                        byte[] encryptedData = Networking.my_recv(BitConverter.ToInt32(recvBuf, 0), s);
+                        if (encryptedData == null)
+                            return false;
+                        String filename = Encoding.UTF8.GetString(Security.AESDecrypt(aesKey, encryptedData));
+                        recvBuf = Networking.my_recv(4, s);
+                        if (recvBuf == null)
+                            return false;
+                        encryptedData = Networking.my_recv(BitConverter.ToInt32(recvBuf, 0), s);
+                        if (encryptedData == null)
+                            return false;
+                        String filePath = Encoding.UTF8.GetString(Security.AESDecrypt(aesKey, encryptedData));
+                        if (!Directory.Exists(filePath))
+                            Directory.CreateDirectory(filePath);
+                        recvBuf = Networking.my_recv(8, s);
+                        if (recvBuf == null)
+                            return false;
+                        Int64 fileLen = BitConverter.ToInt64(recvBuf, 0);
+                        Networking.recvEncryptedFile(fileLen, s, aesKey, Path.Combine(filePath, filename));
+                        buf = BitConverter.GetBytes(File.GetLastWriteTime(Path.Combine(filePath, filename)).ToBinary());
+                        s.Send(buf);
+                        double percentage = (double)i / filesToRecv;
+                        worker.ReportProgress((int)(percentage * 100));
+                        command = Networking.my_recv(4, s);
+                        if (command != null && (
+                            ((Networking.CONNECTION_CODES)BitConverter.ToUInt32(command, 0) == Networking.CONNECTION_CODES.OK)))
+                            continue;
+                        else
+                        {
+                            result = false;
+                            break;
+                        }
+                    }
+                    return result;
+                }
+            }
+            catch (SocketException) { }
+            return false;
+        }
+
+
     }
 }
