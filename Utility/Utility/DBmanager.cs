@@ -837,8 +837,8 @@ namespace Utility
                 }
                 return true;
             }
-            catch (SQLiteException) { }
-            return false;
+            catch (SQLiteException) { return false; }
+           
         }
 
         public static bool updateFile(SQLiteConnection conn, String path, String filename, String user, byte[] file, DateTime creationTime, DateTime lastModTime)
@@ -894,8 +894,8 @@ namespace Utility
                 }
                 return true;
             }
-            catch (SQLiteException) { }
-            return false;
+            catch (SQLiteException) {  return false;}
+           
         }
 
         public static List<Int64> getFilesDeletedIDs(String directory, String user, ref DateTime creationTime)
@@ -1014,7 +1014,7 @@ namespace Utility
                     }
                 }
             }
-            catch (SQLiteException) { }
+            catch (SQLiteException) { return; }
         }
 
         public static bool restoreFile(Int64 id, String path, String name, String user, DateTime lastModTime, DateTime creationTime)

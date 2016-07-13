@@ -1186,7 +1186,7 @@ namespace ServerApp
         }
 
 
-        public bool DownloadDirectory(ClientSession clientSession,DateTime creationTime)
+        public bool DownloadDirectory(ClientSession clientSession)
         {
             try
             {
@@ -1199,9 +1199,15 @@ namespace ServerApp
                 recvBuf = Networking.my_recv(pathLen, s);
                 if (recvBuf == null)
                     return false;
+                String dir = Encoding.UTF8.GetString(Security.AESDecrypt(aes, recvBuf));
+                 recvBuf = Networking.my_recv(8, s);
+                if (recvBuf == null)
+                    return false;
+                DateTime creationTime = DateTime.FromBinary(BitConverter.ToInt64(recvBuf, 0));
+
                 byte[] command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.OK);
                 s.Send(command);
-                String dir = Encoding.UTF8.GetString(Security.AESDecrypt(aes, recvBuf));
+                
                 List<Int64> ids = DBmanager.getFilesIdToDownload(dir, clientSession.User.UserId, creationTime);
                 byte[] buf = BitConverter.GetBytes(ids.Count);
                 s.Send(buf);
