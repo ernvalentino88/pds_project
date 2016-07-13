@@ -48,6 +48,7 @@ namespace ClientApp
         private ObservableCollection<ListItem> FileList;
         private BackgroundWorker sync_worker;
         private BackgroundWorker restore_worker;
+        private BackgroundWorker download_worker;
         private Watcher watcher;
 
         public MainWindow()
@@ -67,6 +68,12 @@ namespace ClientApp
             restore_worker.DoWork += new DoWorkEventHandler(rw_DoWork);
             restore_worker.ProgressChanged += new ProgressChangedEventHandler(rw_ProgressChanged);
             restore_worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(rw_RunWorkerCompleted);
+            download_worker = new BackgroundWorker();
+            download_worker.WorkerReportsProgress = true;
+            download_worker.WorkerSupportsCancellation = true;
+            download_worker.DoWork += new DoWorkEventHandler(dw_DoWork);
+            download_worker.ProgressChanged += new ProgressChangedEventHandler(dw_ProgressChanged);
+            download_worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(dw_RunWorkerCompleted);
         }
 
 
@@ -314,6 +321,15 @@ namespace ClientApp
             dlg.Description = "Choose the folder you want to start synchronize";
             dlg.ShowDialog();
             
+            return dlg.SelectedPath;
+        }
+
+        private String chooseDirectoryWhereDownload()
+        {
+            FolderBrowserDialog dlg = new FolderBrowserDialog();
+            dlg.Description = "Choose the folder where to download the selected directory";
+            dlg.ShowDialog();
+
             return dlg.SelectedPath;
         }
 
@@ -899,7 +915,121 @@ namespace ClientApp
 
         private void Download_Button_Click(object sender, RoutedEventArgs e)
         {
+            ListItem item = ((FrameworkElement)sender).DataContext as ListItem;
+            DispatcherOperation result = this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new LoginDelegate(chooseDirectoryWhereDownload));
+            result.Wait();
+            String basedir = (String)result.Result;
+            if (basedir != null && basedir != String.Empty)
+            {
+                String dirName = System.IO.Path.GetFileName(item.Path);
+                String newRoot = System.IO.Path.Combine(basedir, dirName);
+                if (!Directory.Exists(newRoot))
+                    Directory.CreateDirectory(newRoot);
+                else
+                {
+                    dirName += "_" + DateTime.Now.ToString("dd-MM-yyyy_HH-mm-ss");
+                    this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, (Action)(async () => {
+                        await this.ShowMessageAsync("Attention!", "In the selected path already exist a directory called " +
+                            System.IO.Path.GetFileName(item.Path) + ", so it will be renamed in " + dirName);
+                    }));
+                    newRoot = System.IO.Path.Combine(basedir, dirName);
+                }
 
+                PbUpdater up = new PbUpdater();
+                up.rootDir = newRoot;
+                up.path = item.Path;
+                up.creationTime = Convert.ToDateTime(item.LastModificationTime);
+                download_worker.RunWorkerAsync(up);
+                this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, (Action)(() =>
+                {
+                    this.progressBar_file.IsIndeterminate = true;
+                    this.progressBar_file.Visibility = Visibility.Visible;
+                    this.Back_button.Visibility = Visibility.Hidden;
+                    this.Back_button_2.Visibility = Visibility.Hidden;
+                    this.Home_button.Visibility = Visibility.Hidden;
+                    this.Refresh_button.Visibility = Visibility.Hidden;
+                    this.fileSnap_grid.Visibility = Visibility.Hidden;
+                    this.dir_grid.Visibility = Visibility.Hidden;
+                    this.file_grid.Visibility = Visibility.Hidden;
+                    this.Label_log.Content = "Downloading directory . . .";
+                    this.Label_log.Visibility = Visibility.Visible;
+                }));
+            }
+        }
+
+        private void dw_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            if (e.Error != null || e.Cancelled)
+            {
+                //something went wrong during restore
+                connected = false;
+                client.TcpClient.Close();
+                String msg = "Log in to the remote server";
+                String title = "You were disconnected";
+                String bannerMsg = "An error on the server occurred, please try later";
+                this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegateAsync(updateUI_banner), msg, title, bannerMsg);
+            }
+            else
+            {
+                bool result = (bool)e.Result;
+                if (result)
+                {
+                    this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, (Action)(async () =>
+                    {
+                        await this.ShowMessageAsync("Download Completed!","Your download completed succesfully.");
+                        this.progressBar_file.Visibility = Visibility.Hidden;
+                        this.Grid_initial.Visibility = Visibility.Collapsed;
+                        this.Grid_logged.Visibility = Visibility.Visible;
+                        this.file_grid.Visibility = Visibility.Hidden;
+                        this.dir_grid.Visibility = Visibility.Hidden;
+                        this.fileSnap_grid.Visibility = Visibility.Hidden;
+                        this.Back_button.Visibility = Visibility.Hidden;
+                        this.Back_button_2.Visibility = Visibility.Collapsed;
+                        this.Refresh_button.Visibility = Visibility.Hidden;
+                        this.Home_button.Visibility = Visibility.Hidden;
+                        this.Sync_init_button.Visibility = Visibility.Visible;
+                        this.Restore_init_button.Visibility = Visibility.Visible;
+                        this.Label_log.Visibility = Visibility.Visible;
+                        this.Label_log.Content = "Welcome back, " + client.UserId + "! Choose one of the following options";
+                    }));
+                }
+                else
+                {
+                    //something went wrong during restore
+                    connected = false;
+                    client.TcpClient.Close();
+                    String msg = "Log in to the remote server";
+                    String title = "You were disconnected";
+                    String bannerMsg = "An error on the server occurred, please try later";
+                    this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegateAsync(updateUI_banner), msg, title, bannerMsg);
+                }
+            }
+        }
+
+        private void dw_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        {
+            this.Dispatcher.BeginInvoke(DispatcherPriority.Background, new UpdateBar(update_bar), e.ProgressPercentage);
+        }
+
+        private void dw_DoWork(object sender, DoWorkEventArgs e)
+        {
+            BackgroundWorker worker = sender as BackgroundWorker;
+            PbUpdater up = (PbUpdater)e.Argument;
+            if (worker.CancellationPending)
+            {
+                e.Cancel = true;
+            }
+            else
+            {
+                if (!client.resumeSession())
+                {
+                    e.Result = false;
+                }
+                else
+                {
+                    e.Result = client.downloadDirectory(up.rootDir, up.path, up.creationTime, download_worker);
+                }
+            }
         }
 
         private void dir_grid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
@@ -1053,6 +1183,7 @@ namespace ClientApp
         public DirectoryStatus local { get; set; }
         public String rootDir { get; set; }
         public String path { get; set; }
+        public DateTime creationTime { get; set; }
         public Int64 id { get; set; }
     }
 }

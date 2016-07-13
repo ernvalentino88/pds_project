@@ -1229,14 +1229,14 @@ namespace ClientApp
         }
 
 
-        public bool downloadDirectory(String path, DateTime creationTime, BackgroundWorker worker)
+        public bool downloadDirectory(String newRoot, String oldRoot, DateTime creationTime, BackgroundWorker worker)
         {
             try
             {
                 Socket s = tcpClient.Client;
                 byte[] command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.DOWN);
                 s.Send(command);
-                byte[] buf = Security.AESEncrypt(aesKey, Encoding.UTF8.GetBytes(path));
+                byte[] buf = Security.AESEncrypt(aesKey, Encoding.UTF8.GetBytes(oldRoot));
                 s.Send(BitConverter.GetBytes(buf.Length));
                 s.Send(buf);
                 buf = BitConverter.GetBytes(creationTime.ToBinary());
@@ -1267,14 +1267,18 @@ namespace ClientApp
                         if (encryptedData == null)
                             return false;
                         String filePath = Encoding.UTF8.GetString(Security.AESDecrypt(aesKey, encryptedData));
-                        if (!Directory.Exists(filePath))
-                            Directory.CreateDirectory(filePath);
+                        
                         recvBuf = Networking.my_recv(8, s);
                         if (recvBuf == null)
                             return false;
                         Int64 fileLen = BitConverter.ToInt64(recvBuf, 0);
-                        Networking.recvEncryptedFile(fileLen, s, aesKey, Path.Combine(filePath, filename));
-                        buf = BitConverter.GetBytes(File.GetLastWriteTime(Path.Combine(filePath, filename)).ToBinary());
+                        int index = filePath.IndexOf(oldRoot);
+                        String partialPath = (index < 0) ? filePath : filePath.Remove(index, oldRoot.Length);
+                        String newPath = newRoot + partialPath;
+                        if (!Directory.Exists(newPath))
+                            Directory.CreateDirectory(newPath);
+                        Networking.recvEncryptedFile(fileLen, s, aesKey, Path.Combine(newPath, filename));
+                        buf = BitConverter.GetBytes(File.GetLastWriteTime(Path.Combine(newPath, filename)).ToBinary());
                         s.Send(buf);
                         double percentage = (double)i / filesToRecv;
                         worker.ReportProgress((int)(percentage * 100));
