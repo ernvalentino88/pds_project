@@ -136,10 +136,11 @@ namespace Utility
                             }
                         }
                     }
-                }
+                } 
+                return ds;
             }
             catch (SQLiteException) { return null; }
-            return ds;
+           
         }
 
         public static bool insertDirectory(SQLiteConnection conn, DirectoryStatus newStatus, String filename, String path, DateTime lastModTime)
@@ -163,8 +164,8 @@ namespace Utility
                 newStatus.Files.Add(dirFile.Fullname, dirFile);
                 return true;
             }
-            catch (SQLiteException) { }
-            return false;
+            catch (SQLiteException) {  return false;}
+           
         }
         /***** Clean DB functions ******/
 
@@ -222,10 +223,11 @@ namespace Utility
                         }
                     }
                 }
+                return true;
             }
             catch (SQLiteException) { return false; }
             catch (Exception) { return false; }
-            return true;
+            
         }
         
         //n.b ho 2 funzioni per pulire files una con tipo DirectoryStatus per user e altro con String
@@ -349,10 +351,11 @@ namespace Utility
                         }
                     }
                // }
+                return true;
             }
             catch (SQLiteException) { return false; }
             catch (Exception) { return false; }
-            return true;
+           
         
         }
 
@@ -416,8 +419,8 @@ namespace Utility
                 newStatus.Files.Add(dirFile.Fullname, dirFile);
                 return true;
             }
-            catch (SQLiteException) { }
-            return false;
+            catch (SQLiteException) {  return false;}
+           
         }
 
 
@@ -483,8 +486,8 @@ namespace Utility
                 }
                 return true;
             }
-            catch (SQLiteException) { }
-            return false;
+            catch (SQLiteException) { return false;}
+            
         }
 
         public static bool deleteFile(SQLiteConnection conn, DirectoryFile file, DirectoryStatus newStatus)
