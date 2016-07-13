@@ -212,6 +212,10 @@ namespace ServerApp
                                 if (!server.getSnapshotInfo(cs))
                                     exit = true;
                                 break;
+                            case Networking.CONNECTION_CODES.DOWN:
+                                if (!server.DownloadDirectory(cs))
+                                    exit = true;
+                                break;
                             case Networking.CONNECTION_CODES.HELLO:
                                 server.Hello(s);
                                 break;
