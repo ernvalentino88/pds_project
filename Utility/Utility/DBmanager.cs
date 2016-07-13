@@ -514,8 +514,8 @@ namespace Utility
                 newStatus.Files.Add(dirFile.Fullname, dirFile);
                 return true;
             }
-            catch (SQLiteException) { }
-            return false;
+            catch (SQLiteException) {   return false; }
+         
         }
 
         public static bool insertUnchanged(SQLiteConnection conn, DirectoryStatus oldStatus, DirectoryStatus newStatus)
@@ -568,8 +568,8 @@ namespace Utility
                 }
                 return true;
             }
-            catch (SQLiteException) { }
-            return false;
+            catch (SQLiteException) { return false;}
+            
         }
 
 
@@ -629,9 +629,10 @@ namespace Utility
                         }
                     }
                 }
+                return ds;
             }
-            catch (SQLiteException) { }
-            return ds;
+            catch (SQLiteException) { return ds; }
+            
         }
 
         public static DirectoryStatus getPreviousVersion(String path, String username, DateTime date)
@@ -674,9 +675,10 @@ namespace Utility
                     }
                     
                 }
+                return ds;
             }
-            catch (SQLiteException) { }
-            return ds;
+            catch (SQLiteException) { return ds; }
+            
         }
 
         public static bool deleteDirectory(SQLiteConnection con, String path, String user, DateTime creationTime)
@@ -709,8 +711,8 @@ namespace Utility
                 }
                 return true;
             }
-            catch (SQLiteException) { }
-            return false;
+            catch (SQLiteException) {  return false;}
+           
         }
 
         public static bool deleteFile(SQLiteConnection con, String path, String filename, String user, DateTime creationTime)
@@ -731,8 +733,8 @@ namespace Utility
                 }
                 return true;
             }
-            catch (SQLiteException) { }
-            return false;
+            catch (SQLiteException) { return false;}
+            
         }
 
         public static bool insertDirectory(SQLiteConnection conn, String path, String filename, String user, DateTime creationTime, DateTime lastModTime)
@@ -784,8 +786,8 @@ namespace Utility
                     return true;
                 }
             }
-            catch (SQLiteException) { }
-            return false;
+            catch (SQLiteException) { return false;}
+            
         }
 
         public static bool insertFile(SQLiteConnection conn, String path, String filename, byte[] file, String user, DateTime creationTime, DateTime lastModTime)
@@ -1057,8 +1059,8 @@ namespace Utility
                     }
                 }
             }
-            catch (SQLiteException) { }
-            return false;
+            catch (SQLiteException) {return false; }
+            
         }
 
         public static bool restoreFile(Int64 id, String path, String name, String user, String checksum, DateTime lastModTime)
@@ -1115,9 +1117,10 @@ namespace Utility
                         }
                     }
                 }
+                return false;
             }
-            catch (SQLiteException) { }
-            return false;
+            catch (SQLiteException) {  return false;}
+           
         }
 
 
@@ -1149,10 +1152,11 @@ namespace Utility
                         }
                     }
                 }
+                return ds;
             }
             catch (SQLiteException) { return null; }
 
-            return ds;
+           
         }
 
         public static DirectoryStatus getSnapshotFilesOfDirectory(String directory, String username, DateTime creationTime)
@@ -1196,9 +1200,10 @@ namespace Utility
                         }
                     }
                 }
+                return ds;
             }
-            catch (SQLiteException) { }
-            return ds;
+            catch (SQLiteException) { return ds; }
+            
         }
 
 
