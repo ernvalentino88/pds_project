@@ -1045,3 +1045,9 @@ Parameter name: hostNameOrAddress
 13/07/2016 15:55:50 ***Fatal Error***  Impossibile stabilire la connessione. Rifiuto persistente del computer di destinazione 192.162.1.66:8001
    in System.Net.Sockets.TcpClient.Connect(String hostname, Int32 port)
    in ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 196
+14/07/2016 16:04:04 ***Fatal Error***  Impossibile stabilire la connessione. Risposta non corretta della parte connessa dopo l'intervallo di tempo oppure mancata risposta dall'host collegato 192.168.1.66:8001
+   in System.Net.Sockets.TcpClient.Connect(String hostname, Int32 port)
+   in ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 204
+14/07/2016 17:38:47 ***Fatal Error***  Impossibile stabilire la connessione. Risposta non corretta della parte connessa dopo l'intervallo di tempo oppure mancata risposta dall'host collegato 192.168.1.133:8001
+   in System.Net.Sockets.TcpClient.Connect(String hostname, Int32 port)
+   in ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 204
