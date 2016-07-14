@@ -428,12 +428,14 @@ namespace Utility
         {
             try
             {
+                path += "\\";
                 Dictionary<String, DirectoryFile> del = new Dictionary<String,DirectoryFile>();
                 foreach (var item in oldStatus.Files)
                 {
-                    if (item.Key.Length >= path.Length)
+                    String s = item.Key + "\\";
+                    if (s.Length >= path.Length)
                     {
-                        if (item.Key.Substring(0, path.Length).Equals(path))
+                        if (s.Substring(0, path.Length).Equals(path))
                         {
                             // file or directory contained in the directory to delete
                             del.Add(item.Key, item.Value);

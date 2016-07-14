@@ -385,6 +385,7 @@ namespace ServerApp
                                     lock (this)
                                     {
                                         this.id2client[clientSession.SessionId].CurrentStatus = null;
+                                        this.id2client[clientSession.SessionId].CurrentStatus = newStatus;
                                         this.id2client[clientSession.SessionId].LastStatusTime = newStatus.CreationTime;
                                         this.id2client[clientSession.SessionId].LastActivationTime = DateTime.Now;
                                     }
@@ -401,7 +402,6 @@ namespace ServerApp
                         exit = true;
                     }
                 }
-                newStatus = null;
                 if (success)
                 {
                     transaction.Commit();
@@ -412,7 +412,6 @@ namespace ServerApp
                 else
                 {
                     transaction.Rollback();
-                    transaction.Dispose();
                 }
             }
             catch (SocketException)
