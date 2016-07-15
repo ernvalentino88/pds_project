@@ -382,11 +382,10 @@ namespace ServerApp
                                 {
                                     //success
                                     success = true;
-                                    lock (this)
+                                    lock (this.id2client[clientSession.SessionId])
                                     {
                                         this.id2client[clientSession.SessionId].CurrentStatus = null;
                                         this.id2client[clientSession.SessionId].CurrentStatus = newStatus;
-                                        this.id2client[clientSession.SessionId].LastStatusTime = newStatus.CreationTime;
                                         this.id2client[clientSession.SessionId].LastActivationTime = DateTime.Now;
                                     }
                                 }
@@ -481,7 +480,7 @@ namespace ServerApp
                             case Networking.CONNECTION_CODES.END_SYNCH:
                                 //success
                                 success = true;
-                                lock (this)
+                                lock (this.id2client[clientSession.SessionId])
                                 {
                                     this.id2client[clientSession.SessionId].LastActivationTime = DateTime.Now;
                                 }
@@ -502,8 +501,16 @@ namespace ServerApp
                 else
                     transaction.Rollback();
             }
-            catch (SocketException) { if (transaction != null)transaction.Rollback(); return; }
-            catch (SQLiteException) { if (transaction != null)transaction.Rollback(); return; }
+            catch (SocketException) { 
+                if (transaction != null)
+                    transaction.Rollback(); 
+                return; 
+            }
+            catch (SQLiteException) { 
+                if (transaction != null)
+                    transaction.Rollback(); 
+                return; 
+            }
 
             finally
             {
@@ -692,12 +699,12 @@ namespace ServerApp
                 {
                     //directory
                     String fullname = Path.Combine(path, filename);
-                    return DBmanager.deleteDirectory(conn, fullname, clientSession.User.UserId, clientSession.LastStatusTime);
+                    return DBmanager.deleteDirectory(conn, fullname, clientSession.User.UserId, clientSession.CurrentStatus.CreationTime);
                 }
                 if ((Networking.CONNECTION_CODES)BitConverter.ToUInt32(recvBuf, 0) == Networking.CONNECTION_CODES.FILE)
                 {
                     //file
-                    return DBmanager.deleteFile(conn, path, filename, clientSession.User.UserId, clientSession.LastStatusTime);
+                    return DBmanager.deleteFile(conn, path, filename, clientSession.User.UserId, clientSession.CurrentStatus.CreationTime);
                 }
                 return false;
             }
@@ -735,7 +742,7 @@ namespace ServerApp
                 if ((Networking.CONNECTION_CODES)BitConverter.ToUInt32(recvBuf, 0) == Networking.CONNECTION_CODES.DIR)
                 {
                     //directory
-                    return DBmanager.insertDirectory(conn, path, filename, clientSession.User.UserId, clientSession.LastStatusTime, lastModTime);
+                    return DBmanager.insertDirectory(conn, path, filename, clientSession.User.UserId, clientSession.CurrentStatus.CreationTime, lastModTime);
                 }
                 if ((Networking.CONNECTION_CODES)BitConverter.ToUInt32(recvBuf, 0) == Networking.CONNECTION_CODES.FILE)
                 {
@@ -749,7 +756,7 @@ namespace ServerApp
                     byte[] file = Networking.recvEncryptedFile(fileLen, s, aes);
                     if (file == null)
                         return false;
-                    return DBmanager.insertFile(conn, path, filename, file, clientSession.User.UserId, clientSession.LastStatusTime, lastModTime);
+                    return DBmanager.insertFile(conn, path, filename, file, clientSession.User.UserId, clientSession.CurrentStatus.CreationTime, lastModTime);
                 }
                 return false;
             }
@@ -792,7 +799,7 @@ namespace ServerApp
                 if (file == null)
                     return false;
 
-                return DBmanager.updateFile(conn, path, filename, clientSession.User.UserId, file, clientSession.LastStatusTime, lastModTime);
+                return DBmanager.updateFile(conn, path, filename, clientSession.User.UserId, file, clientSession.CurrentStatus.CreationTime, lastModTime);
             }
             catch (SocketException) {    return false;}
          

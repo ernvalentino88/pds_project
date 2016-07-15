@@ -120,13 +120,28 @@ namespace ClientApp
                 if (Directory.Exists(e.FullPath))
                 {
                     //directory
-                    Console.WriteLine(e.FullPath);
                     lock (this)
                     {
                         DirectoryFile file = new DirectoryFile();
                         file.Directory = true;
                         file.Filename = Path.GetFileName(e.FullPath);
                         file.Fullname = e.FullPath;
+                        file.LastModificationTime = Directory.GetCreationTime(e.FullPath);
+                        file.Path = Path.GetDirectoryName(e.FullPath);
+                        file.UserId = client.UserId;
+                        client.addFile(file, true);
+                    }
+                }
+                else
+                {
+                    //file
+                    lock (this)
+                    {
+                        DirectoryFile file = new DirectoryFile();
+                        file.Directory = false;
+                        file.Filename = Path.GetFileName(e.FullPath);
+                        file.Fullname = e.FullPath;
+                        file.LastModificationTime = File.GetLastWriteTime(e.FullPath);
                         file.Path = Path.GetDirectoryName(e.FullPath);
                         file.UserId = client.UserId;
                         client.addFile(file, true);

@@ -602,11 +602,11 @@ namespace ClientApp
             if (item.Directory)
             {
                 //restore directory
+                watcher.Stop();
                 if (!Directory.Exists(path))
                     Directory.CreateDirectory(path);
                 PbUpdater up = new PbUpdater();
-                up.path = path;
-                watcher.Stop();
+                up.path = path;  
                 restore_worker.RunWorkerAsync(up);
             }
             else
@@ -614,12 +614,12 @@ namespace ClientApp
                 if (item.Deleted)
                 {
                     //restore file
+                    watcher.Stop();
                     if (!Directory.Exists(item.Path))
                         Directory.CreateDirectory(item.Path);
                     PbUpdater up = new PbUpdater();
                     up.path = path;
                     up.id = item.Id;
-                    watcher.Stop();
                     restore_worker.RunWorkerAsync(up);
                 }
                 else
