@@ -477,6 +477,14 @@ namespace ServerApp
                                 if (!this.deleteFile(con, clientSession, s))
                                     exit = true;
                                 break;
+                            case Networking.CONNECTION_CODES.RENAME_DIR:
+                                if (!this.renameDirectory(con, clientSession, s))
+                                    exit = true;
+                                break;
+                            case Networking.CONNECTION_CODES.RENAME_FILE:
+                                if (!this.renameFile(con, clientSession, s))
+                                    exit = true;
+                                break;
                             case Networking.CONNECTION_CODES.END_SYNCH:
                                 //success
                                 success = true;
@@ -571,6 +579,63 @@ namespace ServerApp
             }
             catch (SocketException) {return false; }
             
+        }
+
+        private bool renameFile(SQLiteConnection conn, ClientSession clientSession, Socket s)
+        {
+            AesCryptoServiceProvider aes = clientSession.AESKey;
+            try
+            {
+                byte[] recvBuf = Networking.my_recv(4, s);
+                if (recvBuf == null)
+                    return false;
+                byte[] encryptedData = Networking.my_recv(BitConverter.ToInt32(recvBuf, 0), s);
+                if (encryptedData == null)
+                    return false;
+                String oldName = Encoding.UTF8.GetString(Security.AESDecrypt(aes, encryptedData));
+                recvBuf = Networking.my_recv(4, s);
+                if (recvBuf == null)
+                    return false;
+                encryptedData = Networking.my_recv(BitConverter.ToInt32(recvBuf, 0), s);
+                if (encryptedData == null)
+                    return false;
+                String newName = Encoding.UTF8.GetString(Security.AESDecrypt(aes, encryptedData));
+                recvBuf = Networking.my_recv(4, s);
+                if (recvBuf == null)
+                    return false;
+                encryptedData = Networking.my_recv(BitConverter.ToInt32(recvBuf, 0), s);
+                if (encryptedData == null)
+                    return false;
+                String path = Encoding.UTF8.GetString(Security.AESDecrypt(aes, encryptedData));
+
+                return DBmanager.renameFile(conn, clientSession.User.UserId, path, oldName, newName);
+            }
+            catch (SocketException) { return false; }
+        }
+
+        private bool renameDirectory(SQLiteConnection conn, ClientSession clientSession, Socket s)
+        {
+            AesCryptoServiceProvider aes = clientSession.AESKey;
+            try
+            {
+                byte[] recvBuf = Networking.my_recv(4, s);
+                if (recvBuf == null)
+                    return false;
+                byte[] encryptedData = Networking.my_recv(BitConverter.ToInt32(recvBuf, 0), s);
+                if (encryptedData == null)
+                    return false;
+                String oldPath = Encoding.UTF8.GetString(Security.AESDecrypt(aes, encryptedData));
+                recvBuf = Networking.my_recv(4, s);
+                if (recvBuf == null)
+                    return false;
+                encryptedData = Networking.my_recv(BitConverter.ToInt32(recvBuf, 0), s);
+                if (encryptedData == null)
+                    return false;
+                String newPath = Encoding.UTF8.GetString(Security.AESDecrypt(aes, encryptedData));
+
+                return DBmanager.renameDirectory(conn, clientSession.User.UserId, oldPath, newPath, clientSession.CurrentStatus.CreationTime);
+            }
+            catch (SocketException) { return false; }
         }
 
         private bool addFile(SQLiteConnection conn, ClientSession clientSession, DirectoryStatus newStatus)
@@ -708,8 +773,7 @@ namespace ServerApp
                 }
                 return false;
             }
-            catch (SocketException) { return false; }
-           
+            catch (SocketException) { return false; }         
         }
 
         private bool addFile(SQLiteConnection conn, ClientSession clientSession, Socket s)

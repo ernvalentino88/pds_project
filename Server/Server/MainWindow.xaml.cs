@@ -39,7 +39,7 @@ namespace ServerApp
         private TcpListener myList;
         private Boolean connected;
         private Server server;
-        private List<Socket> all_sockets = new List<Socket>();
+        //private List<Socket> all_sockets = new List<Socket>();
        
         public MainWindow()
         {
@@ -268,15 +268,15 @@ namespace ServerApp
             this.text_label.Content = msg;
         }
 
-        private void close_all() {
-            foreach (Socket s in all_sockets) {
-                if (s.Connected)
-                {
-                    s.Close();
-                }
-                all_sockets.Remove(s);
-            }
-        }
+        //private void close_all() {
+        //    foreach (Socket s in all_sockets) {
+        //        if (s.Connected)
+        //        {
+        //            s.Close();
+        //        }
+        //        all_sockets.Remove(s);
+        //    }
+        //}
   
 
         

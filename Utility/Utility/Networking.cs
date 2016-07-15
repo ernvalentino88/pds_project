@@ -43,7 +43,9 @@ namespace Utility
             RESTORE_FILE = 23,
             GET_SNAP = 24,
             SNAP = 25,
-            DOWN = 26
+            DOWN = 26,
+            RENAME_FILE=27,
+            RENAME_DIR=28,
         };
 
         public static byte[] my_recv(int size, Socket s)

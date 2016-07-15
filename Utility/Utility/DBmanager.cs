@@ -14,9 +14,9 @@ namespace Utility
     public class DBmanager
     {   
         //pc alex
-        //public static String connectionString = @"Data Source=C:\Users\John\Desktop\SQLiteStudio\PDS.db;Version=3;";
+        public static String connectionString = @"Data Source=C:\Users\John\Desktop\SQLiteStudio\PDS.db;Version=3;";
         //pc ernesto
-        public static String connectionString = @"Data Source=C:\Users\Ernesto\Documents\SQLiteStudio\PDS.db;Version=3;";
+        //public static String connectionString = @"Data Source=C:\Users\Ernesto\Documents\SQLiteStudio\PDS.db;Version=3;";
         public static String date_format = "yyyy-MM-dd HH:mm:ss";
         public static Int64 max_versions=3;
         public static int days_limit = 30;//espresso in giorni
@@ -847,6 +847,71 @@ namespace Utility
             catch (SQLiteException) { return false; }
            
         }
+
+        public static bool renameFile(SQLiteConnection conn, String user, String path, String oldName, String newName) {
+
+            try {
+                using (SQLiteCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"update  snapshots set filename=@newName where user_id=@user and filename=@oldName"
+                           + " and path=@dir;";
+                    cmd.Parameters.AddWithValue("@user", user);
+                    cmd.Parameters.AddWithValue("@newName", newName);
+                    cmd.Parameters.AddWithValue("@oldName",oldName);
+                    cmd.Parameters.AddWithValue("@dir", path + "\\");
+                    cmd.ExecuteNonQuery();
+                }
+                using (SQLiteCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"update  files set filename=@newName where user_id=@user and filename=@oldName"
+                           + " and path=@dir;";
+                    cmd.Parameters.AddWithValue("@user", user);
+                    cmd.Parameters.AddWithValue("@newName", newName);
+                    cmd.Parameters.AddWithValue("@oldName", oldName);
+                    cmd.Parameters.AddWithValue("@dir", path + "\\");
+                    cmd.ExecuteNonQuery();
+                }
+                return true;
+            }
+            catch (SQLiteException) { return false; }
+        
+        }
+
+        public static bool renameDirectory(SQLiteConnection conn, String user, String oldPath, String newPath, DateTime creation_time) {
+            try
+            {
+             
+                using (SQLiteCommand cmd = conn.CreateCommand())
+                {
+
+                    cmd.CommandText = @"update  snapshots set filename=@newName where user_id=@user and filename=@oldName"
+                        + " and path=@dir and creation_time=@creation_time;";
+                    cmd.Parameters.AddWithValue("@user", user);
+                    cmd.Parameters.AddWithValue("@newName", Path.GetFileName(newPath));
+                    cmd.Parameters.AddWithValue("@oldName", Path.GetFileName(oldPath));
+                    cmd.Parameters.AddWithValue("@dir", oldPath + "\\");
+                    cmd.Parameters.AddWithValue("@creation_time", creation_time.ToString(date_format));
+                    cmd.ExecuteNonQuery();
+                }
+                using (SQLiteCommand cmd = conn.CreateCommand())
+                {
+
+                    cmd.CommandText = @"update  snapshots set path=@newPath where user_id=@user"
+                        + " and path=@oldPath and creation_time=@creation_time;";
+                    cmd.Parameters.AddWithValue("@user", user);
+                    cmd.Parameters.AddWithValue("@newPath", newPath + "\\");
+                    cmd.Parameters.AddWithValue("@oldPath", oldPath + "\\");
+                    cmd.Parameters.AddWithValue("@creation_time", creation_time.ToString(date_format));
+                    cmd.ExecuteNonQuery();
+                }
+                  
+                return true;  
+            }
+            catch (SQLiteException) { 
+                return false; 
+            }
+        }
+
 
         public static bool updateFile(SQLiteConnection conn, String path, String filename, String user, byte[] file, DateTime creationTime, DateTime lastModTime)
         {

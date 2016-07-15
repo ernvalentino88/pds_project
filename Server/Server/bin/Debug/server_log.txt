@@ -437,3 +437,7 @@ Nome parametro: port
    at System.Number.StringToNumber(String str, NumberStyles options, NumberBuffer& number, NumberFormatInfo info, Boolean parseDecimal)
    at System.Number.ParseInt32(String s, NumberStyles style, NumberFormatInfo info)
    at ServerApp.MainWindow.start_server(String port) in c:\Users\John\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:line 75
+15/07/2016 16:41:19 ***Fatal Error***  Input string was not in a correct format.
+   at System.Number.StringToNumber(String str, NumberStyles options, NumberBuffer& number, NumberFormatInfo info, Boolean parseDecimal)
+   at System.Number.ParseInt32(String s, NumberStyles style, NumberFormatInfo info)
+   at ServerApp.MainWindow.start_server(String port) in c:\Users\Ernesto\Documents\GitHub\pds_project\Server\Server\MainWindow.xaml.cs:line 75
