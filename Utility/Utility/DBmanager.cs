@@ -883,21 +883,32 @@ namespace Utility
              
                 using (SQLiteCommand cmd = conn.CreateCommand())
                 {
-
                     cmd.CommandText = @"update  snapshots set filename=@newName where user_id=@user and filename=@oldName"
                         + " and path=@dir and creation_time=@creation_time;";
                     cmd.Parameters.AddWithValue("@user", user);
                     cmd.Parameters.AddWithValue("@newName", Path.GetFileName(newPath));
                     cmd.Parameters.AddWithValue("@oldName", Path.GetFileName(oldPath));
-                    cmd.Parameters.AddWithValue("@dir", oldPath + "\\");
+                    cmd.Parameters.AddWithValue("@dir", Path.GetDirectoryName(oldPath) + "\\");
+                    cmd.Parameters.AddWithValue("@creation_time", creation_time.ToString(date_format));
+                    if (cmd.ExecuteNonQuery() < 1)
+                        return false;
+                }
+                using (SQLiteCommand cmd = conn.CreateCommand())
+                {
+
+                    cmd.CommandText = @"update  files set path=replace(path,@oldPath,@newPath) where file_id IN (select file_id from snapshots where user_id=@user"
+                        + " and substr(path,1," + (oldPath.Length+1) + ")=@oldPath and creation_time=@creation_time);";
+                    cmd.Parameters.AddWithValue("@user", user);
+                    cmd.Parameters.AddWithValue("@newPath", newPath + "\\");
+                    cmd.Parameters.AddWithValue("@oldPath", oldPath + "\\");
                     cmd.Parameters.AddWithValue("@creation_time", creation_time.ToString(date_format));
                     cmd.ExecuteNonQuery();
                 }
                 using (SQLiteCommand cmd = conn.CreateCommand())
                 {
 
-                    cmd.CommandText = @"update  snapshots set path=@newPath where user_id=@user"
-                        + " and path=@oldPath and creation_time=@creation_time;";
+                    cmd.CommandText = @"update  snapshots set path=replace(path,@oldPath,@newPath)  where user_id=@user"
+                        + " and substr(path,1," + (oldPath.Length+1) + ")=@oldPath and creation_time=@creation_time;";
                     cmd.Parameters.AddWithValue("@user", user);
                     cmd.Parameters.AddWithValue("@newPath", newPath + "\\");
                     cmd.Parameters.AddWithValue("@oldPath", oldPath + "\\");

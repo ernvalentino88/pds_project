@@ -39,6 +39,7 @@ namespace ServerApp
         private TcpListener myList;
         private Boolean connected;
         private Server server;
+        private static object syncLock = new object();
         //private List<Socket> all_sockets = new List<Socket>();
        
         public MainWindow()
@@ -193,9 +194,12 @@ namespace ServerApp
                                 }
                                 break;
                             case Networking.CONNECTION_CODES.FS_SYNCH:
-                                server.synchronizationSession(cs, s);
+                                
+                                    server.synchronizationSession(cs, s);
+                                
                                 exit = true;
                                 break;
+                                
                             case Networking.CONNECTION_CODES.RESTORE_DIR:
                                 if (!server.restoreDirectory(cs))
                                     exit = true;

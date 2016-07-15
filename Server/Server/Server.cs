@@ -505,9 +505,17 @@ namespace ServerApp
                     }
                 }
                 if (success)
+                {
                     transaction.Commit();
+                    byte[] command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.OK);
+                    s.Send(command);
+                }
                 else
+                {
                     transaction.Rollback();
+                    byte[] command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.ERR);
+                    s.Send(command);
+                }
             }
             catch (SocketException) { 
                 if (transaction != null)
