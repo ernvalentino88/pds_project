@@ -137,14 +137,20 @@ namespace ClientApp
                     //file
                     lock (this)
                     {
-                        DirectoryFile file = new DirectoryFile();
-                        file.Directory = false;
-                        file.Filename = Path.GetFileName(e.FullPath);
-                        file.Fullname = e.FullPath;
-                        file.LastModificationTime = File.GetLastWriteTime(e.FullPath);
-                        file.Path = Path.GetDirectoryName(e.FullPath);
-                        file.UserId = client.UserId;
-                        client.addFile(file, true);
+                        FileInfo info = new FileInfo(e.FullPath);
+                        if (!info.Name[0].Equals('~') && !info.Name[0].Equals('$') &&
+                                 !info.Name[0].Equals('.') && !info.Extension.Equals(".tmp") &&
+                                 !info.Extension.Equals(".TMP") && !info.Extension.Equals(""))
+                        {
+                            DirectoryFile file = new DirectoryFile();
+                            file.Directory = false;
+                            file.Filename = info.Name;
+                            file.Fullname = info.FullName;
+                            file.LastModificationTime = info.LastWriteTime;
+                            file.Path = info.DirectoryName;
+                            file.UserId = client.UserId;
+                            client.addFile(file, true);
+                        }
                     }
                 }
             }
@@ -197,20 +203,7 @@ namespace ClientApp
                     // a directory is renamed
                     lock (this)
                     {
-                        DirectoryFile file = new DirectoryFile();
-                        file.Fullname = e.OldFullPath;
-                        file.Filename = Path.GetFileName(e.OldFullPath);
-                        file.Path = Path.GetDirectoryName(e.OldFullPath);
-                        file.UserId = client.UserId;
-                        file.Directory = true;
-                        client.deleteFile(file, true);
-                        file = new DirectoryFile();
-                        file.Fullname = e.FullPath;
-                        file.Filename = Path.GetFileName(e.OldFullPath);
-                        file.Path = Path.GetDirectoryName(e.FullPath);
-                        file.UserId = client.UserId;
-                        file.Directory = true;
-                        client.addFile(file, true);
+                        client.renameDirectory(e.OldFullPath, e.FullPath);
                     }
                 }
                 if (File.Exists(e.FullPath))
@@ -249,20 +242,7 @@ namespace ClientApp
                         {
                             lock (this)
                             {
-                                DirectoryFile file = new DirectoryFile();
-                                file.Fullname = fi_old.FullName;
-                                file.Filename = fi_old.Name;
-                                file.Path = fi_old.DirectoryName;
-                                file.UserId = client.UserId;
-                                client.deleteFile(file, true);
-                                file = new DirectoryFile();
-                                file.Fullname = fi_new.FullName;
-                                file.Filename = fi_new.Name;
-                                file.Path = fi_new.DirectoryName;
-                                file.UserId = client.UserId;
-                                file.LastModificationTime = fi_new.LastWriteTime;
-                                file.Length = fi_new.Length;
-                                client.addFile(file, true);
+                                client.renameFile(fi_old.Name, fi_new.Name, fi_old.DirectoryName);
                             }
                         }
                     }

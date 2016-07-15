@@ -1060,3 +1060,11 @@ Parameter name: hostNameOrAddress
 15/07/2016 16:46:48 ***Fatal Error***  No connection could be made because the target machine actively refused it 127.0.0.1:12345
    at System.Net.Sockets.TcpClient.Connect(String hostname, Int32 port)
    at ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\John\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:line 204
+15/07/2016 19:56:27 ***Fatal Error***  Impossibile stabilire la connessione. Risposta non corretta della parte connessa dopo l'intervallo di tempo oppure mancata risposta dall'host collegato 192.168.1.66:8001
+   in System.Net.Sockets.TcpClient.Connect(String hostname, Int32 port)
+   in ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:riga 204
+15/07/2016 20:26:42 ***Fatal Error***  Impossibile stabilire la connessione. Risposta non corretta della parte connessa dopo l'intervallo di tempo oppure mancata risposta dall'host collegato 192.168.1.66:8001 code: TimedOut
+   in System.Net.Sockets.Socket.DoConnect(EndPoint endPointSnapshot, SocketAddress socketAddress)
+   in System.Net.Sockets.Socket.Connect(EndPoint remoteEP)
+   in System.Net.Sockets.TcpClient.Connect(IPEndPoint remoteEP)
+   in ClientApp.Client.keepAlive() in c:\Users\Ernesto\Documents\GitHub\pds_project\Client\Client\Client.cs:riga 290

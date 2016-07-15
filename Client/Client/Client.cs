@@ -1300,5 +1300,136 @@ namespace ClientApp
         }
 
 
+
+        public void renameDirectory(String oldPath, String newPath)
+        {
+            Socket s = null;
+            try
+            {
+                for (int i = 0; i < 3; i++)
+                {
+                    if (keepAlive())
+                    {
+                        TcpClient client = new TcpClient();
+                        client.Connect(this.server);
+                        s = client.Client;
+                        s.ReceiveTimeout = Networking.TIME_OUT_SHORT;
+                        s.SendTimeout = Networking.TIME_OUT_SHORT;
+                        //using client credential with a new socket
+                        byte[] command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.SESSION_WATCH);
+                        s.Send(command);
+                        byte[] session = BitConverter.GetBytes(this.sessionId);
+                        byte[] rand = Networking.my_recv(8, s);
+                        SHA1CryptoServiceProvider sha = new SHA1CryptoServiceProvider();
+                        byte[] hash = sha.ComputeHash(Security.XOR(rand, session));
+                        s.Send(hash);
+                        command = Networking.my_recv(4, s);
+                        if (command != null && (
+                                ((Networking.CONNECTION_CODES)BitConverter.ToUInt32(command, 0) == Networking.CONNECTION_CODES.OK)))
+                        {
+                            //session is not expired: ok
+                            command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.FS_SYNCH);
+                            s.Send(command);
+                            command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.RENAME_DIR);
+                            s.Send(command);
+                            byte[] encryptedData = Security.AESEncrypt(aesKey, oldPath);
+                            byte[] buf = BitConverter.GetBytes(encryptedData.Length);
+                            s.Send(buf);
+                            s.Send(encryptedData);
+                            encryptedData = Security.AESEncrypt(aesKey, newPath);
+                            buf = BitConverter.GetBytes(encryptedData.Length);
+                            s.Send(buf);
+                            s.Send(encryptedData);
+                            command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.END_SYNCH);
+                            s.Send(command);
+
+                            command = Networking.my_recv(4, s);
+                            if (command != null && (
+                            ((Networking.CONNECTION_CODES)BitConverter.ToUInt32(command, 0) == Networking.CONNECTION_CODES.OK)))
+                            {
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            catch (SocketException) { }
+
+            finally
+            {
+                if (s != null)
+                    s.Close();
+            }
+        }
+
+
+
+        public void renameFile(String oldName, String newName, String path)
+        {
+            Socket s = null;
+            try
+            {
+                for (int i = 0; i < 3; i++)
+                {
+                    if (keepAlive())
+                    {
+                        TcpClient client = new TcpClient();
+                        client.Connect(this.server);
+                        s = client.Client;
+                        s.ReceiveTimeout = Networking.TIME_OUT_SHORT;
+                        s.SendTimeout = Networking.TIME_OUT_SHORT;
+                        //using client credential with a new socket
+                        byte[] command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.SESSION_WATCH);
+                        s.Send(command);
+                        byte[] session = BitConverter.GetBytes(this.sessionId);
+                        byte[] rand = Networking.my_recv(8, s);
+                        SHA1CryptoServiceProvider sha = new SHA1CryptoServiceProvider();
+                        byte[] hash = sha.ComputeHash(Security.XOR(rand, session));
+                        s.Send(hash);
+                        command = Networking.my_recv(4, s);
+                        if (command != null && (
+                                ((Networking.CONNECTION_CODES)BitConverter.ToUInt32(command, 0) == Networking.CONNECTION_CODES.OK)))
+                        {
+                            //session is not expired: ok
+                            command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.FS_SYNCH);
+                            s.Send(command);
+                            command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.RENAME_FILE);
+                            s.Send(command);
+                            byte[] encryptedData = Security.AESEncrypt(aesKey, oldName);
+                            byte[] buf = BitConverter.GetBytes(encryptedData.Length);
+                            s.Send(buf);
+                            s.Send(encryptedData);
+                            encryptedData = Security.AESEncrypt(aesKey, newName);
+                            buf = BitConverter.GetBytes(encryptedData.Length);
+                            s.Send(buf);
+                            s.Send(encryptedData);
+                            encryptedData = Security.AESEncrypt(aesKey, path);
+                            buf = BitConverter.GetBytes(encryptedData.Length);
+                            s.Send(buf);
+                            s.Send(encryptedData);
+                            command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.END_SYNCH);
+                            s.Send(command);
+
+                            command = Networking.my_recv(4, s);
+                            if (command != null && (
+                            ((Networking.CONNECTION_CODES)BitConverter.ToUInt32(command, 0) == Networking.CONNECTION_CODES.OK)))
+                            {
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            catch (SocketException) { }
+
+            finally
+            {
+                if (s != null)
+                    s.Close();
+            }
+        }
+
+
+
     }
 }
