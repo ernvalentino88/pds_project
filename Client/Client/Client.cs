@@ -711,14 +711,19 @@ namespace ClientApp
                                     //s.Send(buf);
                                     left -= dim;
                                 }
+                                command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.END_SYNCH);
+                                s.Send(command);
                             }
-                            command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.END_SYNCH);
-                            s.Send(command);
                         }
                     }
                 }
             }
             catch (SocketException) { }
+
+            catch (IOException)
+            {
+                //file opended by other process
+            }
 
             finally
             {
@@ -890,9 +895,9 @@ namespace ClientApp
                                         //s.Send(buf);
                                         left -= dim;
                                     }
+                                    command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.END_SYNCH);
+                                    s.Send(command);
                                 }
-                                command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.END_SYNCH);
-                                s.Send(command);
                             }
                         }
                     }
