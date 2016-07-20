@@ -41,6 +41,7 @@ namespace ServerApp
         private Server server;
         private static object syncLock = new object();
         //private List<Socket> all_sockets = new List<Socket>();
+        private ManualResetEvent evt=new ManualResetEvent(false) ;
        
         public MainWindow()
         {
@@ -64,8 +65,14 @@ namespace ServerApp
                 connected = false;
                 this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new update_ui_delegate(updateUI), "Insert port number for listening to ingress connection");
                 //close_all();
-                myList.Stop();
-                myList.Server.Close();
+                if (myList != null)
+                {
+                    myList.Stop();
+                    myList.Server.Close();
+                }
+                evt.Set();
+                //http://stackoverflow.com/questions/5074996/stopping-all-thread-in-net-threadpool
+                //MAybe need to notify all threads to exit on disconnect using MAnualResetEvent
                
             }
             else
@@ -81,7 +88,7 @@ namespace ServerApp
 
                     while (true)
                     {
-                        s = myList.AcceptSocket();
+                        s = myList.AcceptSocket(); 
                         //all_sockets.Add(s);
                         ThreadPool.QueueUserWorkItem(new WaitCallback(clientHandler), s);
                         msg = "Connection accpeted from " + s.RemoteEndPoint;
@@ -133,7 +140,9 @@ namespace ServerApp
             {
                 while (!exit)
                 {
-                    s.ReceiveTimeout = Networking.TIME_OUT_LONG;
+                    if (evt.WaitOne(0))
+                       break; // or otherwise exit the thread
+                    s.ReceiveTimeout = Networking.TIME_OUT_LONG;//TODO:MAKE LONG
                     s.SendTimeout = Networking.TIME_OUT_SHORT;
                     byte[] buffer_command = Utility.Networking.my_recv(4, s);
                     if (buffer_command != null)

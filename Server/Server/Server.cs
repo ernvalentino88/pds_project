@@ -1278,14 +1278,14 @@ namespace ServerApp
                 if (recvBuf == null)
                     return false;
                 String dir = Encoding.UTF8.GetString(Security.AESDecrypt(aes, recvBuf));
-                 recvBuf = Networking.my_recv(8, s);
+                recvBuf = Networking.my_recv(8, s);
                 if (recvBuf == null)
                     return false;
                 DateTime creationTime = DateTime.FromBinary(BitConverter.ToInt64(recvBuf, 0));
 
                 byte[] command = BitConverter.GetBytes((UInt32)Networking.CONNECTION_CODES.OK);
                 s.Send(command);
-                
+
                 List<Int64> ids = DBmanager.getFilesIdToDownload(dir, clientSession.User.UserId, creationTime);
                 byte[] buf = BitConverter.GetBytes(ids.Count);
                 s.Send(buf);
@@ -1343,6 +1343,7 @@ namespace ServerApp
                 return result;
             }
             catch (SocketException) { return false; }
+            catch (Exception) { return false; }
 
         }
 

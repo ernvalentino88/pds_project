@@ -14,9 +14,9 @@ namespace Utility
     public class DBmanager
     {   
         //pc alex
-        //public static String connectionString = @"Data Source=C:\Users\John\Desktop\SQLiteStudio\PDS.db;Version=3;";
+        public static String connectionString = @"Data Source=C:\Users\John\Desktop\SQLiteStudio\PDS.db;Version=3;";
         //pc ernesto
-        public static String connectionString = @"Data Source=C:\Users\Ernesto\Documents\SQLiteStudio\PDS.db;Version=3;";
+        //public static String connectionString = @"Data Source=C:\Users\Ernesto\Documents\SQLiteStudio\PDS.db;Version=3;";
         public static String date_format = "yyyy-MM-dd HH:mm:ss";
         public static Int64 max_versions=3;
         public static int days_limit = 30;//espresso in giorni
