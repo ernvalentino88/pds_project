@@ -496,59 +496,68 @@ namespace ClientApp
 
         public void fillDirectoryStatus(DirectoryStatus local, String directory)
         {
-           var entries = Directory.EnumerateFileSystemEntries(directory);
-           foreach (var path in entries)
-           {
-               if (File.Exists(path))
-               {
-                   //entry is a file
-                   FileInfo info = new FileInfo(path);
-                   DirectoryFile file = new DirectoryFile();
-                   file.Length = info.Length;
-                   file.UserId = userId;
-                   file.LastModificationTime = info.LastWriteTime;
-                   file.Filename = info.Name;
-                   file.Path = info.DirectoryName;
-                   file.Fullname = info.FullName;
-                   file.Checksum = getChecksum(info);
-                   local.Files.Add(file.Fullname, file);
-               }
-               if (Directory.Exists(path))
-               {
-                   //entry is a directory
-                   DirectoryFile file = new DirectoryFile();
-                   DirectoryInfo info = new DirectoryInfo(path);
-                   file.UserId = userId;
-                   file.Directory = true;
-                   file.Filename = info.Name;
-                   file.Path = info.Parent.FullName;
-                   file.Fullname = info.FullName;
-                   file.LastModificationTime = info.LastWriteTime;
-                   local.Files.Add(file.Fullname, file);
-                   fillDirectoryStatus(local, info.FullName);
-               }
-           }
+            try
+            {
+                var entries = Directory.EnumerateFileSystemEntries(directory);
+                foreach (var path in entries)
+                {
+                    if (File.Exists(path))
+                    {
+                        //entry is a file
+                        FileInfo info = new FileInfo(path);
+                        DirectoryFile file = new DirectoryFile();
+                        file.Length = info.Length;
+                        file.UserId = userId;
+                        file.LastModificationTime = info.LastWriteTime;
+                        file.Filename = info.Name;
+                        file.Path = info.DirectoryName;
+                        file.Fullname = info.FullName;
+                        file.Checksum = getChecksum(info);
+                        local.Files.Add(file.Fullname, file);
+                    }
+                    if (Directory.Exists(path))
+                    {
+                        //entry is a directory
+                        DirectoryFile file = new DirectoryFile();
+                        DirectoryInfo info = new DirectoryInfo(path);
+                        file.UserId = userId;
+                        file.Directory = true;
+                        file.Filename = info.Name;
+                        file.Path = info.Parent.FullName;
+                        file.Fullname = info.FullName;
+                        file.LastModificationTime = info.LastWriteTime;
+                        local.Files.Add(file.Fullname, file);
+                        fillDirectoryStatus(local, info.FullName);
+                    }
+                }
+            }
+            catch (UnauthorizedAccessException uae) { throw uae; }
+            catch (IOException ioe) { throw ioe; }
         }
 
         public String getChecksum(FileInfo info)
         {
             byte[] fileBytes = new byte[info.Length];
-            using (MemoryStream ms = new MemoryStream(fileBytes))
+            try
             {
-                using (FileStream reader = File.OpenRead(info.FullName))
+                using (MemoryStream ms = new MemoryStream(fileBytes))
                 {
-                    long left = info.Length;
-                    int n = 0;
-                    while (left > 0)
+                    using (FileStream reader = File.OpenRead(info.FullName))
                     {
-                        int dim = (left > 8192) ? 8192 : (int)left;
-                        byte[] buf = new byte[dim];
-                        n = reader.Read(buf, 0, dim);
-                        ms.Write(buf, 0, n);
-                        left -= n;
+                        long left = info.Length;
+                        int n = 0;
+                        while (left > 0)
+                        {
+                            int dim = (left > 8192) ? 8192 : (int)left;
+                            byte[] buf = new byte[dim];
+                            n = reader.Read(buf, 0, dim);
+                            ms.Write(buf, 0, n);
+                            left -= n;
+                        }
                     }
                 }
             }
+            catch (IOException ioe) { throw ioe; }
             return Security.CalculateMD5Hash(fileBytes);
         }
 
@@ -1064,6 +1073,8 @@ namespace ClientApp
                         s.Send(buf);
                         double percentage = (double)i / filesToRecv;
                         worker.ReportProgress((int)(percentage * 100));
+                        Thread.Sleep(1000 * 1);
+
                         command = Networking.my_recv(4, s);
                         if (command != null && (
                             ((Networking.CONNECTION_CODES)BitConverter.ToUInt32(command, 0) == Networking.CONNECTION_CODES.OK)))
