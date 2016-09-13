@@ -31,17 +31,12 @@ namespace ServerApp
     /// 
     public partial class MainWindow : MetroWindow
     {
-       
-
         public delegate void start_server_delegate(String port);
         public delegate void update_ui_delegate(String msg);
         public delegate Task UpdateDelegateAsync(String msg, String bannerTitle, String bannerMsg);
         private TcpListener myList;
         private Boolean connected;
         private Server server;
-        private static object syncLock = new object();
-        //private List<Socket> all_sockets = new List<Socket>();
-        private ManualResetEvent evt=new ManualResetEvent(false) ;
        
         public MainWindow()
         {
@@ -51,8 +46,7 @@ namespace ServerApp
         }
 
         private void launch_button_Click(object sender, RoutedEventArgs e)
-        {
-            
+        {            
             start_server_delegate sd = new start_server_delegate(start_server);
             sd.BeginInvoke(this.text_port.Text,null, null);
         }
@@ -60,73 +54,54 @@ namespace ServerApp
         public void start_server(String port) 
         {
             Socket s = null;
-            if (connected)
+            try
+            {
+
+                myList = new TcpListener(IPAddress.Any, Int32.Parse(port));
+                myList.Start();
+                connected = true;
+                String msg = "The server is running at : " + myList.LocalEndpoint;
+                this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new update_ui_delegate(updateUI), msg);
+
+                while (true)
+                {
+                    s = myList.AcceptSocket(); 
+                    ThreadPool.QueueUserWorkItem(new WaitCallback(clientHandler), s);
+                    msg = "Connection accpeted from " + s.RemoteEndPoint;
+                    this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new update_ui_delegate(updateUI_msg), msg);
+                }
+            }
+            catch (SocketException se)
             {
                 connected = false;
-                this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new update_ui_delegate(updateUI), "Insert port number for listening to ingress connection");
-                //close_all();
-                if (myList != null)
+                if (se.SocketErrorCode != SocketError.Interrupted)
                 {
-                    myList.Stop();
-                    myList.Server.Close();
-                }
-                evt.Set();
-                //http://stackoverflow.com/questions/5074996/stopping-all-thread-in-net-threadpool
-                //MAybe need to notify all threads to exit on disconnect using MAnualResetEvent
-               
-            }
-            else
-            {
-                try
-                {
-
-                    myList = new TcpListener(IPAddress.Any, Int32.Parse(port));
-                    myList.Start();
-                    connected = true;
-                    String msg = "The server is running at : " + myList.LocalEndpoint;
-                    this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new update_ui_delegate(updateUI), msg);
-
-                    while (true)
-                    {
-                        s = myList.AcceptSocket(); 
-                        //all_sockets.Add(s);
-                        ThreadPool.QueueUserWorkItem(new WaitCallback(clientHandler), s);
-                        msg = "Connection accpeted from " + s.RemoteEndPoint;
-                        this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new update_ui_delegate(updateUI_msg), msg);
-                    }
-                }
-                catch (SocketException se)
-                {
-                    connected = false;
-                    if (se.SocketErrorCode != SocketError.Interrupted)
-                    {
-                        String msg = "Insert port number for listening to ingress connection";
-                        StreamWriter sw = new StreamWriter("server_log.txt", true);
-                        sw.Write(DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss"));
-                        sw.WriteLine(" ***Fatal Error***  " + se.Message);
-                        sw.WriteLine(se.StackTrace);
-                        sw.Close();
-                        this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegateAsync(updateUI_banner), msg, "Network Error", se.Message);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    connected = false;
                     String msg = "Insert port number for listening to ingress connection";
                     StreamWriter sw = new StreamWriter("server_log.txt", true);
                     sw.Write(DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss"));
-                    sw.WriteLine(" ***Fatal Error***  " + ex.Message);
-                    sw.WriteLine(ex.StackTrace);
+                    sw.WriteLine(" ***Fatal Error***  " + se.Message);
+                    sw.WriteLine(se.StackTrace);
                     sw.Close();
-                    this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegateAsync(updateUI_banner), msg, "Unexpected Error", ex.Message);
+                    this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegateAsync(updateUI_banner), msg, "Network Error", se.Message);
                 }
-                finally
+            }
+            catch (Exception ex)
+            {
+                connected = false;
+                String msg = "Insert port number for listening to ingress connection";
+                StreamWriter sw = new StreamWriter("server_log.txt", true);
+                sw.Write(DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss"));
+                sw.WriteLine(" ***Fatal Error***  " + ex.Message);
+                sw.WriteLine(ex.StackTrace);
+                sw.Close();
+                this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new UpdateDelegateAsync(updateUI_banner), msg, "Unexpected Error", ex.Message);
+            }
+
+            finally
+            {
+                if (s != null && s.Connected)
                 {
-                    if (s != null && s.Connected)
-                    {
-                        //all_sockets.Remove(s);
-                        s.Close();
-                    }
+                    s.Close();
                 }
             }
         }
@@ -140,8 +115,6 @@ namespace ServerApp
             {
                 while (!exit)
                 {
-                    if (evt.WaitOne(0))
-                       break; // or otherwise exit the thread
                     s.ReceiveTimeout = Networking.TIME_OUT_LONG;//TODO:MAKE LONG
                     s.SendTimeout = Networking.TIME_OUT_SHORT;
                     byte[] buffer_command = Utility.Networking.my_recv(4, s);
@@ -203,9 +176,10 @@ namespace ServerApp
                                 }
                                 break;
                             case Networking.CONNECTION_CODES.FS_SYNCH:
-                                
+                                if (cs != null)
+                                {
                                     server.synchronizationSession(cs, s);
-                                
+                                }
                                 exit = true;
                                 break;
                                 
@@ -245,7 +219,7 @@ namespace ServerApp
                 }
             }
             catch (SocketException) { return; }
-            //all_sockets.Remove(s);
+
             finally
             {
                 if(s!=null)
@@ -262,7 +236,7 @@ namespace ServerApp
         {
             if (connected)
             {
-                this.launch_button.Content = "disconnect";
+                this.launch_button.Visibility = Visibility.Hidden;
                 this.text_port.Visibility = Visibility.Hidden;
             }
             else
@@ -280,19 +254,5 @@ namespace ServerApp
             this.text_port.Visibility = Visibility.Visible;
             this.text_label.Content = msg;
         }
-
-        //private void close_all() {
-        //    foreach (Socket s in all_sockets) {
-        //        if (s.Connected)
-        //        {
-        //            s.Close();
-        //        }
-        //        all_sockets.Remove(s);
-        //    }
-        //}
-  
-
-        
-
     }
 }
