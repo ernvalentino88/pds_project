@@ -413,7 +413,7 @@ namespace ClientApp
                     return filesInfoToRecv;
                 }
             }
-            catch (SocketException) { }
+            catch (SocketException) { return -1; }
             return -1;
         }
 
@@ -490,8 +490,8 @@ namespace ClientApp
                     return filesInfoToRecv;
                 }
             }
-            catch (SocketException) {  }
-            return -1;
+            catch (SocketException) { return -1; }
+            return -1; 
         }
 
         public void fillDirectoryStatus(DirectoryStatus local, String directory)
@@ -727,11 +727,12 @@ namespace ClientApp
                     }
                 }
             }
-            catch (SocketException) { }
+            catch (SocketException) { return; }
 
             catch (IOException)
             {
                 //file opended by other process
+                return;
             }
 
             finally
@@ -826,7 +827,7 @@ namespace ClientApp
                     }
                 }
             }
-            catch (SocketException) { }
+            catch (SocketException) { return; }
 
             finally
             {
@@ -912,7 +913,7 @@ namespace ClientApp
                     }
                 }
             }
-            catch (SocketException) { }
+            catch (SocketException) { return; }
 
             finally
             {
@@ -1022,7 +1023,7 @@ namespace ClientApp
                     return filesInfoToRecv;
                 }
             }
-            catch (SocketException) { }
+            catch (SocketException) { return -1; }
             return -1;
         }
 
@@ -1088,8 +1089,8 @@ namespace ClientApp
                     return result;
                 }
             }
-            catch (SocketException) { }
-            return false;
+            catch (SocketException) { return false; }
+            return false; 
         }
 
         public bool restoreFile(String path, Int64 id, BackgroundWorker worker)
@@ -1120,7 +1121,7 @@ namespace ClientApp
                     }
                 }
             }
-            catch (SocketException) { }
+            catch (SocketException) { return false; }
             return false;
         }
 
@@ -1240,8 +1241,8 @@ namespace ClientApp
                     return filesInfoToRecv;
                 }
             }
-            catch (SocketException) { }
-            return -1;
+            catch (SocketException) { return -1; }
+            return -1; 
         }
 
 
@@ -1311,8 +1312,8 @@ namespace ClientApp
                     return result;
                 }
             }
-            catch (SocketException) { }
-            return false;
+            catch (SocketException) { return false; }
+            return false; 
         }
 
 
@@ -1369,7 +1370,7 @@ namespace ClientApp
                     }
                 }
             }
-            catch (SocketException) { }
+            catch (SocketException) { return; }
 
             finally
             {
@@ -1436,7 +1437,7 @@ namespace ClientApp
                     }
                 }
             }
-            catch (SocketException) { }
+            catch (SocketException) { return; }
 
             finally
             {

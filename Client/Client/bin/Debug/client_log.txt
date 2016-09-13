@@ -1106,3 +1106,9 @@ Parameter name: hostNameOrAddress
 13/09/2016 12:31:08 ***Fatal Error***  No connection could be made because the target machine actively refused it 192.165.1.65:8001
    at System.Net.Sockets.TcpClient.Connect(String hostname, Int32 port)
    at ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\John\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:line 204
+13/09/2016 13:12:55 ***Fatal Error***  No such host is known
+   at System.Net.Dns.GetAddrInfo(String name)
+   at System.Net.Dns.InternalGetHostByName(String hostName, Boolean includeIPv6)
+   at System.Net.Dns.GetHostAddresses(String hostNameOrAddress)
+   at System.Net.Sockets.TcpClient.Connect(String hostname, Int32 port)
+   at ClientApp.MainWindow.connect(String address, String port, String username, String pwd) in c:\Users\John\Documents\GitHub\pds_project\Client\Client\MainWindow.xaml.cs:line 204

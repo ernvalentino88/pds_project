@@ -70,7 +70,8 @@ namespace ClientApp
             }
             catch (SystemException) 
             { 
-                //TODO:wrong folder
+              //wrong folder
+                return;
             }
         }
 
@@ -154,7 +155,7 @@ namespace ClientApp
                     }
                 }
             }
-            catch (Exception) { }
+            catch (Exception) { return; }
         }
 
         private void OnChanged(object source, FileSystemEventArgs e)
@@ -189,7 +190,7 @@ namespace ClientApp
                     }
                 }
             }
-            catch (Exception) { }
+            catch (Exception) { return; }
         }
 
         private void OnRenamed(object source, RenamedEventArgs e)
@@ -248,7 +249,7 @@ namespace ClientApp
                     }
                 }
             }
-            catch (Exception) { }
+            catch (Exception) { return; }
         }
     }
 }
