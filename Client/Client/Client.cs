@@ -1073,7 +1073,7 @@ namespace ClientApp
                         s.Send(buf);
                         double percentage = (double)i / filesToRecv;
                         worker.ReportProgress((int)(percentage * 100));
-                        Thread.Sleep(1000 * 1);
+                       // Thread.Sleep(1000 * 1);
 
                         command = Networking.my_recv(4, s);
                         if (command != null && (

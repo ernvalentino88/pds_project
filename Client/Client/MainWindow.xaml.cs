@@ -987,6 +987,7 @@ namespace ClientApp
                         this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, (Action)(() =>
                         {
                             this.progressBar_file.Visibility = Visibility.Hidden;
+                            this.Home_button.Visibility = Visibility.Visible;
                             this.Label_log.Content = "No previous synchronization found.\nGo back and start synchronize one folder";
                         }));
                     }

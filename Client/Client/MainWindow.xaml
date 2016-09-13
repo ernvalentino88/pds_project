@@ -232,7 +232,7 @@
                     <Image Source="refresh.ico" Width="22" Height="20"></Image>
                 </Button>
                 <Grid HorizontalAlignment="Center">
-                    <Label HorizontalContentAlignment="Center" x:Name="Label_log" FontSize="16" FontWeight="ExtraBold" FontFamily="Calibri" Foreground="SteelBlue" Height="43" Margin="219,199,219,455" />
+                    <Label HorizontalContentAlignment="Center" x:Name="Label_log" FontSize="16" FontWeight="ExtraBold" FontFamily="Calibri" Foreground="SteelBlue" Height="48" Margin="219,199,219,455" />
                 </Grid>
                 <Button BorderBrush="SkyBlue" x:Name="Sync_init_button" Style="{StaticResource AccentedSquareButtonStyle}" Margin="365,326,318,285" Height="86" Width="239" Click="Sync_init_button_Click" Visibility="Collapsed">
                     <StackPanel>
